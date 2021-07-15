@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView
+from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView
 
 urlpatterns = [
     # tutor
@@ -18,6 +18,10 @@ urlpatterns = [
     # price
     path('priceList/', priceView.PriceList.as_view(), name='price-list'),
     path('priceDetail/<int:pk>', priceView.PriceDetail.as_view(), name='price-detail'),
+
+    # price
+    path('waitingTutorList/', waitingTutorView.WaitingTutorList.as_view(), name='waiting-tutor-list'),
+    path('waitingTutorDetail/<int:pk>', waitingTutorView.WaitingTutorDetail.as_view(), name='price-detail'),
 
     # user
     path('userList/', userAuthView.UserList.as_view(), name='user-list'),

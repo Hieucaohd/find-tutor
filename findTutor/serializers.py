@@ -77,7 +77,7 @@ class PriceSerializer(serializers.ModelSerializer):
     SEX_OF_TEACHER_CHOICES = PriceModel.SEX_OF_TEACHER_CHOICES
     sex_of_teacher = serializers.MultipleChoiceField(choices=SEX_OF_TEACHER_CHOICES)
 
-    class_id = serializers.PrimaryKeyRelatedField(read_only='True', source='class_id.parent.user.username')
+    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
 
     class Meta:
         model = PriceModel
@@ -88,6 +88,15 @@ class PriceSerializer(serializers.ModelSerializer):
                 'required': False,
             }
         }
+
+
+class WaitingTutorSerializer(serializers.ModelSerializer):
+    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+
+    class Meta:
+        model = WaitingTutorModel
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -106,3 +115,4 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         Token.objects.create(user=user)
         return user
+

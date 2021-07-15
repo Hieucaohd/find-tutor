@@ -93,7 +93,7 @@ class ParentRoomModel(models.Model):
 
 
 class PriceModel(models.Model):
-    class_id = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
+    parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
 
     time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1)  #(hour)
     money = models.IntegerField()
@@ -110,4 +110,37 @@ class PriceModel(models.Model):
     sex_of_teacher = MultiSelectField(choices=SEX_OF_TEACHER_CHOICES, min_choices=1)
 
     def __str__(self):
-        return str(self.class_id) + ' ' + str(self.money)
+        return str(self.parent_room) + ' ' + str(self.money)
+
+
+class WaitingTutorModel(models.Model):
+    parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    join_at = models.DateTimeField(auto_now_add=True)
+    time_expired = models.BooleanField(default=False)
+
+
+class TutorTeachingModel(models.Model):
+    parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+
+
+class NotifiedModel(models.Model):
+    content = models.TextField()
+    notified_at = models.DateTimeField(auto_now_add=True)
+
+
+class NotifiedParentModel(NotifiedModel):
+    parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
+
+
+class NotifiedTutorModel(NotifiedModel):
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+
+
+class CommentAboutTutorModel(models.Model):
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
+    create_at = models.DateTimeField(auto_now=True)
+    content = models.TextField()
+
