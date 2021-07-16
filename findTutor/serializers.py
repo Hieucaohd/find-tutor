@@ -93,9 +93,32 @@ class PriceSerializer(serializers.ModelSerializer):
 class WaitingTutorSerializer(serializers.ModelSerializer):
     parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
     tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+    parent_invite = serializers.ReadOnlyField()
+    tutor_agree = serializers.ReadOnlyField()
 
     class Meta:
         model = WaitingTutorModel
+        fields = '__all__'
+
+
+class ListInvitedSerializer(serializers.ModelSerializer):
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
+    tutor_agree = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ListInvitedModel
+        fields = '__all__'
+
+
+class TryTeachingSerializer(serializers.ModelSerializer):
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+    parent_room = serializers.ReadOnlyField(source='parent_room.id')
+    tutor_agree = serializers.ReadOnlyField()
+    parent_agree = serializers.ReadOnlyField()
+
+    class Meta:
+        model = TryTeachingModel
         fields = '__all__'
 
 

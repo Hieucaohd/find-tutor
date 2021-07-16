@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
+from django.http import Http404
+
 from ..models import ParentRoomModel, ParentModel
 from ..serializers import ParentRoomSerializer
 
@@ -34,7 +36,11 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
 
         all_number = int(request.query_params.get('all', 1))
         if all_number == 0:
-            parent = ParentModel.objects.get(user=request.user)
+            try:
+                parent = ParentModel.objects.get(user=request.user)
+            except ParentModel.DoesNotExist as e:
+                raise Http404
+
             rooms = self.modelBase.objects.filter(parent=parent)
             serializer = self.serializerBase(rooms, many=True)
             return Response(serializer.data)

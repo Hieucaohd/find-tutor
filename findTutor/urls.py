@@ -1,6 +1,6 @@
 from django.urls import path, include
-from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView
+# from rest_framework.authtoken import views
+from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken
 
 urlpatterns = [
     # tutor
@@ -33,5 +33,5 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('api-token-auth/', views.obtain_auth_token)
+    path('api-token-auth/', customAuthToken.CustomAuthToken.as_view())
 ]

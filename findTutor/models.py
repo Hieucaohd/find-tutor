@@ -118,6 +118,23 @@ class WaitingTutorModel(models.Model):
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
     join_at = models.DateTimeField(auto_now_add=True)
     time_expired = models.BooleanField(default=False)
+    parent_invite = models.BooleanField(default=False)
+    tutor_agree = models.BooleanField(default=False)
+
+
+class ListInvitedModel(models.Model):
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
+    tutor_agree = models.BooleanField(default=False)
+
+
+class TryTeachingModel(models.Model):
+    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
+    tutor_agree = models.BooleanField(default=False)
+    parent_agree = models.BooleanField(default=False)
+    create_at = models.DateTimeField(auto_now_add=True)
+    time_expired = models.BooleanField(default=False)
 
 
 class TutorTeachingModel(models.Model):
