@@ -122,6 +122,15 @@ class TryTeachingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TutorTeachingSerializer(serializers.ModelSerializer):
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+    parent_room = serializers.ReadOnlyField(source='parent_room.id')
+
+    class Meta:
+        model = TutorTeachingModel
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

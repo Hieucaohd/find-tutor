@@ -95,7 +95,7 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
 
     def put(self, request, pk, format=None):
         """
-            This is called when tutor agree.
+            This is called when tutor agree to try teaching.
         """
         if self.isTutorBeInvited(request, pk):
             item = self.get_object(pk)
@@ -108,8 +108,12 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
                     tutor = self.get_tutor_from_request(request)
                     parent_room = item.parent_room
                     TryTeachingModel.objects.create(tutor=tutor, parent_room=parent_room)
+                    item.delete()
+                    # notification for parent that tutor agree to try teaching.
+
                 else:
                     # notification for tutor that: room is having a another tutor try teaching.
+
                     return Response(status=status.HTTP_403_FORBIDDEN)
 
                 return Response(serializer.data)
@@ -119,10 +123,15 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
 
     def delete(self, request, pk, format=None):
         """
-            This is called when tutor not agree.
+            This is called when tutor not agree to try teaching or parent don't want tutor in list_invited any more.
         """
-        if self.isTutorBeInvited(request, pk) or self.isParentInvited(request, pk):
-            # notification for parent or tutor.
+        if self.isTutorBeInvited(request, pk):
+            # notification for parent that tutor don't agree to try teaching.
+
+            return super().delete(request, pk)
+        elif self.isParentInvited(request, pk):
+            # notification for tutor that parent don't want him/her to try teaching any more.
+
             return super().delete(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)

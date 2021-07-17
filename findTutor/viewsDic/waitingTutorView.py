@@ -12,6 +12,24 @@ class WaitingTutorList(ItemRelateListBaseView):
     modelBase = WaitingTutorModel
     serializerBase = WaitingTutorSerializer
 
+    def get_tutor_from_request(self, request):
+        return TutorModel.objects.get(user=request.user)
+
+    def get_for_room(self, request):
+        return super().get(request)
+
+    def get_for_tutor(self, request):
+        tutor_request = self.get_tutor_from_request(request)
+        list_waiting_for_tutor = self.modelBase.objects.filter(tutor=tutor_request)
+        serializer = self.serializerBase(list_waiting_for_tutor, many=True)
+        return Response(serializer.data)
+
+    def get(self, request, format=None):
+        if self.get_pk_room(request):
+            return self.get_for_room(request)
+        else:
+            return self.get_for_tutor(request)
+
     def isTutor(self, request):
         take_tutor_request = TutorModel.objects.filter(user=request.user)   # take_tutor_request is a list.
         if take_tutor_request:
@@ -75,6 +93,9 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
 
                 # take tutor to List Invited.
                 ListInvitedModel.objects.create(parent_room=waiting_obj.parent_room, tutor=waiting_obj.tutor)
+                # notification for tutor here.
+
+                waiting_obj.delete()    # delete tutor from waiting list.
 
                 return Response(serializer.data)
             return Response(serializer.errors)

@@ -66,11 +66,13 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
         if self.isParentOwner(request, pk):
             if serializer.is_valid():
                 serializer.save(parent_agree=True)
+                # notification for tutor that parent agree for him/her teach.
             else:
                 return Response(serializer.errors)
         elif self.isTutorTryTeaching(request, pk):
             if serializer.is_valid():
                 serializer.save(tutor_agree=True)
+                # notification for parent that tutor agree for teaching their children.
             else:
                 return Response(serializer.errors)
         else:
@@ -79,17 +81,28 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
         if item.tutor_agree and item.parent_agree:
             TutorTeachingModel.objects.create(parent_room=item.parent_room, tutor=item.tutor)
 
-            # Delete tutor from waiting list.
-            tutor_need_delete = WaitingTutorModel.objects.get(tutor=item.tutor)
-            tutor_need_delete.delete()
-
             # Take list invited of room to waiting.
+            list_invited_of_room = ListInvitedModel.objects.filter(parent_room=item.parent_room)
+            for invited in list_invited_of_room:
+                # notification for each tutor in list_invited that the room has a tutor in teaching.
+
+                WaitingTutorModel.objects.create(parent_room=item.parent_room, tutor=item.tutor)
             # Delete invited list.
-            ListInvitedModel.objects.filter(parent_room=item.parent_room).delete()
-            # Set parent_invite in waiting list all to False.
-            WaitingTutorModel.objects.filter(parent_invite=True).update(parent_invite=False)
+            list_invited_of_room.delete()
 
         return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+        if self.isParentOwner(request, pk):
+            # notification for tutor that parent don't want him/her to continue teach.
+
+            return super().delete(request, pk)
+        elif self.isTutorTryTeaching(request, pk):
+            # notification for parent that tutor don't want to continue teach.
+
+            return super().delete(request, pk)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 

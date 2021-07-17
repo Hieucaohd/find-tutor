@@ -119,7 +119,7 @@ class WaitingTutorModel(models.Model):
     join_at = models.DateTimeField(auto_now_add=True)
     time_expired = models.BooleanField(default=False)
     parent_invite = models.BooleanField(default=False)
-    tutor_agree = models.BooleanField(default=False)
+    # tutor_agree = models.BooleanField(default=False)
 
 
 class ListInvitedModel(models.Model):
@@ -140,6 +140,7 @@ class TryTeachingModel(models.Model):
 class TutorTeachingModel(models.Model):
     parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    start_at = models.DateTimeField(auto_now_add=True)
 
 
 class NotifiedModel(models.Model):
