@@ -28,16 +28,15 @@ class CustomAuthToken(ObtainAuthToken):
 
         type_1 = ''
         if self.isTutor(user):
-            type_1 += 'tutor'
+            type_1 = 'tutor'
 
         type_2 = ''
         if self.isParent(user):
-            type_2 += 'parent'
+            type_2 = 'parent'
 
         return Response({
             'token': token.key,
-            'user_id': user.pk,
-            'email': user.email,
+            'id': user.pk,
             'type_1': type_1,
             'type_2': type_2,
         })

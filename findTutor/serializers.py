@@ -59,7 +59,7 @@ class ParentRoomSerializer(serializers.ModelSerializer):
     DAY_CAN_TEACH_CHOICES = ParentRoomModel.DAY_CAN_TEACH_CHOICES
     day_can_teach = serializers.MultipleChoiceField(choices=DAY_CAN_TEACH_CHOICES)
 
-    parent = serializers.PrimaryKeyRelatedField(read_only='True', source='parent.user.username')
+    parent = serializers.PrimaryKeyRelatedField(read_only='True', source='parent.user.id')
 
     class Meta:
         model = ParentRoomModel

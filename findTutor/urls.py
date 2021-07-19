@@ -45,5 +45,5 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('api-token-auth/', customAuthToken.CustomAuthToken.as_view())
+    path('getToken/', customAuthToken.CustomAuthToken.as_view())
 ]
