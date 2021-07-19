@@ -70,7 +70,7 @@ class DeleteBaseView(TakeObjectView):
     def delete(self, request, pk, format=None):
         item = self.get_object(pk)
         item.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RetrieveUpdateDeleteBaseView(RetrieveBaseView, UpdateBaseView, DeleteBaseView):
