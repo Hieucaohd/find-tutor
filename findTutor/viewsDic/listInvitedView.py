@@ -57,7 +57,7 @@ class ListInvitedList(ListCreateBaseView):
 
     def get(self, request, format=None):
         if self.get_pk_room(request):
-            return self.get_for_tutor(request)
+            return self.get_for_room(request)
         else:
             return self.get_for_tutor(request)
 

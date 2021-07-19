@@ -26,17 +26,12 @@ class CustomAuthToken(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
 
-        type_1 = ''
-        if self.isTutor(user):
-            type_1 = 'tutor'
-
-        type_2 = ''
-        if self.isParent(user):
-            type_2 = 'parent'
+        type_tutor = self.isTutor(user)
+        type_parent = self.isParent(user)
 
         return Response({
             'token': token.key,
             'id': user.pk,
-            'type_1': type_1,
-            'type_2': type_2,
+            'type_tutor': type_tutor,
+            'type_parent': type_parent,
         })
