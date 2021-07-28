@@ -15,7 +15,7 @@ class ItemRelateListBaseView(ListBaseView):
         try:
             return int(request.query_params['pk_room'])
         except Exception as e:
-            raise Http404
+            return False
 
     def get_room(self, request):
         pk_room = self.get_pk_room(request)
@@ -31,6 +31,6 @@ class ItemRelateListBaseView(ListBaseView):
             serializer = self.serializerBase(item_relate_to_room, many=True)
             return Response(serializer.data)
         except Http404 as e:
-            pass
+            raise Http404
 
-        return super().get(request=request)
+        # return super().get(request=request)

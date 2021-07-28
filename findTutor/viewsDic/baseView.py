@@ -4,6 +4,8 @@ from rest_framework import status
 
 from django.http import Http404
 
+from ..models import TutorModel, ParentModel
+
 
 class ModelAndSerializer:
     modelBase = None
@@ -68,7 +70,7 @@ class DeleteBaseView(TakeObjectView):
     def delete(self, request, pk, format=None):
         item = self.get_object(pk)
         item.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"id": pk})
 
 
 class RetrieveUpdateDeleteBaseView(RetrieveBaseView, UpdateBaseView, DeleteBaseView):

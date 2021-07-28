@@ -1,6 +1,6 @@
 from django.urls import path, include
-from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView
+# from rest_framework.authtoken import views
+from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor
 
 urlpatterns = [
     # tutor
@@ -19,9 +19,24 @@ urlpatterns = [
     path('priceList/', priceView.PriceList.as_view(), name='price-list'),
     path('priceDetail/<int:pk>', priceView.PriceDetail.as_view(), name='price-detail'),
 
-    # price
+    # waiting list
     path('waitingTutorList/', waitingTutorView.WaitingTutorList.as_view(), name='waiting-tutor-list'),
     path('waitingTutorDetail/<int:pk>', waitingTutorView.WaitingTutorDetail.as_view(), name='price-detail'),
+
+    # invited list
+    path('listInvitedList/', listInvitedView.ListInvitedList.as_view(), name='list-invited-list'),
+    path('listInvitedDetail/<int:pk>', listInvitedView.ListInvitedDetail.as_view(), name='list-invited-detail'),
+
+    # try teaching list
+    path('tryTeachingList/', tryTeachingView.TryTeachingList.as_view(), name='try-teaching-list'),
+    path('tryTeachingDetail/<int:pk>', tryTeachingView.TryTeachingDetail.as_view(), name='try-teaching-detail'),
+
+    # teaching list
+    path('teachingList/', tutorTeachingView.TutorTeachingList.as_view(), name='tutor-teaching-list'),
+    path('teachingDetail/<int:pk>', tutorTeachingView.TutorTeachingDetail.as_view(), name='tutor-teaching-detail'),
+
+    # information about room of tutor
+    path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
 
     # user
     path('userList/', userAuthView.UserList.as_view(), name='user-list'),
@@ -33,5 +48,5 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('api-token-auth/', views.obtain_auth_token)
+    path('getToken/', customAuthToken.CustomAuthToken.as_view())
 ]
