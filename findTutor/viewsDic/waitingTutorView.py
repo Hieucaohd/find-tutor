@@ -1,4 +1,4 @@
-from ..serializers import WaitingTutorSerializer
+from ..serializers import WaitingTutorSerializer, ListInvitedSerializer
 from ..models import TutorModel, ParentModel, WaitingTutorModel, ListInvitedModel, TutorTeachingModel
 
 from rest_framework.response import Response
@@ -61,7 +61,10 @@ class WaitingTutorList(ItemRelateListBaseView):
             serializer = self.serializerBase(data=request.data)
             if serializer.is_valid():
                 serializer.save(parent_room=room, tutor=tutor)
-                return Response(serializer.data)
+                
+                data = serializer.data
+
+                return Response(data)
             return Response(serializer.errors)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -92,12 +95,14 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
                 serializer.save(parent_invite=True)
 
                 # take tutor to List Invited.
-                ListInvitedModel.objects.create(parent_room=waiting_obj.parent_room, tutor=waiting_obj.tutor)
+                new_invited = ListInvitedModel.objects.create(parent_room=waiting_obj.parent_room, tutor=waiting_obj.tutor)
+                data = ListInvitedSerializer(new_invited).data
+                print(data)
                 # notification for tutor here.
 
                 waiting_obj.delete()    # delete tutor from waiting list.
 
-                return Response(serializer.data)
+                return Response(data)
             return Response(serializer.errors)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -106,7 +111,9 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
         """
             When parent or tutor don't want to continua waiting.
         """
-        if self.isOwnerOfRoom(request, pk) or self.isTutorCreate(request, pk):
+        if self.isOwnerOfRoom(request, pk):
+            return super().delete(request, pk)
+        elif self.isTutorCreate(request, pk):
             return super().delete(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)

@@ -1,5 +1,5 @@
 from ..models import ListInvitedModel, TutorModel, TryTeachingModel, ParentRoomModel
-from ..serializers import ListInvitedSerializer
+from ..serializers import ListInvitedSerializer, TryTeachingSerializer
 
 from .baseView import ListCreateBaseView, RetrieveUpdateDeleteBaseView
 
@@ -98,25 +98,28 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
             This is called when tutor agree to try teaching.
         """
         if self.isTutorBeInvited(request, pk):
-            item = self.get_object(pk)
-            serializer = self.serializerBase(item, data=request.data)
+            invited = self.get_object(pk)
+            serializer = self.serializerBase(invited, data=request.data)
             if serializer.is_valid():
 
                 # take tutor and room to Try Teaching.
                 if not self.isRoomHasTutorTryTeaching(request, pk):
-                    serializer.save(tutor_agree=True)
+                    # serializer.save(tutor_agree=True)
+                    
                     tutor = self.get_tutor_from_request(request)
-                    parent_room = item.parent_room
-                    TryTeachingModel.objects.create(tutor=tutor, parent_room=parent_room)
-                    item.delete()
+                    parent_room = invited.parent_room
+                    new_try_teaching = TryTeachingModel.objects.create(tutor=tutor, parent_room=parent_room)
+                    data = TryTeachingSerializer(new_try_teaching, many=False).data
+                    print(data)
+                    invited.delete()
                     # notification for parent that tutor agree to try teaching.
-
+                    
                 else:
                     # notification for tutor that: room is having a another tutor try teaching.
 
                     return Response(status=status.HTTP_403_FORBIDDEN)
 
-                return Response(serializer.data)
+                return Response(data)
             return Response(serializer.errors)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)

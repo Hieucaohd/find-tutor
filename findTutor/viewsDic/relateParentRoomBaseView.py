@@ -31,6 +31,6 @@ class ItemRelateListBaseView(ListBaseView):
             serializer = self.serializerBase(item_relate_to_room, many=True)
             return Response(serializer.data)
         except Http404 as e:
-            pass
+            raise Http404
 
-        return super().get(request=request)
+        # return super().get(request=request)

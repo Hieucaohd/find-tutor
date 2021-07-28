@@ -1,6 +1,6 @@
 from django.urls import path, include
 # from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView
+from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor
 
 urlpatterns = [
     # tutor
@@ -34,6 +34,9 @@ urlpatterns = [
     # teaching list
     path('teachingList/', tutorTeachingView.TutorTeachingList.as_view(), name='tutor-teaching-list'),
     path('teachingDetail/<int:pk>', tutorTeachingView.TutorTeachingDetail.as_view(), name='tutor-teaching-detail'),
+
+    # information about room of tutor
+    path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
 
     # user
     path('userList/', userAuthView.UserList.as_view(), name='user-list'),

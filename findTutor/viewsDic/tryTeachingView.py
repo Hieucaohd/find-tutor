@@ -1,7 +1,7 @@
 from .baseView import *
 
 from ..models import TryTeachingModel, TutorModel, ParentRoomModel, TutorTeachingModel, ListInvitedModel, WaitingTutorModel
-from ..serializers import TryTeachingSerializer
+from ..serializers import TryTeachingSerializer, TutorTeachingSerializer
 
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -15,7 +15,7 @@ class TryTeachingList(ListBaseView):
 
     def get_for_tutor(self, request):
         tutor_request = TutorModel.objects.get(user=request.user)
-        list_try_teaching = self.serializerBase.objects.filter(tutor=tutor_request)
+        list_try_teaching = self.modelBase.objects.filter(tutor=tutor_request)
         serializer = self.serializerBase(list_try_teaching, many=True)
         return Response(serializer.data)
 
@@ -53,7 +53,7 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
 
     def isParentOwner(self, request, pk):
         item = self.get_object(pk)
-        return item.parent_room.paren.user == request.user
+        return item.parent_room.parent.user == request.user
 
     def isTutorTryTeaching(self, request, pk):
         item = self.get_object(pk)
@@ -66,12 +66,14 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
         if self.isParentOwner(request, pk):
             if serializer.is_valid():
                 serializer.save(parent_agree=True)
+                data = serializer.data
                 # notification for tutor that parent agree for him/her teach.
             else:
                 return Response(serializer.errors)
         elif self.isTutorTryTeaching(request, pk):
             if serializer.is_valid():
                 serializer.save(tutor_agree=True)
+                data = serializer.data
                 # notification for parent that tutor agree for teaching their children.
             else:
                 return Response(serializer.errors)
@@ -79,7 +81,13 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         if item.tutor_agree and item.parent_agree:
-            TutorTeachingModel.objects.create(parent_room=item.parent_room, tutor=item.tutor)
+               
+            new_teaching = TutorTeachingModel.objects.create(parent_room=item.parent_room, tutor=item.tutor)
+            data = TutorTeachingSerializer(new_teaching).data;
+            data["tutor_agree"] = True;
+            data["parent_agree"] = True;
+            # delete from try_teaching.
+            item.delete()
 
             # Take list invited of room to waiting.
             list_invited_of_room = ListInvitedModel.objects.filter(parent_room=item.parent_room)
@@ -90,7 +98,8 @@ class TryTeachingDetail(RetrieveUpdateDeleteBaseView):
             # Delete invited list.
             list_invited_of_room.delete()
 
-        return Response(serializer.data)
+        print(data)
+        return Response(data)
 
     def delete(self, request, pk, format=None):
         if self.isParentOwner(request, pk):

@@ -29,6 +29,11 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
     modelBase = ParentRoomModel
     serializerBase = ParentRoomSerializer
 
+    def getRoom(self, request, format=None):
+        items = self.modelBase.objects.all().order_by('-create_at');
+        serializer = self.serializerBase(items, many=True)
+        return Response(serializer.data)
+
     def get(self, request, format=None):
         # all is a query params.
         # If all = 0: just take the room of request.user.parent.
@@ -45,7 +50,7 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
             serializer = self.serializerBase(rooms, many=True)
             return Response(serializer.data)
         else:
-            return super().get(request)
+            return self.getRoom(request)
 
     def post(self, request, format=None):
         if self.isParent(request):

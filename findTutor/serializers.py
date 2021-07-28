@@ -91,8 +91,8 @@ class PriceSerializer(serializers.ModelSerializer):
 
 
 class WaitingTutorSerializer(serializers.ModelSerializer):
-    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
-    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
+    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.parent.user.id')
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
     parent_invite = serializers.ReadOnlyField()
     tutor_agree = serializers.ReadOnlyField()
 
@@ -102,8 +102,8 @@ class WaitingTutorSerializer(serializers.ModelSerializer):
 
 
 class ListInvitedSerializer(serializers.ModelSerializer):
-    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
-    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
+    parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.parent.user.id')
     tutor_agree = serializers.ReadOnlyField()
 
     class Meta:
@@ -112,8 +112,8 @@ class ListInvitedSerializer(serializers.ModelSerializer):
 
 
 class TryTeachingSerializer(serializers.ModelSerializer):
-    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
-    parent_room = serializers.ReadOnlyField(source='parent_room.id')
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
+    parent_room = serializers.ReadOnlyField(source='parent_room.parent.user.id')
     tutor_agree = serializers.ReadOnlyField()
     parent_agree = serializers.ReadOnlyField()
 
@@ -123,8 +123,8 @@ class TryTeachingSerializer(serializers.ModelSerializer):
 
 
 class TutorTeachingSerializer(serializers.ModelSerializer):
-    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.username')
-    parent_room = serializers.ReadOnlyField(source='parent_room.id')
+    tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
+    parent_room = serializers.ReadOnlyField(source='parent_room.parent.user.id')
 
     class Meta:
         model = TutorTeachingModel

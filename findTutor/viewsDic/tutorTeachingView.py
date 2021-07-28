@@ -34,7 +34,7 @@ class TutorTeachingList(ListBaseView):
 
     def get_for_tutor(self, request):
         tutor_request = TutorModel.objects.get(user=request.user)
-        list_teaching = self.serializerBase.objects.filter(tutor=tutor_request)
+        list_teaching = self.modelBase.objects.filter(tutor=tutor_request)
         serializer = self.serializerBase(list_teaching, many=True)
         return Response(serializer.data)
 
