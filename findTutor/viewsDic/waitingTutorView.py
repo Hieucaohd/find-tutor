@@ -22,7 +22,8 @@ class WaitingTutorList(ItemRelateListBaseView):
         tutor_request = self.get_tutor_from_request(request)
         list_waiting_for_tutor = self.modelBase.objects.filter(tutor=tutor_request)
         serializer = self.serializerBase(list_waiting_for_tutor, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        return Response(data)
 
     def get(self, request, format=None):
         if self.get_pk_room(request):
