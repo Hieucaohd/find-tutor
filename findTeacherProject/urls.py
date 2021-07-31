@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('findTutor/', include('findTutor.urls')),
     path('auth/', include('authentication.urls')),
+    path('social-auth/', include('socialAuth.urls')),
 ]
 
 urlpatterns += [

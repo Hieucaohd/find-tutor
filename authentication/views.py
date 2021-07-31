@@ -19,6 +19,8 @@ import jwt
 
 from findTutor.models import TutorModel, ParentModel
 
+from findTutor.checkTutorAndParent import isTutor, isParent
+
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
@@ -46,8 +48,17 @@ class RegisterView(generics.GenericAPIView):
         }
 
         Util.send_email(data)
+        token = user.tokens()
 
-        return Response(user_data)
+        return {
+            'email': user.email,
+            'username': user.username,
+            'token': token.get('access', ''),
+            'refresh_token': token.get('refresh', ''),
+            'id': user.id,
+            'type_tutor': False,
+            'type_parent': False,
+        }
 
 
 class VerifyEmail(generics.GenericAPIView):
@@ -69,26 +80,14 @@ class VerifyEmail(generics.GenericAPIView):
 class Login(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    def isTutor(self, user):
-        take_tutor_request = TutorModel.objects.filter(user=user)
-        if take_tutor_request:
-            return True
-        return False
-
-    def isParent(self, user):
-        take_parent_request = ParentModel.objects.filter(user=user)
-        if take_parent_request:
-            return True
-        return False
-
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.data
 
         user = User.objects.get(email=data.get('email'))
-        type_tutor = self.isTutor(user)
-        type_parent = self.isParent(user)
+        type_tutor = isTutor(user)
+        type_parent = isParent(user)
         token = user.tokens()
 
         return Response({

@@ -50,8 +50,13 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         email = attrs.get('email', '')
         password = attrs.get('password', '')
-
+        filter_user_by_email = User.objects.filter(email=email)
         user = auth.authenticate(email=email, password=password)
+
+        if filter_user_by_email[0].auth_provider != 'email':
+            raise AuthenticationFailed("Ban da dang nhap bang email " + email +
+                                       " bang " + filter_user_by_email[0].auth_provider +
+                                       ". Hay dang nhap bang " + filter_user_by_email[0].auth_provider)
 
         if not user:
             raise AuthenticationFailed("Ten dang nhap hoac mat khau khong dung.")
