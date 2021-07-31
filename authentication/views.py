@@ -17,6 +17,8 @@ from django.conf import settings
 
 import jwt
 
+from findTutor.models import TutorModel, ParentModel
+
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
@@ -67,7 +69,34 @@ class VerifyEmail(generics.GenericAPIView):
 class Login(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
+    def isTutor(self, user):
+        take_tutor_request = TutorModel.objects.filter(user=user)
+        if take_tutor_request:
+            return True
+        return False
+
+    def isParent(self, user):
+        take_parent_request = ParentModel.objects.filter(user=user)
+        if take_parent_request:
+            return True
+        return False
+
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = serializer.data
+
+        user = User.objects.get(email=data.get('email'))
+        type_tutor = self.isTutor(user)
+        type_parent = self.isParent(user)
+        token = user.tokens()
+
+        return Response({
+            'email': user.email,
+            'username': user.username,
+            'token': token.get('access', ''),
+            'refresh_token': token.get('refresh', ''),
+            'id': user.id,
+            'type_tutor': type_tutor,
+            'type_parent': type_parent,
+        }, status=status.HTTP_200_OK)

@@ -27,37 +27,25 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.ModelSerializer):
-    def isTutor(self, user):
-        take_tutor_request = TutorModel.objects.filter(user=user)
-        if take_tutor_request:
-            return True
-        return False
+    email = serializers.EmailField(max_length=255, min_length=3)
+    password = serializers.CharField(max_length=68, min_length=6, write_only=True)
+    username = serializers.CharField(max_length=255, min_length=3, read_only=True)
 
-    def isParent(self, user):
-        take_parent_request = ParentModel.objects.filter(user=user)
-        if take_parent_request:
-            return True
-        return False
+    # def isTutor(self, user):
+    #     take_tutor_request = TutorModel.objects.filter(user=user)
+    #     if take_tutor_request:
+    #         return True
+    #     return False
+    #
+    # def isParent(self, user):
+    #     take_parent_request = ParentModel.objects.filter(user=user)
+    #     if take_parent_request:
+    #         return True
+    #     return False
 
     class Meta:
         model = User
         fields = ['email', 'password', 'username', 'tokens']
-
-        extra_kwargs = {
-            'password': {
-                'write_only': True,
-                'required': True,
-            },
-            'email': {
-                'required': True,
-            },
-            'username': {
-                'read_only': True,
-            },
-            'tokens': {
-                'read_only': True,
-            }
-        }
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -72,16 +60,22 @@ class LoginSerializer(serializers.ModelSerializer):
         # if not user.is_verified:
         #     raise AuthenticationFailed("Email chua duoc xac nhan, voi long xac nhan email")
 
-        type_tutor = self.isTutor(user)
-        type_parent = self.isParent(user)
-        token = user.tokens()
+        # type_tutor = self.isTutor(user)
+        # type_parent = self.isParent(user)
+        # token = user.tokens()
 
-        return {
-            'email': user.email,
-            'username': user.username,
-            'token': token.get('access', ''),
-            'id': user.id,
-            'type_tutor': type_tutor,
-            'type_parent': type_parent,
-        }
+        # return {
+        #     'email': user.email,
+        #     'username': user.username,
+        #     'token': token.get('access', ''),
+        #     'id': user.id,
+        #     'type_tutor': type_tutor,
+        #     'type_parent': type_parent,
+        # }
+
+        return attrs
+    #
+    # def create(self, validated_data):
+    #     email = validated_data.get('email', '')
+    #     return User.objects.get(email=email)
 
