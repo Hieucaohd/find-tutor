@@ -38,15 +38,15 @@ urlpatterns = [
     # information about room of tutor
     path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
 
-    # user
-    path('userList/', userAuthView.UserList.as_view(), name='user-list'),
-    path('userDetail/<int:pk>', userAuthView.UserDetail.as_view(), name='user-detail'),
+    # # user
+    # path('userList/', userAuthView.UserList.as_view(), name='user-list'),
+    # path('userDetail/<int:pk>', userAuthView.UserDetail.as_view(), name='user-detail'),
 ]
 
-urlpatterns += [
-    path('api-auth/', include('rest_framework.urls')),
-]
-
-urlpatterns += [
-    path('getToken/', customAuthToken.CustomAuthToken.as_view())
-]
+# urlpatterns += [
+#     path('api-auth/', include('rest_framework.urls')),
+# ]
+#
+# urlpatterns += [
+#     path('getToken/', customAuthToken.CustomAuthToken.as_view())
+# ]
