@@ -19,6 +19,7 @@ class PeopleList(ListCreateBaseView):
         serializer = self.serializerBase(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
+            print(serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors)
 

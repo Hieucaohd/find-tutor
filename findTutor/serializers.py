@@ -30,6 +30,9 @@ class TutorSerializer(serializers.ModelSerializer):
             },
             'lop_day': {
                 'required': False,
+            },
+            'birthday': {
+                'required': False,
             }
         }
 
