@@ -50,7 +50,7 @@ class RegisterView(generics.GenericAPIView):
         Util.send_email(data)
         token = user.tokens()
 
-        return {
+        return Response({
             'email': user.email,
             'username': user.username,
             'token': token.get('access', ''),
@@ -58,7 +58,7 @@ class RegisterView(generics.GenericAPIView):
             'id': user.id,
             'type_tutor': False,
             'type_parent': False,
-        }
+        })
 
 
 class VerifyEmail(generics.GenericAPIView):
