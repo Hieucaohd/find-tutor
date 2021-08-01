@@ -18,7 +18,7 @@
 - tạo một môi trường ảo, nhập lệnh: python -m venv [tên thư mục chứa môi trường ảo] (giả sử là DjangoEnv)
 - Mỗi lần pull về thì nhập lần lượt các lệnh sau: 
 - Đầu tiên cd tới thư mục chứa môi trường ảo (cd DjangoEnv), nhập lệnh: source bin/active
-- Sau đó lại cd tới thư mục chứa project về pull về (cd findTutor), nhập lệnh: pip install -r requirements.txt
+- Sau đó lại cd tới thư mục chứa project vừa pull về (cd findTutor), nhập lệnh: pip install -r requirements.txt
 - Để chạy server, nhập lệnh: python manage.py runserver.
 
 
