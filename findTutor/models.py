@@ -21,6 +21,7 @@ class UserPrimaryInformation(models.Model):
 
     birthday = models.DateField(null=True)
 
+    # location
     province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
     district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
     ward_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_ward], default=1)
@@ -37,7 +38,8 @@ class TutorModel(UserPrimaryInformation):
     # profession
     PROFESSION_CHOICES = [('sv', 'SINH_VIEN'), ('gv', 'GIAO_VIEN')]
     profession = models.CharField(max_length=10, choices=PROFESSION_CHOICES, null=True)
-    university = models.CharField(max_length=200, null=True)
+
+    university = models.CharField(max_length=200, null=True)    # truong dai hoc da hoac dang hoc.
 
     experience = models.TextField(null=True)  #kinh nghiem
     achievement = models.TextField(null=True)  #thanh tich
@@ -48,7 +50,7 @@ class TutorModel(UserPrimaryInformation):
         if i == 4:
             ten_cap = 'dai_hoc'
         CAP_DAY_CHOICES.append((i, ten_cap))
-    cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, null=True)
+    cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, min_choices=0)
 
     LOP_DAY_CHOICES = []
     for i in range(1, 18):
@@ -57,7 +59,7 @@ class TutorModel(UserPrimaryInformation):
         else:
             ten_lop = 'nam_' + str(i-12)
         LOP_DAY_CHOICES.append((i, ten_lop))
-    lop_day = MultiSelectField(choices=LOP_DAY_CHOICES, null=True)
+    lop_day = MultiSelectField(choices=LOP_DAY_CHOICES, min_choices=0)
 
     khu_vuc_day = models.TextField(null=True)
 
