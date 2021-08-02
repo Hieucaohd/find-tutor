@@ -2,6 +2,7 @@ from django.db import models
 from authentication.models import User
 from multiselectfield import MultiSelectField
 
+from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
 # Create your models here.
 
 
@@ -19,7 +20,12 @@ class UserPrimaryInformation(models.Model):
     last_name = models.CharField(max_length=20, null=False)
 
     birthday = models.DateField(null=True)
-    location = models.CharField(max_length=200, null=True)
+
+    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_ward], default=1)
+
+    detail_location = models.CharField(max_length=500, null=True)
 
     def __str__(self):
         full_name = str(self.first_name) + ' ' + str(self.last_name)
@@ -62,7 +68,11 @@ class ParentModel(UserPrimaryInformation):
 
 class ParentRoomModel(models.Model):
     parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
-    location = models.CharField(max_length=200, null=False) # can select
+
+    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_ward], default=1)
+
     detail_location = models.CharField(max_length=500, null=True)
 
     subject = models.CharField(max_length=200, null=False)  # can select
