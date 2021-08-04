@@ -38,6 +38,7 @@ urlpatterns = [
     path('findTutor/', include('findTutor.urls')),
     path('auth/', include('authentication.urls')),
     path('social-auth/', include('socialAuth.urls')),
+    path('search/', include('search.urls')),
 ]
 
 urlpatterns += [

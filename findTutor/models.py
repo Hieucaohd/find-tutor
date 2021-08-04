@@ -5,6 +5,21 @@ from multiselectfield import MultiSelectField
 from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
 # Create your models here.
 
+from django.db.models import Lookup, Field
+
+
+class NotEqual(Lookup):
+    lookup_name = 'ne'
+
+    def as_sql(self, compiler, connection):
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+        rhs, rhs_params = self.process_rhs(compiler, connection)
+        params = lhs_params + rhs_params
+        return '%s <> %s' % (lhs, rhs), params
+
+
+Field.register_lookup(NotEqual)
+
 
 class UserPrimaryInformation(models.Model):
     # imagine
@@ -21,10 +36,10 @@ class UserPrimaryInformation(models.Model):
 
     birthday = models.DateField(null=True)
 
-    # location
+    # location (living)
     province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
     district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
-    ward_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_ward], default=1)
+    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
 
     detail_location = models.CharField(max_length=500, null=True)
 
@@ -32,17 +47,25 @@ class UserPrimaryInformation(models.Model):
         full_name = str(self.first_name) + ' ' + str(self.last_name)
         return full_name
 
+    def getFullName(self):
+        return self.__str__()
+
 
 class TutorModel(UserPrimaryInformation):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     # profession
     PROFESSION_CHOICES = [('sv', 'SINH_VIEN'), ('gv', 'GIAO_VIEN')]
     profession = models.CharField(max_length=10, choices=PROFESSION_CHOICES, null=True)
 
     university = models.CharField(max_length=200, null=True)    # truong dai hoc da hoac dang hoc.
+    # anh the sinh vien hoac anh bang tot nghiep
 
-    experience = models.TextField(null=True)  #kinh nghiem
-    achievement = models.TextField(null=True)  #thanh tich
+    experience = models.TextField(null=True)  # kinh nghiem
+    # imagine to show experience here
+
+    achievement = models.TextField(null=True)  # thanh tich
+    # imagine to show achievement here
 
     CAP_DAY_CHOICES = []
     for i in range(1, 5):
@@ -64,6 +87,7 @@ class TutorModel(UserPrimaryInformation):
     khu_vuc_day = models.TextField(null=True)
 
 
+
 class ParentModel(UserPrimaryInformation):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -73,9 +97,9 @@ class ParentRoomModel(models.Model):
 
     province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
     district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
-    ward_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_ward], default=1)
+    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
 
-    detail_location = models.CharField(max_length=500, null=True)
+    detail_location = models.CharField(max_length=500, null=False)
 
     subject = models.CharField(max_length=200, null=False)  # can select
     LOP_CHOICES = []
@@ -104,11 +128,29 @@ class ParentRoomModel(models.Model):
     def __str__(self):
         return 'lop ' + str(self.subject)
 
+    def getSubject(self):
+        return str(self.subject)
+
+    def getOtherRequire(self):
+        return str(self.other_require)
+
+
+class OldLocationModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
+
+    detail_location = models.CharField(max_length=500, null=False)
+
+    create_at = models.DateTimeField(auto_now_add=True)
+
 
 class PriceModel(models.Model):
     parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
 
-    time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1, null=False)  #(hour)
+    time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1, null=False)  # (hour)
     money = models.IntegerField(null=False)
     PER_CHOICES = [
         ('buoi', 'BUOI'),

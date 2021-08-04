@@ -3,7 +3,7 @@ from rest_framework import status, permissions
 
 from django.http import Http404
 
-from ..models import ParentRoomModel, ParentModel
+from ..models import ParentRoomModel, ParentModel, OldLocationModel
 from ..serializers import ParentRoomSerializer
 
 from .baseView import *
@@ -58,7 +58,17 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
             if serializer.is_valid():
                 parent = ParentModel.objects.get(user=request.user)
                 serializer.save(parent=parent)
-                return Response(serializer.data)
+
+                data = serializer.data
+                # save old location to use later.
+                old_location = OldLocationModel()
+                old_location.user = request.user
+                old_location.province_code = data.get('province_code', 1)
+                old_location.district_code = data.get('district_code', 1)
+                old_location.ward_code = data.get('ward_code', 1)
+                old_location.save()
+
+                return Response(data)
             return Response(serializer.errors)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -71,13 +81,13 @@ class ParentRoomDetail(RetrieveUpdateDeleteBaseView, PermissionParentRoom):
     serializerBase = ParentRoomSerializer
 
     def put(self, request, pk, format=None):
-        if self.isParent(request) and self.isParentOwner(request, pk):
+        if self.isParentOwner(request, pk):
             return super().put(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, pk, format=None):
-        if self.isParent(request) and self.isParentOwner(request, pk):
+        if self.isParentOwner(request, pk):
             return super().delete(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
