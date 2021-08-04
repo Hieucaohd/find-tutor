@@ -75,6 +75,14 @@ class ParentRoomSerializer(serializers.ModelSerializer):
         }
 
 
+class OldLocationSerializer(serializers.ModelSerializer):
+    parent = serializers.PrimaryKeyRelatedField(read_only='True', source='parent.user.id')
+
+    class Meta:
+        model = OldLocationModel
+        fields = "__all__"
+
+
 class PriceSerializer(serializers.ModelSerializer):
 
     SEX_OF_TEACHER_CHOICES = PriceModel.SEX_OF_TEACHER_CHOICES
@@ -134,22 +142,3 @@ class TutorTeachingSerializer(serializers.ModelSerializer):
     class Meta:
         model = TutorTeachingModel
         fields = '__all__'
-
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'password']
-#
-#         extra_kwargs = {
-#             'password': {
-#                 'write_only': True,
-#                 'required': True,
-#             },
-#         }
-#
-#     def create(self, validated_data):
-#         user = User.objects.create_user(**validated_data)
-#         Token.objects.create(user=user)
-#         return user
-

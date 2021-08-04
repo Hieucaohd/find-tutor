@@ -2,6 +2,7 @@ from django.urls import path, include
 # from rest_framework.authtoken import views
 from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor
 
+
 urlpatterns = [
     # tutor
     path('tutorList/', tutorView.TutorList.as_view(), name='tutor-list'),
@@ -37,6 +38,8 @@ urlpatterns = [
 
     # information about room of tutor
     path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
+
+    
 
     # # user
     # path('userList/', userAuthView.UserList.as_view(), name='user-list'),

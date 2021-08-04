@@ -15,3 +15,5 @@ Pillow==7.0.0
 PyJWT==2.1.0
 requests==2.22.0
 vietnam-provinces==0.4.2
+pylcs==0.0.6
+rapidfuzz==1.4.1
