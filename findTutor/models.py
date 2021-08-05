@@ -5,26 +5,14 @@ from multiselectfield import MultiSelectField
 from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
 # Create your models here.
 
-from django.db.models import Lookup, Field
-
-
-class NotEqual(Lookup):
-    lookup_name = 'ne'
-
-    def as_sql(self, compiler, connection):
-        lhs, lhs_params = self.process_lhs(compiler, connection)
-        rhs, rhs_params = self.process_rhs(compiler, connection)
-        params = lhs_params + rhs_params
-        return '%s <> %s' % (lhs, rhs), params
-
-
-Field.register_lookup(NotEqual)
+AVATAR_FOLDER = "avatar/"
+IDENTITY_CARD_FOLDER = "identity_card/"
 
 
 class UserPrimaryInformation(models.Model):
-    # imagine
-    avatar = models.ImageField(null=True)
-    identity_card = models.ImageField(null=True)
+    # image
+    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True)
+    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True)
 
     # information
     number_phone = models.CharField(max_length=30, null=True)
@@ -86,6 +74,18 @@ class TutorModel(UserPrimaryInformation):
 
     khu_vuc_day = models.TextField(null=True)
 
+
+IMAGE_OF_TUTOR_FOLDER = "tutor_image/"
+
+
+class ImageOfTutor(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    image = models.ImageField(upload_to=IMAGE_OF_TUTOR_FOLDER, null=False)
+
+    type_of_image = models.CharField(max_length=200, null=True)
+
+    create_at = models.DateTimeField(auto_now_add=True)
 
 
 class ParentModel(UserPrimaryInformation):

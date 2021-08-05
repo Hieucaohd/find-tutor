@@ -19,10 +19,12 @@ class Search(APIView):
         search_infor = search_infor.lower()
         list_word = search_infor.split()
 
-        list_word_normal = []
-        for word in list_word:
-            word = re.sub(r'[^\w\s]', '', word)
-            list_word_normal.append(word)
+        # list_word_normal = []
+        # for word in list_word:
+        #     word = re.sub(r'[^\w\s]', '', word)
+        #     list_word_normal.append(word)
+
+        list_word_normal = (re.sub(r'[^\w\s]', '', word) for word in list_word)
 
         result = " ".join(list_word_normal)
         result = unidecode.unidecode(result)
@@ -44,7 +46,7 @@ class Search(APIView):
         score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
         print(score)
 
-        limit = 60
+        limit = 70
 
         return (result_1 >= limit) or \
                (result_1_1 >= limit) or \
@@ -73,7 +75,8 @@ class Search(APIView):
         list_tutor = (tutor for tutor in TutorModel.objects.all() if
                       self.test_for_string(tutor.getFullName(), search_infor) or
                       self.test_for_string(tutor.experience, search_infor) or
-                      self.test_for_string(tutor.achievement, search_infor))
+                      self.test_for_string(tutor.achievement, search_infor) or 
+                      self.test_for_string(tutor.university, search_infor))
 
         data_tutor = TutorSerializer(list_tutor, many=True)
 

@@ -168,3 +168,7 @@ EMAIL_PORT = 587
 # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_HOST_USER = 'pythonhieu192@gmail.com'
 EMAIL_HOST_PASSWORD = 'phaithanhcong1'
+
+
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
