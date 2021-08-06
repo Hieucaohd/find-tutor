@@ -1,11 +1,11 @@
 from django.shortcuts import render
 
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer
 from .models import User
 from .utils import Util
 
@@ -99,3 +99,16 @@ class Login(generics.GenericAPIView):
             'type_tutor': type_tutor,
             'type_parent': type_parent,
         }, status=status.HTTP_200_OK)
+
+
+class Logout(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
