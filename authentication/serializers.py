@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from .models import User
 
@@ -31,18 +32,6 @@ class LoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, min_length=6, write_only=True)
     username = serializers.CharField(max_length=255, min_length=3, read_only=True)
 
-    # def isTutor(self, user):
-    #     take_tutor_request = TutorModel.objects.filter(user=user)
-    #     if take_tutor_request:
-    #         return True
-    #     return False
-    #
-    # def isParent(self, user):
-    #     take_parent_request = ParentModel.objects.filter(user=user)
-    #     if take_parent_request:
-    #         return True
-    #     return False
-
     class Meta:
         model = User
         fields = ['email', 'password', 'username', 'tokens']
@@ -62,25 +51,26 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed("Ten dang nhap hoac mat khau khong dung.")
         if not user.is_active:
             raise AuthenticationFailed("Tai khoan dang bi khoa, voi long lien he voi admin de moi lai")
-        # if not user.is_verified:
-        #     raise AuthenticationFailed("Email chua duoc xac nhan, voi long xac nhan email")
+        
+        return attrs
 
-        # type_tutor = self.isTutor(user)
-        # type_parent = self.isParent(user)
-        # token = user.tokens()
 
-        # return {
-        #     'email': user.email,
-        #     'username': user.username,
-        #     'token': token.get('access', ''),
-        #     'id': user.id,
-        #     'type_tutor': type_tutor,
-        #     'type_parent': type_parent,
-        # }
+class LogoutSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
+    default_error_message = {
+        'bad_token': ('Token is expired or invalid')
+    }
+
+    def validate(self, attrs):
+
+        self.refresh_token = attrs['refresh_token']
 
         return attrs
-    #
-    # def create(self, validated_data):
-    #     email = validated_data.get('email', '')
-    #     return User.objects.get(email=email)
+    
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.refresh_token).blacklist()
+        except TokenError:
+            self.fail("bad_token")
 
