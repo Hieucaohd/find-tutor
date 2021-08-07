@@ -24,7 +24,7 @@ class PermissionParentRoom(TakeObjectView):
 
 
 class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     modelBase = ParentRoomModel
     serializerBase = ParentRoomSerializer
@@ -46,7 +46,7 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
             except ParentModel.DoesNotExist as e:
                 raise Http404
 
-            rooms = self.modelBase.objects.filter(parent=parent)
+            rooms = self.modelBase.objects.filter(parent=parent).order_by('-create_at')
             serializer = self.serializerBase(rooms, many=True)
             return Response(serializer.data)
         else:

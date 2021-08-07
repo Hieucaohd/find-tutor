@@ -19,7 +19,7 @@ import jwt
 
 from findTutor.models import TutorModel, ParentModel
 
-from findTutor.checkTutorAndParent import isTutor, isParent
+from .showInforAboutAnUser import inforAboutUser
 
 
 class RegisterView(generics.GenericAPIView):
@@ -48,17 +48,8 @@ class RegisterView(generics.GenericAPIView):
         }
 
         Util.send_email(data)
-        token = user.tokens()
 
-        return Response({
-            'email': user.email,
-            'username': user.username,
-            'token': token.get('access', ''),
-            'refresh_token': token.get('refresh', ''),
-            'id': user.id,
-            'type_tutor': False,
-            'type_parent': False,
-        })
+        return Response(inforAboutUser(user))
 
 
 class VerifyEmail(generics.GenericAPIView):
@@ -86,19 +77,8 @@ class Login(generics.GenericAPIView):
         data = serializer.data
 
         user = User.objects.get(email=data.get('email'))
-        type_tutor = isTutor(user)
-        type_parent = isParent(user)
-        token = user.tokens()
 
-        return Response({
-            'email': user.email,
-            'username': user.username,
-            'token': token.get('access', ''),
-            'refresh_token': token.get('refresh', ''),
-            'id': user.id,
-            'type_tutor': type_tutor,
-            'type_parent': type_parent,
-        }, status=status.HTTP_200_OK)
+        return Response(inforAboutUser(user), status=status.HTTP_200_OK)
 
 
 class Logout(generics.GenericAPIView):

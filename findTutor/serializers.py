@@ -33,6 +33,9 @@ class TutorSerializer(serializers.ModelSerializer):
             },
             'birthday': {
                 'required': False,
+            },
+            'full_name': {
+                'read_only': True,
             }
         }
 
@@ -55,6 +58,9 @@ class ParentSerializer(serializers.ModelSerializer):
             'identity_card': {
                 'required': False,
             },
+            'full_name': {
+                'read_only': True,
+            }
         }
 
 

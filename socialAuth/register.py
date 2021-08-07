@@ -1,4 +1,5 @@
 from authentication.models import User
+from authentication.showInforAboutAnUser import inforAboutUser
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
@@ -19,19 +20,8 @@ def register_social_user(user_id, email, name, provider):
             register_user = authenticate(email=email, password=filtered_user_by_email[0].password)
 
             user = filtered_user_by_email[0]
-            type_tutor = isTutor(user)
-            type_parent = isParent(user)
-            token = user.tokens()
 
-            return {
-                'email': user.email,
-                'username': user.username,
-                'token': token.get('access', ''),
-                'refresh_token': token.get('refresh', ''),
-                'id': user.id,
-                'type_tutor': type_tutor,
-                'type_parent': type_parent,
-            }
+            return inforAboutUser(user)
 
         else:
             raise AuthenticationFailed("Ban da su dung email " + email + " de dang nhap bang " +
@@ -46,13 +36,5 @@ def register_social_user(user_id, email, name, provider):
         user.save()
 
         new_user = authenticate(email=email, password=password)
-        token = new_user.tokens()
-        return {
-            'email': new_user.email,
-            'username': new_user.username,
-            'token': token.get('access', ''),
-            'refresh_token': token.get('refresh', ''),
-            'id': new_user.id,
-            'type_tutor': False,
-            'type_parent': False,
-        }
+        
+        return inforAboutUser(new_user)

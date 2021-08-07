@@ -61,7 +61,7 @@ class Search(APIView):
                             self.test_for_string(room.other_require, search_infor))
 
         list_parent = (parent for parent in ParentModel.objects.all() if
-                       self.test_for_string(parent.getFullName(), search_infor))
+                       self.test_for_string(parent.full_name, search_infor))
 
         data_parent_room = ParentRoomSerializer(list_parent_room, many=True)
         data_parent = ParentSerializer(list_parent, many=True)
@@ -73,7 +73,7 @@ class Search(APIView):
 
     def search_for_parent(self, request, search_infor):
         list_tutor = (tutor for tutor in TutorModel.objects.all() if
-                      self.test_for_string(tutor.getFullName(), search_infor) or
+                      self.test_for_string(tutor.full_name, search_infor) or
                       self.test_for_string(tutor.experience, search_infor) or
                       self.test_for_string(tutor.achievement, search_infor) or 
                       self.test_for_string(tutor.university, search_infor))
@@ -101,10 +101,4 @@ class Search(APIView):
 
         if isParent(request.user):
             return self.search_for_parent(request, search_infor)
-
-
-
-
-        
-
 
