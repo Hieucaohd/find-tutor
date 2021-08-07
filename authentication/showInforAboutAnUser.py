@@ -11,6 +11,8 @@ def inforAboutUser(user):
         'token': token.get('access', ''),
         'refresh_token': token.get('refresh', ''),
         'id': user.id,
+        'type_tutor': False,
+        'type_parent': False,
 	}
 
 	type_tutor = isTutor(user)
