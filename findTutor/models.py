@@ -5,6 +5,7 @@ from multiselectfield import MultiSelectField
 from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
 # Create your models here.
 
+
 AVATAR_FOLDER = "avatar/"
 IDENTITY_CARD_FOLDER = "identity_card/"
 
@@ -35,7 +36,8 @@ class UserPrimaryInformation(models.Model):
         full_name = str(self.first_name) + ' ' + str(self.last_name)
         return full_name
 
-    def getFullName(self):
+    @property
+    def full_name(self):
         return self.__str__()
 
 
@@ -127,12 +129,6 @@ class ParentRoomModel(models.Model):
 
     def __str__(self):
         return 'lop ' + str(self.subject)
-
-    def getSubject(self):
-        return str(self.subject)
-
-    def getOtherRequire(self):
-        return str(self.other_require)
 
 
 class OldLocationModel(models.Model):
