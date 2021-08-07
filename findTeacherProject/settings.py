@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'socialAuth',
     'search',
     'rest_framework_simplejwt.token_blacklist',
+    'comment',
 ]
 
 REST_FRAMEWORK = {
