@@ -87,15 +87,21 @@ class Search(APIView):
 
     def get(self, request, format=None):
         province_code = request.query_params.get('province_code', 0)
+        if not province_code:
+            province_code = 0
+
         district_code = request.query_params.get('district_code', 0)
+        if not district_code:
+            district_code = 0
+
         ward_code = request.query_params.get('ward_code', 0)
+        if not ward_code:
+            ward_code = 0
 
         room = request.query_params.get('room', 0)
 
         search_infor = request.query_params.get('search', '')
-        # print(search_infor)
         search_infor = self.normal_search_infor(search_infor)
-        # print(search_infor)
 
         q_object = Q(province_code = int(province_code)) | Q(district_code = int(district_code)) | Q(ward_code = int(ward_code))
         
