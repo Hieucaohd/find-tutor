@@ -194,22 +194,7 @@ class TutorTeachingModel(models.Model):
     start_at = models.DateTimeField(auto_now_add=True)
 
 
-class NotifiedModel(models.Model):
-    content = models.TextField()
-    notified_at = models.DateTimeField(auto_now_add=True)
 
 
-class NotifiedParentModel(NotifiedModel):
-    parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
 
-
-class NotifiedTutorModel(NotifiedModel):
-    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
-
-
-class CommentAboutTutorModel(models.Model):
-    tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
-    parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
-    create_at = models.DateTimeField(auto_now=True)
-    content = models.TextField()
 
