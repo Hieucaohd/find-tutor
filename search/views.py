@@ -88,16 +88,24 @@ class Search(APIView):
         district_code = request.query_params.get('district_code', 0)
         ward_code = request.query_params.get('ward_code', 0)
 
+        room = request.query_params.get('room', 0)
+
         search_infor = request.query_params.get('search', '')
         # print(search_infor)
         search_infor = self.normal_search_infor(search_infor)
         # print(search_infor)
 
-        SearchModel.objects.create(user=request.user, content_search=search_infor)
+        
 
-        if isTutor(request.user):
+        if room:
+            return self.search_for_room(request, search_infor)
+        elif isTutor(request.user):
+            SearchModel.objects.create(user=request.user, content_search=search_infor)
             return self.search_for_tutor(request, search_infor)
-
-        if isParent(request.user):
+        elif isParent(request.user):
+            SearchModel.objects.create(user=request.user, content_search=search_infor)
             return self.search_for_parent(request, search_infor)
+        
+
+
 
