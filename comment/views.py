@@ -8,6 +8,7 @@ from .models import CommentAboutTutorModel, CommentAboutParentModel, CommentAbou
 from .serializers import CommentAboutTutorSerializer, CommentAboutParentSerializer, CommentAboutParentRoomSerializer
 
 from findTutor.viewsDic.baseView import UpdateBaseView, DeleteBaseView
+from findTutor.models import TutorModel, ParentModel, ParentRoomModel
 
 
 class CommentListBaseView(APIView):
@@ -15,15 +16,38 @@ class CommentListBaseView(APIView):
 
 	modelBase = None
 	serializerBase = None
+	aboutModel = None
+
+	def get(self, request, format=None):
+		about_who_pk = request.query_params.get('about_who_id', 0)
+		
+		if about_who_pk:
+			about_who = self.aboutModel.get(pk=about_who_pk)
+			list_comment = self.modelBase.filter(about_who=about_who)
+
+			serializer = self.serializerBase(list_comment, many=True)
+
+			return Response(serializer.data, status=status.HTTP_200_OK)
+		else:
+			return Response(status=status.HTTP_403_FORBIDDEN)
+
 
 	def post(self, request, format=None):
 		about_who_pk = request.query_params.get('about_who_id', 0)
+		belong_to_pk = request.query_params.get('belong_to_id', 0)
 
 		if about_who_pk:
-			about_who = self.modelBase.get(pk=about_who_pk)
+			about_who = self.aboutModel.get(pk=about_who_pk)
+
 			serializer = self.serializerBase(data=request.data)
+
 			if serializer.is_valid():
-				serializer.save(about_who=about_who, user=request.user)
+
+				if belong_to_pk:
+					belong_to = self.modelBase.get(pk=belong_to_pk)
+					serializer.save(about_who=about_who, user=request.user, belong_to=belong_to)
+				else:
+					serializer.save(about_who=about_who, user=request.user)
 
 				data = serializer.data
 
@@ -35,16 +59,19 @@ class CommentListBaseView(APIView):
 class CommentAboutTutorList(CommentListBaseView):
 	modelBase = CommentAboutTutorModel
 	serializerBase = CommentAboutTutorSerializer
+	aboutModel = TutorModel
 
 
 class CommentAboutParentList(CommentListBaseView):
 	modelBase = CommentAboutParentModel
 	serializerBase = CommentAboutParentSerializer
+	aboutModel = ParentModel
 
 
 class CommentAboutParentRoomList(CommentListBaseView):
 	modelBase = CommentAboutParentRoomModel
 	serializerBase = CommentAboutParentRoomSerializer
+	aboutModel = ParentRoomModel
 
 
 class CommentDetailBaseView(UpdateBaseView, DeleteBaseView):
