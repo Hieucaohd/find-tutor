@@ -8,6 +8,8 @@ from findTutor.checkTutorAndParent import isTutor, isParent
 
 from .models import SearchModel
 
+from django.db.models import Q
+
 
 class Search(APIView):
 
@@ -55,16 +57,16 @@ class Search(APIView):
                (result_3 >= limit) or \
                (result_3_3 >= limit)
 
-    def search_for_tutor(self, request, search_infor):
-        list_parent = (parent for parent in ParentModel.objects.all() if
+    def search_for_tutor(self, request, search_infor, q_object):
+        list_parent = (parent for parent in ParentModel.objects.filter(q_object) if
                        self.test_for_string(parent.full_name, search_infor))
 
         data_parent = ParentSerializer(list_parent, many=True)
 
         return Response(data_parent.data)
 
-    def search_for_parent(self, request, search_infor):
-        list_tutor = (tutor for tutor in TutorModel.objects.all() if
+    def search_for_parent(self, request, search_infor, q_object):
+        list_tutor = (tutor for tutor in TutorModel.objects.filter(q_object) if
                       self.test_for_string(tutor.full_name, search_infor) or
                       self.test_for_string(tutor.experience, search_infor) or
                       self.test_for_string(tutor.achievement, search_infor) or 
@@ -74,8 +76,8 @@ class Search(APIView):
 
         return Response(data_tutor.data)
 
-    def search_for_room(self, request, search_infor):
-        list_parent_room = (room for room in ParentRoomModel.objects.all() if
+    def search_for_room(self, request, search_infor, q_object):
+        list_parent_room = (room for room in ParentRoomModel.objects.filter(q_object) if
                             self.test_for_string(room.subject, search_infor) or
                             self.test_for_string(room.other_require, search_infor))
 
@@ -95,16 +97,17 @@ class Search(APIView):
         search_infor = self.normal_search_infor(search_infor)
         # print(search_infor)
 
+        q_object = Q(province_code = int(province_code)) | Q(district_code = int(district_code)) | Q(ward_code = int(ward_code))
         
 
         if room:
-            return self.search_for_room(request, search_infor)
+            return self.search_for_room(request, search_infor, q_object)
         elif isTutor(request.user):
             SearchModel.objects.create(user=request.user, content_search=search_infor)
-            return self.search_for_tutor(request, search_infor)
+            return self.search_for_tutor(request, search_infor, q_object)
         elif isParent(request.user):
             SearchModel.objects.create(user=request.user, content_search=search_infor)
-            return self.search_for_parent(request, search_infor)
+            return self.search_for_parent(request, search_infor, q_object)
         
 
 
