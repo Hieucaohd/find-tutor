@@ -36,34 +36,37 @@ class Search(APIView):
         from rapidfuzz import fuzz
         import pylcs
 
-        # print('source: ', source)
-        # print('have: ', have)
+        print('source: ', source)
+        print('have: ', have)
 
         result_1 = fuzz.ratio(source, have)
         result_1_1 = fuzz.ratio(self.normal_search_infor(source), self.normal_search_infor(have))
-        # print(f'ratio: {result_1}, {result_1_1}')
+        print(f'ratio: {result_1}, {result_1_1}')
 
         result_2 = 0
         result_2_2 = 0
 
-        len_no_space_1 = len(self.normal_search_infor(source).replace(' ', ""))
-        len_no_space_2 = len(self.normal_search_infor(have).replace(' ', ""))
-        sum_of_word = 0
-        if len_no_space_1 > len_no_space_2:
-            sum_of_word =  len_no_space_2 / len_no_space_1
-        else:
-            sum_of_word = len_no_space_1 / len_no_space_2
+        # len_no_space_1 = len(self.normal_search_infor(source).replace(' ', ""))
+        # len_no_space_2 = len(self.normal_search_infor(have).replace(' ', ""))
+        # sum_of_word = 0
+        # if len_no_space_1 > len_no_space_2:
+        #     sum_of_word =  len_no_space_2 / len_no_space_1
+        # else:
+        #     sum_of_word = len_no_space_1 / len_no_space_2
 
         # print(f'sum of word: {sum_of_word}')
 
-        if sum_of_word > 0.7:
+        # if sum_of_word > 0.7:
+
+        len_no_space_have = len(self.normal_search_infor(have).replace(' ', ""))
+        if len_no_space_have > 2:
             result_2 = fuzz.partial_ratio(source, have)
             result_2_2 = fuzz.partial_ratio(self.normal_search_infor(source), self.normal_search_infor(have))
-        # print(f'fuzz: {result_2}, {result_2_2}')
+        print(f'fuzz: {result_2}, {result_2_2}')
 
         result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
         result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-        # print(f'pylcs: {result_3}, {result_3_3}')
+        print(f'pylcs: {result_3}, {result_3_3}')
 
         # score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
         # print(score)
@@ -156,7 +159,7 @@ class Search(APIView):
             SearchModel.objects.create(user=request.user, content_search=search_infor)
 
         if type_search == 'room':
-            return self.get_for_room(request, search_infor, q_object)
+            return self.search_for_room(request, search_infor, q_object)
         elif type_search == 'people':
             list_parent = self.search_parent(request, search_infor, q_object)
             list_tutor = self.search_tutor(request, search_infor, q_object)
