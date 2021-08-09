@@ -15,7 +15,6 @@ from numba import jit
 
 class Search(APIView):
 
-    @jit
     def normal_search_infor(self, search_infor):
         import re
         import unidecode
@@ -30,7 +29,6 @@ class Search(APIView):
         result = unidecode.unidecode(result)
         return result
 
-    @jit
     def test_for_string(self, source, have):
         from rapidfuzz import fuzz
         import pylcs
@@ -112,14 +110,20 @@ class Search(APIView):
         ward_code = request.query_params.get('ward_code', 0)
 
         lop = request.data.get('lop', [])
-        #print(lop)
 
-        #room = request.query_params.get('room', 0)
         type_search = request.query_params.get('type', '')  # quy ước với bên front end là: room hoặc people
 
         search_infor = request.query_params.get('search', '')
         search_infor = self.normal_search_infor(search_infor)
-        print(search_infor)
+        
+        can_tim_kiem = f'''Can tim kiem: 
+                            \n\tsearch: {search_infor}
+                            \n\tlop: {lop}
+                            \n\ttype: {type_search}
+                            \n\tprovince: {province_code}
+                            \n\tdistrict: {district_code}
+                            \n\tward: {ward_code}'''
+        print(can_tim_kiem)
 
         location_query = None
         if province_code or district_code or ward_code:
