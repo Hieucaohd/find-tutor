@@ -110,12 +110,14 @@ class Search(APIView):
         ward_code = request.query_params.get('ward_code', 0)
 
         lop = request.query_params.get('lop', [])
-        try:
-            if lop != []:
+        if lop == '':
+            lop = []
+        else:
+            try:
                 lop = lop.split(",")
                 lop = list(int(item) for item in lop)
-        except:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
         type_search = request.query_params.get('type', '')  # quy ước với bên front end là: room hoặc people
 
@@ -130,7 +132,6 @@ class Search(APIView):
                             \tdistrict: {district_code}
                             \tward: {ward_code}'''
         print(can_tim_kiem)
-        print('lop: ', lop[1])
 
         location_query = None
         if province_code or district_code or ward_code:
