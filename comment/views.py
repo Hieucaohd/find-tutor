@@ -19,11 +19,11 @@ class CommentListBaseView(APIView):
 	aboutModel = None
 
 	def get(self, request, format=None):
-		about_who_pk = request.query_params.get('about_who_id', 0)
+		about_who_pk = request.data.get('about_who_id', 0)
 		
 		if about_who_pk:
-			about_who = self.aboutModel.get(pk=about_who_pk)
-			list_comment = self.modelBase.filter(about_who=about_who)
+			about_who = self.aboutModel.objects.get(pk=about_who_pk)
+			list_comment = self.modelBase.objects.filter(about_who=about_who)
 
 			serializer = self.serializerBase(list_comment, many=True)
 
@@ -33,8 +33,8 @@ class CommentListBaseView(APIView):
 
 
 	def post(self, request, format=None):
-		about_who_pk = request.query_params.get('about_who_id', 0)
-		belong_to_pk = request.query_params.get('belong_to_id', 0)
+		about_who_pk = request.data.get('about_who_id', 0)
+		belong_to_pk = request.data.get('belong_to_id', 0)
 
 		if about_who_pk:
 			about_who = self.aboutModel.objects.get(pk=about_who_pk)

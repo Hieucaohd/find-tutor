@@ -10,7 +10,7 @@ from .models import SearchModel
 
 from django.db.models import Q
 
-
+from numba import jit
 
 
 class Search(APIView):
@@ -68,6 +68,7 @@ class Search(APIView):
                (result_3 >= limit) or \
                (result_3_3 >= limit)
 
+    
     def condition_for_search_infor(self, search_infor='', fields=[]):
         for field in fields:
             if self.test_for_string(search_infor, field):
@@ -109,14 +110,20 @@ class Search(APIView):
         ward_code = request.query_params.get('ward_code', 0)
 
         lop = request.data.get('lop', [])
-        #print(lop)
 
-        #room = request.query_params.get('room', 0)
         type_search = request.query_params.get('type', '')  # quy ước với bên front end là: room hoặc people
 
         search_infor = request.query_params.get('search', '')
         search_infor = self.normal_search_infor(search_infor)
-        print(search_infor)
+        
+        can_tim_kiem = f'''Can tim kiem: 
+                            \n\tsearch: {search_infor}
+                            \n\tlop: {lop}
+                            \n\ttype: {type_search}
+                            \n\tprovince: {province_code}
+                            \n\tdistrict: {district_code}
+                            \n\tward: {ward_code}'''
+        print(can_tim_kiem)
 
         location_query = None
         if province_code or district_code or ward_code:
