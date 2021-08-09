@@ -24,8 +24,7 @@ class CommentListBaseView(APIView):
 		try:
 			about_who_pk = int(about_who_pk)
 		except:
-			data = self.serializerBase([])
-			return Response(data)
+			return Response(status=status.HTTP_403_FORBIDDEN)
 		
 		if about_who_pk:
 			about_who = self.aboutModel.objects.get(pk=about_who_pk)
