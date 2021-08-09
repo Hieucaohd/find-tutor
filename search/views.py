@@ -10,11 +10,12 @@ from .models import SearchModel
 
 from django.db.models import Q
 
-
+from numba import jit
 
 
 class Search(APIView):
 
+    @jit
     def normal_search_infor(self, search_infor):
         import re
         import unidecode
@@ -29,6 +30,7 @@ class Search(APIView):
         result = unidecode.unidecode(result)
         return result
 
+    @jit
     def test_for_string(self, source, have):
         from rapidfuzz import fuzz
         import pylcs
@@ -68,6 +70,7 @@ class Search(APIView):
                (result_3 >= limit) or \
                (result_3_3 >= limit)
 
+    
     def condition_for_search_infor(self, search_infor='', fields=[]):
         for field in fields:
             if self.test_for_string(search_infor, field):
