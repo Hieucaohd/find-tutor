@@ -11,7 +11,7 @@ class CommentAboutTutorModel(models.Model):
 	belong_to = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	create_at = models.DateTimeField(auto_now_add=True)
-	content = models.TextField()
+	content = models.TextField(null=False)
 	
 
 class CommentAboutParentModel(models.Model):
