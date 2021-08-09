@@ -109,7 +109,13 @@ class Search(APIView):
         district_code = request.query_params.get('district_code', 0)
         ward_code = request.query_params.get('ward_code', 0)
 
-        lop = request.data.get('lop', [])
+        lop = request.query_params.get('lop', [])
+        try:
+            if lop != []:
+                lop = lop.split(",")
+                lop = list(int(item) for item in lop)
+        except:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         type_search = request.query_params.get('type', '')  # quy ước với bên front end là: room hoặc people
 
@@ -117,13 +123,14 @@ class Search(APIView):
         search_infor = self.normal_search_infor(search_infor)
         
         can_tim_kiem = f'''Can tim kiem: 
-                            \n\tsearch: {search_infor}
-                            \n\tlop: {lop}
-                            \n\ttype: {type_search}
-                            \n\tprovince: {province_code}
-                            \n\tdistrict: {district_code}
-                            \n\tward: {ward_code}'''
+                            \tsearch: {search_infor}
+                            \tlop: {lop}
+                            \ttype: {type_search}
+                            \tprovince: {province_code}
+                            \tdistrict: {district_code}
+                            \tward: {ward_code}'''
         print(can_tim_kiem)
+        print('lop: ', lop[1])
 
         location_query = None
         if province_code or district_code or ward_code:
@@ -142,12 +149,15 @@ class Search(APIView):
 
             return Response(self.search_engine(ParentRoomModel, ParentRoomSerializer, location_query, search_infor, fields, lop, field_lop))
         elif type_search == 'people':
+
             def fields_tutor(item):
                 return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
             def field_lop_tutor(item):
                 return list(item.lop_day)
 
+            list_tutor  = self.search_engine(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
+            
             def fields_parent(item):
                 return [item.full_name]
 
@@ -155,7 +165,6 @@ class Search(APIView):
                 return list()
 
             list_parent = self.search_engine(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
-            list_tutor  = self.search_engine(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
 
             return Response({
                     'list_tutor': list_tutor,

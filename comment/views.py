@@ -19,7 +19,13 @@ class CommentListBaseView(APIView):
 	aboutModel = None
 
 	def get(self, request, format=None):
-		about_who_pk = request.data.get('about_who_id', 0)
+		about_who_pk = request.query_params.get('about_who_id', 0)
+
+		try:
+			about_who_pk = int(about_who_pk)
+		except:
+			data = self.serializerBase([])
+			return Response(data)
 		
 		if about_who_pk:
 			about_who = self.aboutModel.objects.get(pk=about_who_pk)
