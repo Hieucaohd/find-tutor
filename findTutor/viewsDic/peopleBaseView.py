@@ -33,7 +33,7 @@ class PeopleUpdateView(UpdateBaseView):
 
 
 class PeopleDetail(RetrieveBaseView, UpdateBaseView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def isOwner(self, request, pk):
         obj = self.get_object(pk)
