@@ -63,9 +63,10 @@ class ParentSerializer(serializers.ModelSerializer):
             }
         }
 
+DAY_CAN_TEACH_CHOICES = ParentRoomModel.DAY_CAN_TEACH_CHOICES
 
 class ParentRoomSerializer(serializers.ModelSerializer):
-    DAY_CAN_TEACH_CHOICES = ParentRoomModel.DAY_CAN_TEACH_CHOICES
+    
     day_can_teach = serializers.MultipleChoiceField(choices=DAY_CAN_TEACH_CHOICES)
 
     parent = serializers.PrimaryKeyRelatedField(read_only='True', source='parent.user.id')
@@ -109,10 +110,24 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class WaitingTutorSerializer(serializers.ModelSerializer):
     parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.parent.user.id')
-    roomId = serializers.IntegerField(read_only="True", source='parent_room.id')
+    
     tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
     parent_invite = serializers.ReadOnlyField()
     tutor_agree = serializers.ReadOnlyField()
+
+    roomId = serializers.IntegerField(read_only="True", source='parent_room.id')
+
+    province_code = serializers.IntegerField(read_only="True", source='parent_room.province_code')
+    district_code = serializers.IntegerField(read_only="True", source='parent_room.district_code')
+    ward_code = serializers.IntegerField(read_only="True", source='parent_room.ward_code')
+    
+    detail_location = serializers.CharField(read_only="True", source='parent_room.detail_location')
+    subject = serializers.CharField(read_only="True", source='parent_room.subject')  # can select
+    lop = serializers.IntegerField(read_only="True", source='parent_room.lop')
+    isTeaching = serializers.BooleanField(read_only="True", source='parent_room.isTeaching')
+    create_at = serializers.DateTimeField(read_only="True", source='parent_room.create_at')
+    day_can_teach = serializers.MultipleChoiceField(read_only="True", source='parent_room.day_can_teach', choices=DAY_CAN_TEACH_CHOICES)
+    other_require = serializers.CharField(read_only="True", source='parent_room.other_require')
 
     class Meta:
         model = WaitingTutorModel
@@ -122,8 +137,22 @@ class WaitingTutorSerializer(serializers.ModelSerializer):
 class ListInvitedSerializer(serializers.ModelSerializer):
     tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
     parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.parent.user.id')
-    roomId = serializers.IntegerField(read_only="True", source="parent_room.id")
+    #roomId = serializers.IntegerField(read_only="True", source="parent_room.id")
     tutor_agree = serializers.ReadOnlyField()
+
+    roomId = serializers.IntegerField(read_only="True", source='parent_room.id')
+
+    province_code = serializers.IntegerField(read_only="True", source='parent_room.province_code')
+    district_code = serializers.IntegerField(read_only="True", source='parent_room.district_code')
+    ward_code = serializers.IntegerField(read_only="True", source='parent_room.ward_code')
+    
+    detail_location = serializers.CharField(read_only="True", source='parent_room.detail_location')
+    subject = serializers.CharField(read_only="True", source='parent_room.subject')  # can select
+    lop = serializers.IntegerField(read_only="True", source='parent_room.lop')
+    isTeaching = serializers.BooleanField(read_only="True", source='parent_room.isTeaching')
+    create_at = serializers.DateTimeField(read_only="True", source='parent_room.create_at')
+    day_can_teach = serializers.MultipleChoiceField(read_only="True", source='parent_room.day_can_teach', choices=DAY_CAN_TEACH_CHOICES)
+    other_require = serializers.CharField(read_only="True", source='parent_room.other_require')
 
     class Meta:
         model = ListInvitedModel
@@ -136,6 +165,20 @@ class TryTeachingSerializer(serializers.ModelSerializer):
     tutor_agree = serializers.ReadOnlyField()
     parent_agree = serializers.ReadOnlyField()
 
+    roomId = serializers.IntegerField(read_only="True", source='parent_room.id')
+
+    province_code = serializers.IntegerField(read_only="True", source='parent_room.province_code')
+    district_code = serializers.IntegerField(read_only="True", source='parent_room.district_code')
+    ward_code = serializers.IntegerField(read_only="True", source='parent_room.ward_code')
+    
+    detail_location = serializers.CharField(read_only="True", source='parent_room.detail_location')
+    subject = serializers.CharField(read_only="True", source='parent_room.subject')  # can select
+    lop = serializers.IntegerField(read_only="True", source='parent_room.lop')
+    isTeaching = serializers.BooleanField(read_only="True", source='parent_room.isTeaching')
+    create_at = serializers.DateTimeField(read_only="True", source='parent_room.create_at')
+    day_can_teach = serializers.MultipleChoiceField(read_only="True", source='parent_room.day_can_teach', choices=DAY_CAN_TEACH_CHOICES)
+    other_require = serializers.CharField(read_only="True", source='parent_room.other_require')
+
     class Meta:
         model = TryTeachingModel
         fields = '__all__'
@@ -144,6 +187,20 @@ class TryTeachingSerializer(serializers.ModelSerializer):
 class TutorTeachingSerializer(serializers.ModelSerializer):
     tutor = serializers.PrimaryKeyRelatedField(read_only='True', source='tutor.user.id')
     parent_room = serializers.ReadOnlyField(source='parent_room.parent.user.id')
+
+    roomId = serializers.IntegerField(read_only="True", source='parent_room.id')
+
+    province_code = serializers.IntegerField(read_only="True", source='parent_room.province_code')
+    district_code = serializers.IntegerField(read_only="True", source='parent_room.district_code')
+    ward_code = serializers.IntegerField(read_only="True", source='parent_room.ward_code')
+    
+    detail_location = serializers.CharField(read_only="True", source='parent_room.detail_location')
+    subject = serializers.CharField(read_only="True", source='parent_room.subject')  # can select
+    lop = serializers.IntegerField(read_only="True", source='parent_room.lop')
+    isTeaching = serializers.BooleanField(read_only="True", source='parent_room.isTeaching')
+    create_at = serializers.DateTimeField(read_only="True", source='parent_room.create_at')
+    day_can_teach = serializers.MultipleChoiceField(read_only="True", source='parent_room.day_can_teach', choices=DAY_CAN_TEACH_CHOICES)
+    other_require = serializers.CharField(read_only="True", source='parent_room.other_require')
 
     class Meta:
         model = TutorTeachingModel
