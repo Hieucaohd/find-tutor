@@ -10,6 +10,8 @@ from .models import SearchModel
 
 from django.db.models import Q
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from numba import jit
 
 
@@ -33,47 +35,43 @@ class Search(APIView):
         from rapidfuzz import fuzz
         import pylcs
 
+        source = self.normal_search_infor(source)
+        have = self.normal_search_infor(have)
+
         print('source: ', source)
         print('have: ', have)
 
         result_1 = fuzz.ratio(source, have)
-        result_1_1 = fuzz.ratio(self.normal_search_infor(source), self.normal_search_infor(have))
-        print(f'ratio: {result_1}, {result_1_1}')
+        print(f'ratio: {result_1}')
 
         result_2 = 0
-        result_2_2 = 0
-
-        len_no_space_have = len(self.normal_search_infor(have).replace(' ', ""))
+        len_no_space_have = len(have.replace(' ', ""))
         if len_no_space_have > 2:
             result_2 = fuzz.partial_ratio(source, have)
-            result_2_2 = fuzz.partial_ratio(self.normal_search_infor(source), self.normal_search_infor(have))
-        print(f'fuzz: {result_2}, {result_2_2}')
+        print(f'fuzz: {result_2}')
 
         result_3 = 0
         result_3_3 = 0
         if len(source) != 0:
-            result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-            result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-        print(f'pylcs: {result_3}, {result_3_3}')
+            # xâu con dài nhất
+            result_3 = pylcs.lcs2(source, have) / len(source) * 100
+            
+            # chuỗi con dài nhất            
+            result_3_3 = pylcs.lcs(source, have) / len(source) * 100
+        print(f'pylcs: xau: {result_3}, chuoi: {result_3_3}')
 
-        score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
+        max_score = max(result_1, result_2, result_3, result_3_3)
         print('max score: ', score)
 
-        limit = 75
+        return max_score
 
-        return (result_1 >= limit) or \
-               (result_1_1 >= limit) or \
-               (result_2 >= limit) or \
-               (result_2_2 >= limit) or \
-               (result_3 >= limit) or \
-               (result_3_3 >= limit)
+    def test_for_fields(self, search_infor='', fields=[]):
+        return max(self.test_for_string(search_infor, field) for field in fields)
 
     
     def condition_for_search_infor(self, search_infor='', fields=[]):
-        for field in fields:
-            if self.test_for_string(search_infor, field):
-                return True
-        return False
+        limit = 70
+        return self.test_for_fields(search_infor, fields) >= limit
 
     def condition_for_lop(self, lop=[], field_lop=[]):
         set_1 = set(lop)
@@ -88,7 +86,7 @@ class Search(APIView):
         if lop:
             return self.condition_for_search_infor(search_infor, fields) and self.condition_for_lop(lop, field_lop)
         else:
-            return self.condition_for_search_infor(search_infor, fields)
+            return self.condition_for_search_infor(search_infor, fields) 
 
     def search_engine(self, model, serializer, location_query, search_infor, fields, lop, field_lop):
         list_result = []
@@ -125,6 +123,8 @@ class Search(APIView):
         return data
 
     def get(self, request, format=None):
+        # page_number = request.query_params.get('page')
+
         province_code = request.query_params.get('province_code', 0)
         district_code = request.query_params.get('district_code', 0)
         ward_code = request.query_params.get('ward_code', 0)
@@ -145,7 +145,6 @@ class Search(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         search_infor = request.query_params.get('search', '')
-        search_infor = self.normal_search_infor(search_infor)
         
         can_tim_kiem = f'''Can tim kiem: 
                             \tsearch: {search_infor}
@@ -169,9 +168,18 @@ class Search(APIView):
                 ward_code = 0
 
             try:
-                location_query = Q(province_code = int(province_code)) | Q(district_code = int(district_code)) | Q(ward_code = int(ward_code))
+                province_code = int(province_code)
+                district_code = int(district_code)
+                ward_code = int(ward_code)
             except:
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                Response(status=status.HTTP_204_NO_CONTENT)
+
+            if province_code and district_code and ward_code:
+                location_query = Q(province_code = province_code) & Q(district_code = district_code) & Q(ward_code = ward_code)
+            elif province_code and district_code:
+                location_query = Q(province_code = province_code) & Q(district_code = district_code)
+            elif province_code:
+                location_query = Q(province_code = province_code)
 
         if request.user.is_authenticated and search_infor:
             SearchModel.objects.create(user=request.user, content_search=search_infor)
@@ -213,14 +221,14 @@ class Search(APIView):
                 list_tutor  = self.search_with_no_search_infor(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
                 list_parent = self.search_with_no_search_infor(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
 
-            
-
-            
-
             return Response({
                     'list_tutor': list_tutor,
                     'list_parent': list_parent
                 })
+
+
+# class SearchImprove(Search):
+    
 
 
 
