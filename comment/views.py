@@ -4,15 +4,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from .models import CommentAboutTutorModel, CommentAboutParentModel, CommentAboutParentRoomModel
-from .serializers import CommentAboutTutorSerializer, CommentAboutParentSerializer, CommentAboutParentRoomSerializer
+from .models import CommentAboutUserModel, CommentAboutParentRoomModel
+from .serializers import CommentAboutUserSerializer, CommentAboutParentRoomSerializer
 
 from findTutor.viewsDic.baseView import UpdateBaseView, DeleteBaseView
 from findTutor.models import TutorModel, ParentModel, ParentRoomModel
 
+from authentication.models import User
+
 
 class CommentListBaseView(APIView):
-	permission_classes = [permissions.IsAuthenticated]
+	#permission_classes = [permissions.IsAuthenticated]
 
 	modelBase = None
 	serializerBase = None
@@ -38,6 +40,9 @@ class CommentListBaseView(APIView):
 
 
 	def post(self, request, format=None):
+		if not request.user.is_authenticated:
+			return Response(status=status.HTTP_403_FORBIDDEN)
+
 		about_who_pk = request.data.get('about_who_id', 0)
 		belong_to_pk = request.data.get('belong_to_id', 0)
 
@@ -62,21 +67,17 @@ class CommentListBaseView(APIView):
 			return Response({"khong duoc phep": "khong duoc phep"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentAboutTutorList(CommentListBaseView):
-	modelBase = CommentAboutTutorModel
-	serializerBase = CommentAboutTutorSerializer
-	aboutModel = TutorModel
+class CommentAboutUserList(CommentListBaseView):
+	modelBase = CommentAboutUserModel
+	serializerBase = CommentAboutUserSerializer
 
-
-class CommentAboutParentList(CommentListBaseView):
-	modelBase = CommentAboutParentModel
-	serializerBase = CommentAboutParentSerializer
-	aboutModel = ParentModel
+	aboutModel = User
 
 
 class CommentAboutParentRoomList(CommentListBaseView):
 	modelBase = CommentAboutParentRoomModel
 	serializerBase = CommentAboutParentRoomSerializer
+
 	aboutModel = ParentRoomModel
 
 
@@ -97,14 +98,9 @@ class CommentDetailBaseView(UpdateBaseView, DeleteBaseView):
 			return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class CommentAboutTutorDetail(CommentDetailBaseView):
-	modelBase = CommentAboutTutorModel
-	serializerBase = CommentAboutTutorSerializer
-
-
-class CommentAboutParentDetail(CommentDetailBaseView):
-	modelBase = CommentAboutParentModel
-	serializerBase = CommentAboutParentSerializer
+class CommentAboutUserDetail(CommentDetailBaseView):
+	modelBase = CommentAboutUserModel
+	serializerBase = CommentAboutUserSerializer
 
 
 class CommentAboutParentRoomDetail(CommentDetailBaseView):
