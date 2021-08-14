@@ -122,7 +122,7 @@ class Search(APIView):
 
         return data
 
-    def get(self, request, format=None):
+    def get_params(self, request, format=None):
         # page_number = request.query_params.get('page')
 
         province_code = request.query_params.get('province_code', 0)
@@ -155,6 +155,90 @@ class Search(APIView):
                             \tward: {ward_code}'''
         print(can_tim_kiem)
 
+        return (province_code, 
+               district_code, 
+               ward_code, lop, 
+               type_search, 
+               search_infor)
+
+    def search_for_room(self, location_query, search_infor, lop):
+        def fields(item):
+                return [item.subject, item.other_require]
+
+        def field_lop(item):
+            return [item.lop]
+
+        if search_infor:
+            return Response(self.search_engine(ParentRoomModel, 
+                                               ParentRoomSerializer, 
+                                               location_query, 
+                                               search_infor, 
+                                               fields, lop, field_lop))
+        else:
+            return Response(self.search_with_no_search_infor(ParentRoomModel, 
+                                                             ParentRoomSerializer, 
+                                                             location_query, 
+                                                             search_infor, 
+                                                             fields, lop, field_lop))
+
+    def search_for_people(self, location_query, search_infor, lop):
+        # truong cua tutor
+        def fields_tutor(item):
+            return [item.full_name, 
+                    item.experience, 
+                    item.achievement, 
+                    item.university, 
+                    item.profession]
+
+        def field_lop_tutor(item):
+            return list(item.lop_day)
+
+        # truong cua parent
+        def fields_parent(item):
+            return [item.full_name]
+
+        def field_lop_parent(item):
+            return list()
+
+        list_tutor = []
+        list_parent = []
+        if search_infor:
+            list_tutor  = self.search_engine(TutorModel , 
+                                             TutorSerializer , 
+                                             location_query, 
+                                             search_infor, 
+                                             fields_tutor, 
+                                             lop, field_lop_tutor)
+            list_parent = self.search_engine(ParentModel, 
+                                             ParentSerializer, 
+                                             location_query, 
+                                             search_infor, 
+                                             fields_parent, 
+                                             lop, field_lop_parent)
+        else:
+            list_tutor  = self.search_with_no_search_infor(TutorModel , 
+                                                           TutorSerializer , 
+                                                           location_query, 
+                                                           search_infor, 
+                                                           fields_tutor, 
+                                                           lop, field_lop_tutor)
+            list_parent = self.search_with_no_search_infor(ParentModel, 
+                                                           ParentSerializer, 
+                                                           location_query, 
+                                                           search_infor, 
+                                                           fields_parent, 
+                                                           lop, field_lop_parent)
+
+        return Response({
+                'list_tutor': list_tutor,
+                'list_parent': list_parent
+            })
+
+
+    def get(self, request, format=None):
+
+        province_code, district_code, ward_code, lop, type_search, search_infor = self.get_params(request)
+
         location_query = None
         if province_code or district_code or ward_code:
 
@@ -185,49 +269,30 @@ class Search(APIView):
             SearchModel.objects.create(user=request.user, content_search=search_infor)
 
         if type_search == 'room':
+            return self.search_for_room(location_query, search_infor, lop)
 
-            def fields(item):
-                return [item.subject, item.other_require]
-
-            def field_lop(item):
-                return [item.lop]
-
-            if search_infor:
-                return Response(self.search_engine(ParentRoomModel, ParentRoomSerializer, location_query, search_infor, fields, lop, field_lop))
-            else:
-                return Response(self.search_with_no_search_infor(ParentRoomModel, ParentRoomSerializer, location_query, search_infor, fields, lop, field_lop))
         elif type_search == 'people':
-
-            # truong cua tutor
-            def fields_tutor(item):
-                return [item.full_name, item.experience, item.achievement, item.university, item.profession]
-
-            def field_lop_tutor(item):
-                return list(item.lop_day)
-
-            # truong cua parent
-            def fields_parent(item):
-                return [item.full_name]
-
-            def field_lop_parent(item):
-                return list()
-
-            list_tutor = []
-            list_parent = []
-            if search_infor:
-                list_tutor  = self.search_engine(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
-                list_parent = self.search_engine(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
-            else:
-                list_tutor  = self.search_with_no_search_infor(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
-                list_parent = self.search_with_no_search_infor(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
-
-            return Response({
-                    'list_tutor': list_tutor,
-                    'list_parent': list_parent
-                })
+            return self.search_for_people(location_query, search_infor, lop)
 
 
-# class SearchImprove(Search):
+class SearchImprove(Search):
+    def search_engine(self, model, serializer, location_query, search_infor, fields, lop, field_lop):
+
+        list_result = model.objects.raw('''
+                                        SELECT *,
+                                        max_search_for_room(%s, subject, other_require) AS result 
+                                        FROM findTutor_parentroommodel 
+                                        WHERE max_search_for_room(%s, subject, other_require) > 0 
+                                        ORDER BY result DESC;
+                                        ''', (search_infor, search_infor))
+
+        data = serializer(list_result, many=True).data
+
+        return data
+
+
+class SearchShow(SearchImprove):
+    pass
     
 
 

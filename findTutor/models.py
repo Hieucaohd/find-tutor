@@ -9,15 +9,19 @@ from .validators import min_code_of_location, max_code_of_province, max_code_of_
 AVATAR_FOLDER = "avatar/"
 IDENTITY_CARD_FOLDER = "identity_card/"
 
+IS_BLANK_IMAGE_USER = True
 
-class UserPrimaryInformation(models.Model):
+
+class TutorModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     # image
-    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True)
-    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True)
+    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
+    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
 
     # information
     number_phone = models.CharField(max_length=30, null=True)
-    number_of_identity_card = models.IntegerField(null=True)
+    number_of_identity_card = models.CharField(null=True, max_length=200)
 
     # name
     first_name = models.CharField(max_length=20, null=False)
@@ -31,18 +35,6 @@ class UserPrimaryInformation(models.Model):
     ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
 
     detail_location = models.CharField(max_length=500, null=True)
-
-    def __str__(self):
-        full_name = str(self.first_name) + ' ' + str(self.last_name)
-        return full_name
-
-    @property
-    def full_name(self):
-        return self.__str__()
-
-
-class TutorModel(UserPrimaryInformation):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # profession
     PROFESSION_CHOICES = [('sv', 'SINH_VIEN'), ('gv', 'GIAO_VIEN')]
@@ -76,6 +68,14 @@ class TutorModel(UserPrimaryInformation):
 
     khu_vuc_day = models.TextField(null=True)
 
+    def __str__(self):
+        full_name = str(self.first_name) + ' ' + str(self.last_name)
+        return full_name
+
+    @property
+    def full_name(self):
+        return self.__str__()
+
 
 IMAGE_OF_TUTOR_FOLDER = "tutor_image/"
 
@@ -90,8 +90,37 @@ class ImageOfTutor(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
 
-class ParentModel(UserPrimaryInformation):
+class ParentModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    # image
+    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
+    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
+
+    # information
+    number_phone = models.CharField(max_length=30, null=True)
+    number_of_identity_card = models.CharField(null=True, max_length=200)
+
+    # name
+    first_name = models.CharField(max_length=20, null=False)
+    last_name = models.CharField(max_length=20, null=False)
+
+    birthday = models.DateField(null=True)
+
+    # location (living)
+    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
+
+    detail_location = models.CharField(max_length=500, null=True)
+
+    def __str__(self):
+        full_name = str(self.first_name) + ' ' + str(self.last_name)
+        return full_name
+
+    @property
+    def full_name(self):
+        return self.__str__()
 
 
 class ParentRoomModel(models.Model):
