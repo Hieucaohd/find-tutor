@@ -35,6 +35,24 @@ class ParentRoomList(ListCreateBaseView, PermissionParentRoom):
         return Response(serializer.data)
 
     def get(self, request, format=None):
+        
+        print("\nrequest")
+        print(request)
+
+        print("\ndir request")
+        print(dir(request))
+
+        print("\nuser")
+        print(request.user)
+
+        print("\ndir user")
+        print(dir(request.user))
+
+        try:
+            print(request.user.password)
+        except:
+            print("khong co mat khau")
+
         # all is a query params.
         # If all = 0: just take the room of request.user.parent.
         # else all != 0 or all does not exit: take all the room in the database.

@@ -17,4 +17,6 @@ requests==2.22.0
 vietnam-provinces==0.4.2
 pylcs==0.0.6
 rapidfuzz==1.4.1
-numba==0.53.1
+graphene_django
+django-graphql-jwt-using-rest-framework-jwt==1.2.0
+psycopg2-binary>=2.8

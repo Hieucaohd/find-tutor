@@ -12,7 +12,6 @@ from django.db.models import Q
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from numba import jit
 
 
 class Search(APIView):

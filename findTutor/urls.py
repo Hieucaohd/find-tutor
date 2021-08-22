@@ -2,6 +2,8 @@ from django.urls import path, include
 # from rest_framework.authtoken import views
 from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor
 
+from graphene_django.views import GraphQLView
+from .schema import schema
 
 urlpatterns = [
     # tutor
@@ -39,7 +41,8 @@ urlpatterns = [
     # information about room of tutor
     path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
 
-    
+    # for graphQL
+    path('graphql', GraphQLView.as_view(graphiql=True, schema=schema)),
 
     # # user
     # path('userList/', userAuthView.UserList.as_view(), name='user-list'),
