@@ -6,10 +6,6 @@ services:
     restart: always
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=nothing
-      - POSTGRES_USER=hieucao192
-      - POSTGRES_PASSWORD=192
     ports:
       - "5432:5432"
   web:
