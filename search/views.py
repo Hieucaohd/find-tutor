@@ -10,9 +10,6 @@ from .models import SearchModel
 
 from django.db.models import Q
 
-from numba import jit
-
-
 class Search(APIView):
 
     def normal_search_infor(self, search_infor):
@@ -31,7 +28,7 @@ class Search(APIView):
 
     def test_for_string(self, source, have):
         from rapidfuzz import fuzz
-        import pylcs
+        #import pylcs
 
         print('source: ', source)
         print('have: ', have)
@@ -52,8 +49,9 @@ class Search(APIView):
         result_3 = 0
         result_3_3 = 0
         if len(source) != 0:
-            result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-            result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
+            #result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
+            #result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
+            pass
         print(f'pylcs: {result_3}, {result_3_3}')
 
         score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
@@ -212,10 +210,6 @@ class Search(APIView):
             else:
                 list_tutor  = self.search_with_no_search_infor(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
                 list_parent = self.search_with_no_search_infor(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
-
-            
-
-            
 
             return Response({
                     'list_tutor': list_tutor,

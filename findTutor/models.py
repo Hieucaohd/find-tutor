@@ -6,65 +6,62 @@ from .validators import min_code_of_location, max_code_of_province, max_code_of_
 # Create your models here.
 
 
-AVATAR_FOLDER = "avatar/"
-IDENTITY_CARD_FOLDER = "identity_card/"
+# bảng gia sư
+class TutorModel(models.Model):
+    # nhạy cảm
+    # mỗi người dùng chỉ được đăng kí một gia sư 
+    user = models.OneToOneField(User, on_delete=models.CASCADE) 
 
+    # số thẻ căn cước công dân của gia sư
+    # không yêu cầu cung cấp 
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    number_of_identity_card = models.CharField(null=True, blank=True, max_length=200)
 
-class UserPrimaryInformation(models.Model):
-    # image
-    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True)
-    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True)
+    # số điện thoại
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    number_phone = models.CharField(max_length=30, null=True, blank=True)
 
-    # information
-    number_phone = models.CharField(max_length=30, null=True)
-    number_of_identity_card = models.IntegerField(null=True)
+    # họ và tên
+    # yêu cầu cung cấp
+    first_name = models.CharField(max_length=20, null=False, blank=False)
+    last_name = models.CharField(max_length=20, null=False, blank=False)
 
-    # name
-    first_name = models.CharField(max_length=20, null=False)
-    last_name = models.CharField(max_length=20, null=False)
+    # ngày tháng năm sinh, YYYY-MM-DD
+    # yêu cầu cung cấp
+    birthday = models.DateField(null=False, blank=False)
 
-    birthday = models.DateField(null=True)
+    # đia chỉ của gia sư 
+    # yêu cầu cung cấp, mã của tỉnh và mã của huyện
+    # sử dụng mã code theo tiêu chuẩn của cuộc thống kê quốc gia Việt Nam
+    province_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=True, blank=True, validators=[min_code_of_location, max_code_of_ward], default=1)
 
-    # location (living)
-    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
-    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
-    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
+    # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy 
+    detail_location = models.CharField(max_length=500, null=True, blank=True)
 
-    detail_location = models.CharField(max_length=500, null=True)
-
-    def __str__(self):
-        full_name = str(self.first_name) + ' ' + str(self.last_name)
-        return full_name
-
-    @property
-    def full_name(self):
-        return self.__str__()
-
-
-class TutorModel(UserPrimaryInformation):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    # profession
+    # nghề nghiệp hiện tại, một trong 2 lựa chọn (sinh viên hoặc giáo viên)
+    # yêu cầu cung cấp 
     PROFESSION_CHOICES = [('sv', 'SINH_VIEN'), ('gv', 'GIAO_VIEN')]
-    profession = models.CharField(max_length=10, choices=PROFESSION_CHOICES, null=True)
+    profession = models.CharField(max_length=10, choices=PROFESSION_CHOICES, null=False, blank=False)
 
-    university = models.CharField(max_length=200, null=True)    # truong dai hoc da hoac dang hoc.
-    # anh the sinh vien hoac anh bang tot nghiep
+    # trường đại học đã và đang học của gia sư
+    # không yêu cầu cung cấp
+    university = models.CharField(max_length=200, null=True, blank=True)
 
-    experience = models.TextField(null=True)  # kinh nghiem
-    # imagine to show experience here
+    # kinh nghiệm của gia sư
+    # không yêu cầu cung cấp
+    experience = models.TextField(null=True, blank=True) 
 
-    achievement = models.TextField(null=True)  # thanh tich
-    # imagine to show achievement here
+    # thành tích của gia sư
+    # không yêu cầu cung cấp
+    achievement = models.TextField(null=True, blank=True) 
 
-    CAP_DAY_CHOICES = []
-    for i in range(1, 5):
-        ten_cap = 'cap_' + str(i)
-        if i == 4:
-            ten_cap = 'dai_hoc'
-        CAP_DAY_CHOICES.append((i, ten_cap))
-    cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, min_choices=0)
-
+    # các lớp gia sư dạy được
+    # không yêu cầu cung cấp
     LOP_DAY_CHOICES = []
     for i in range(1, 18):
         if i <= 12:
@@ -74,58 +71,172 @@ class TutorModel(UserPrimaryInformation):
         LOP_DAY_CHOICES.append((i, ten_lop))
     lop_day = MultiSelectField(choices=LOP_DAY_CHOICES, min_choices=0)
 
-    khu_vuc_day = models.TextField(null=True)
+    # khu vực có thể dạy của gia sư 
+    # không yêu cầu cung cấp 
+    khu_vuc_day = models.TextField(null=True, blank=True)
+
+    CAP_DAY_CHOICES = []
+    for i in range(1, 5):
+        ten_cap = 'cap_' + str(i)
+        if i == 4:
+            ten_cap = 'dai_hoc'
+        CAP_DAY_CHOICES.append((i, ten_cap))
+    cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, min_choices=0)
+
+    @property
+    def full_name(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
+
+    def __str__(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
 
 
-IMAGE_OF_TUTOR_FOLDER = "tutor_image/"
+IS_BLANK_IMAGE_USER = True
+AVATAR_FOLDER = "avatar/"   # thư mục lưu trữ ảnh đại diện
+IDENTITY_CARD_FOLDER = "identity_card/"    # thư mục lưu trữ ảnh thẻ căn cước
+STUDENT_CARD_FOLDER = "student_card/"   # thư mục lưu trữ ảnh thẻ sinh viên
 
 
-class ImageOfTutor(models.Model):
+class ImagePrivateUser(models.Model):
+    # mỗi người dùng có thể có nhiều ảnh đại diện hoặc ảnh thẻ căn cước do có thể thay đổi
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    image = models.ImageField(upload_to=IMAGE_OF_TUTOR_FOLDER, null=False)
+    # ảnh đại diện của người dùng
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
+    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
 
-    type_of_image = models.CharField(max_length=200, null=True)
+    # ảnh thẻ căn cước của người dùng
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
+    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
 
+    # ảnh thẻ sinh viên
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
+    student_card = models.ImageField(upload_to=STUDENT_CARD_FOLDER, null=True, blank=IS_BLANK_IMAGE_USER)
+
+    # thời gian tải lên
     create_at = models.DateTimeField(auto_now_add=True)
 
 
-class ParentModel(UserPrimaryInformation):
+IMAGE_OF_USER_FOLDER = "user_image/"
+
+
+class ImageOfUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # ảnh 
+    # yêu cầu cung cấp 
+    image = models.ImageField(upload_to=IMAGE_OF_USER_FOLDER, null=False, blank=False)
+
+    # loại của ảnh
+    # không yêu cầu cung cấp
+    type_of_image = models.CharField(max_length=200, null=True, blank=True)
+
+    # thời gian tạo
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    # người khác có thể xem được không
+    is_public = models.BooleanField(default=False)
+
+
+class ParentModel(models.Model):
+    # nhạy cảm
+    # mỗi người dùng chỉ được đăng kí một gia sư
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    # số điện thoại
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    number_phone = models.CharField(max_length=30, null=True, blank=True)
+
+    # số thẻ căn cước công dân của gia sư
+    # không yêu cầu cung cấp 
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    number_of_identity_card = models.CharField(null=True, blank=True, max_length=200)
+
+    # họ và tên
+    # yêu cầu cung cấp
+    first_name = models.CharField(max_length=20, null=False, blank=False)
+    last_name = models.CharField(max_length=20, null=False, blank=False)
+
+    # ngày tháng năm sinh, YYYY-MM-DD
+    # yêu cầu cung cấp
+    birthday = models.DateField(null=True, blank=True)
+
+    # đia chỉ của gia sư 
+    # yêu cầu cung cấp mã của tỉnh và mã của huyện
+    # sử dụng mã code theo tiêu chuẩn của cuộc thống kê quốc gia Việt Nam
+    province_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=True, blank=True, validators=[min_code_of_location, max_code_of_ward], default=1)
+
+    # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
+    # không yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    detail_location = models.CharField(max_length=500, null=True, blank=True)
+
+    @property
+    def full_name(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
+
+    def __str__(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
 
 
 class ParentRoomModel(models.Model):
+    # phụ huynh tạo ra lớp học
+    # một phụ huynh có thể tao ra nhiều lớp học
     parent = models.ForeignKey(ParentModel, on_delete=models.CASCADE)
 
-    province_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_province], default=1)
-    district_code = models.IntegerField(null=False, validators=[min_code_of_location, max_code_of_district], default=1)
-    ward_code = models.IntegerField(null=True, validators=[min_code_of_location, max_code_of_ward], default=1)
+    # đia chỉ của gia sư 
+    # yêu cầu cung cấp 
+    # sử dụng mã code theo tiêu chuẩn của cuộc thống kê quốc gia Việt Nam
+    province_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_province], default=1)
+    district_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_district], default=1)
+    ward_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_ward], default=1)
 
-    detail_location = models.CharField(max_length=500, null=False)
+    # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
+    # yêu cầu cung cấp
+    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
+    detail_location = models.CharField(max_length=500, null=False, blank=False)
 
-    subject = models.CharField(max_length=200, null=False)  # can select
+    # môn học
+    # yêu cầu cung cấp
+    subject = models.CharField(max_length=200, null=False, blank=False)
+
+    # lớp 
+    # yêu cầu cung cấp
     LOP_CHOICES = []
     for i in range(1, 18):
         if i <= 12:
             ten_lop = 'lop_' + str(i)
         else:
             ten_lop = 'nam_' + str(i-12)
-        LOP_CHOICES.append((i, ten_lop))
-    lop = models.IntegerField(choices=LOP_CHOICES, null=False)
+        LOP_CHOICES.append((i, i))
+    lop = models.IntegerField(choices=LOP_CHOICES, null=False, blank=False)
 
+    # lớp học đã có người dạy hay chưa 
     isTeaching = models.BooleanField(default=False)
+
+    # thời gian tạo lớp học
     create_at = models.DateTimeField(auto_now=True)
 
+    # các ngày có thể dạy
+    # yêu cầu cung cấp ít nhất một ngày
     DAY_CAN_TEACH_CHOICES = []
     for i in range(2, 9):
         if i <= 7:
             ten_ngay = 'thu_' + str(i)
         else:
             ten_ngay = 'chu_nhat'
-        DAY_CAN_TEACH_CHOICES.append((i, ten_ngay))
+        DAY_CAN_TEACH_CHOICES.append((i, i))
     day_can_teach = MultiSelectField(choices=DAY_CAN_TEACH_CHOICES, min_choices=1)
 
-    other_require = models.TextField(null=True)
+    # các yêu cầu đối với người dạy 
+    # không yêu cầu cung cấp 
+    other_require = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return 'lop ' + str(self.subject)
@@ -192,9 +303,4 @@ class TutorTeachingModel(models.Model):
     parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
     start_at = models.DateTimeField(auto_now_add=True)
-
-
-
-
-
 
