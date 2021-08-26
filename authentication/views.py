@@ -47,7 +47,10 @@ class RegisterView(generics.GenericAPIView):
             'to_email': [user.email],
         }
 
-        Util.send_email(data)
+        try:
+            Util.send_email(data)
+        except:
+            pass
 
         return Response(inforAboutUser(user))
 

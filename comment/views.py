@@ -14,7 +14,6 @@ from authentication.models import User
 
 
 class CommentListBaseView(APIView):
-	#permission_classes = [permissions.IsAuthenticated]
 
 	modelBase = None
 	serializerBase = None
