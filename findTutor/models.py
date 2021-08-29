@@ -95,11 +95,31 @@ IS_BLANK_IMAGE_USER = True
 AVATAR_FOLDER = "avatar/"   # thư mục lưu trữ ảnh đại diện
 IDENTITY_CARD_FOLDER = "identity_card/"    # thư mục lưu trữ ảnh thẻ căn cước
 STUDENT_CARD_FOLDER = "student_card/"   # thư mục lưu trữ ảnh thẻ sinh viên
+OLD_IMAGE_PRIVATE_USER = 'old_image_private_user/'  # thư mục lưu trữ ảnh riêng tư cũ của user
 
 
-class ImagePrivateUser(models.Model):
-    # mỗi người dùng có thể có nhiều ảnh đại diện hoặc ảnh thẻ căn cước do có thể thay đổi
+class OldImagePrivateUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    image = models.ImageField()
+
+    type_image_array = ['avatar', 'identity_card', 'student_card']
+    type_image_choices = ((item, item) for item in type_image_array)
+    type_image = models.CharField(max_length=200, choices=type_image_choices)
+
+    type_action_array = ['update', 'delete']
+    type_action_choices = ((item, item) for item in type_action_array)
+    type_action = models.CharField(max_length=200, choices=type_action_choices)
+
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.type_image + " cua " + self.user.username + " bi " + self.type_action
+
+
+class ImagePrivateUserModel(models.Model):
+    # mỗi người dùng có thể có nhiều ảnh đại diện hoặc ảnh thẻ căn cước do có thể thay đổi
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # ảnh đại diện của người dùng
     # không yêu cầu cung cấp
@@ -119,11 +139,17 @@ class ImagePrivateUser(models.Model):
     # thời gian tải lên
     create_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.user.username
+
 
 IMAGE_OF_USER_FOLDER = "user_image/"
 
 
-class ImageOfUser(models.Model):
+# class OldImageOfUserModel(models.Model):
+
+
+class ImageOfUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # ảnh 
@@ -132,7 +158,7 @@ class ImageOfUser(models.Model):
 
     # loại của ảnh
     # không yêu cầu cung cấp
-    type_of_image = models.CharField(max_length=200, null=True, blank=True)
+    type_image = models.CharField(max_length=200, null=True, blank=True)
 
     # thời gian tạo
     create_at = models.DateTimeField(auto_now_add=True)
@@ -140,6 +166,56 @@ class ImageOfUser(models.Model):
     # người khác có thể xem được không
     is_public = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.type_image + " cua " + self.user.username
+
+
+from django.db.models.signals import pre_delete, pre_save, post_save
+
+def before_image_private_user_delete(sender, instance, **kwargs):
+    array_item = []
+
+    if instance.avatar:
+        old_avatar = OldImagePrivateUserModel()
+        old_avatar.image = instance.avatar
+        old_avatar.type_image = OldImagePrivateUserModel.type_image_array[0]    # avatar
+        array_item.append(old_avatar)
+
+    if instance.identity_card:
+        old_identity_card = OldImagePrivateUserModel()
+        old_identity_card.image = instance.identity_card
+        old_identity_card.type_image = OldImagePrivateUserModel.type_image_array[1] # identity_card
+        array_item.append(old_identity_card)
+
+    if instance.student_card:
+        old_student_card = OldImagePrivateUserModel()
+        old_student_card.image = instance.student_card
+        old_student_card.type_image = OldImagePrivateUserModel.type_image_array[2]  # student_card
+        array_item.append(student_card)
+
+    for item in array_item:
+        item.type_action = OldImagePrivateUserModel.type_action_array[1]
+        item.user = instance.user
+        item.save()
+
+    print("ban luu thanh cong")
+
+pre_delete.connect(before_image_private_user_delete, sender=ImagePrivateUserModel)
+
+# def before_image_private_user_update(sender, instance, **kwargs):
+#     print("before")
+#     print(instance.avatar.path)
+#     print(instance.identity_card.path)
+#     print(instance.student_card.path)
+
+# def after_image_private_user_update(sender, instance, **kwargs):
+#     print("after")
+#     print(instance.avatar.path)
+#     print(instance.identity_card.path)
+#     print(instance.student_card.path)
+
+# pre_save.connect(before_image_private_user_update, sender=ImagePrivateUserModel)
+# post_save.connect(after_image_private_user_update, sender=ImagePrivateUserModel)
 
 class ParentModel(models.Model):
     # nhạy cảm

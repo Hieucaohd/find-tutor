@@ -1,6 +1,6 @@
 from django.urls import path, include
 # from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor
+from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor, imagePrivateUserView
 
 from graphene_django.views import GraphQLView
 from .schema import schema
@@ -43,6 +43,10 @@ urlpatterns = [
 
     # for graphQL
     path('graphql', GraphQLView.as_view(graphiql=True, schema=schema)),
+
+    # image private user
+    path('imagePrivateUserList/', imagePrivateUserView.ImagePrivateUserList.as_view()),
+    path('imagePrivateUserDetail/', imagePrivateUserView.ImagePrivateUserDetail.as_view()),
 
     # # user
     # path('userList/', userAuthView.UserList.as_view(), name='user-list'),
