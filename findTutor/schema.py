@@ -156,7 +156,7 @@ class ImageOfUserType(DjangoObjectType):
 
 	@classmethod
 	def get_queryset(cls, queryset, info):
-	    request = info.context
+		request = info.context
 		page = request.GET.get("page_image_of_user", 1)
 		paginator = paginator_function(queryset, 10, page)
 		return paginator
