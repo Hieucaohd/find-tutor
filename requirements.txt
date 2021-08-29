@@ -19,4 +19,5 @@ pylcs
 rapidfuzz==1.4.1
 graphene_django
 django-graphql-jwt-using-rest-framework-jwt==1.2.0
-psycopg2-binary>=2.8
+gunicorn
+whitenoise

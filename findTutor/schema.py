@@ -6,14 +6,23 @@ from graphql_jwt.decorators import login_required
 from .models import *
 from authentication.models import User
 
-class UserType(DjangoObjectType):
-	class Meta:
-		model = User
-		fields = (
-				  "username",
-				  "tutormodel",
-				  "parentmodel",
-				  )
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+def paginator_function(query_set, num_in_page, page):
+	paginator = Paginator(query_set, num_in_page)
+
+	try:
+		list_item = paginator.page(page)
+	except PageNotAnInteger:
+		print("not integer")
+		list_item = paginator.page(1)
+	except EmptyPage:
+		print("empty page")
+		list_item = paginator.page(paginator.num_pages)
+
+	return list_item
+
 
 def is_owner(people, info):
 	if info.context.user == people.user:
@@ -21,10 +30,24 @@ def is_owner(people, info):
 	return False
 
 
+class UserType(DjangoObjectType):
+	class Meta:
+		model = User
+		fields = (
+				  "id",
+				  "username",
+				  "tutormodel",
+				  "parentmodel",
+				  "imageprivateusermodel",
+				  "oldimageprivateusermodel_set",
+				  "imageofusermodel_set",
+				  )
+
+
 class TutorType(DjangoObjectType):
 	class Meta:
 		model = TutorModel
-		fields = (
+		fields =  (
 				  "first_name", 
 				  "last_name",
 				  "birthday",
@@ -69,6 +92,74 @@ class TutorType(DjangoObjectType):
 		if is_owner(self, info):
 			return self.number_of_identity_card
 
+class OldImagePrivateUserType(DjangoObjectType):
+	class Meta:
+		model = OldImagePrivateUserModel
+		fields = (
+				 "image",
+				 "type_image",
+				 "type_action",
+				 "create_at",
+				 )
+
+	def resolve_image(self, info):
+		if is_owner(self, info):
+		 	return self.image
+		elif self.type_image == OldImagePrivateUserModel.type_image_array[0]:
+			return self.image
+		else:
+			return ''
+
+	@classmethod
+	def get_queryset(cls, queryset, info):
+		request = info.context
+		page = request.GET.get("page_old_private_image", 1)
+		queryset = queryset.filter(type_action = "update")
+		paginator = paginator_function(queryset, 5, page)
+		return paginator
+
+
+class ImagePrivateUserType(DjangoObjectType):
+	class Meta:
+		model = ImagePrivateUserModel
+		fields = (
+				 "avatar",
+				 "identity_card",
+				 "student_card",
+				 "create_at",
+				 )
+
+	def resolve_identity_card(self, info):
+		if is_owner(self, info):
+			return self.identity_card
+
+	def resolve_student_card(self, info):
+		if is_owner(self, info):
+			return self.student_card
+
+class ImageOfUserType(DjangoObjectType):
+	class Meta:
+		model = ImageOfUserModel
+		fields = (
+				 "image",
+				 "type_image",
+				 "create_at",
+				 )
+
+	def resolve_image(self, info):
+		if is_owner(self, info):
+			return self.image
+		elif self.is_public:
+			return self.image
+		else:
+			return ''
+
+	@classmethod
+	def get_queryset(cls, queryset, info):
+	    request = info.context
+		page = request.GET.get("page_image_of_user", 1)
+		paginator = paginator_function(queryset, 10, page)
+		return paginator
 
 
 class ParentType(DjangoObjectType):
@@ -111,11 +202,6 @@ class ParentType(DjangoObjectType):
 			return self.number_of_identity_card
 
 
-class OldLocationType(DjangoObjectType):
-	class Meta:
-		model = OldLocationModel
-
-
 class ParentRoomType(DjangoObjectType):
 	class Meta:
 		model = ParentRoomModel
@@ -142,6 +228,9 @@ class ParentRoomType(DjangoObjectType):
 		convert_choices_to_enum = []
 
 
+class OldLocationType(DjangoObjectType):
+	class Meta:
+		model = OldLocationModel
 
 
 class PriceType(DjangoObjectType):
@@ -185,44 +274,35 @@ def who_is(request):
 		print("khong co mat khau")
 
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-def paginator_function(query_set, num_in_page, page):
-	paginator = Paginator(query_set, num_in_page)
-
-	try:
-		list_item = paginator.page(page)
-	except PageNotAnInteger:
-		print("not integer")
-		list_item = paginator.page(1)
-	except EmptyPage:
-		print("empty page")
-		list_item = paginator.page(paginator.num_pages)
-
-	return list_item
-
-
 class Query(graphene.ObjectType):
 	# lay thong tin cua user
-	user_by_id = graphene.Field(UserType, id=graphene.Int(), token=graphene.String(required=False))
+	get_user = graphene.Field(UserType, token=graphene.String(required=False))
+
+	@login_required
+	def resolve_get_user(root, info, **kwargs):
+		request = info.context
+		return User.objects.get(pk=request.user.id)
+
+	# lay thong tin cua user public
+	user_by_id = graphene.Field(UserType, id=graphene.Int(required=True))
 
 	def resolve_user_by_id(root, info, **kwargs):
 		id = kwargs.get('id')
 		return User.objects.get(pk=id)
 
-	# lấy thông tin của phụ huynh theo id  
-	parent_by_id = graphene.Field(ParentType, id=graphene.Int())
+	# # lấy thông tin của phụ huynh theo id  
+	# parent_by_id = graphene.Field(ParentType, id=graphene.Int())
 
-	def resolve_parent_by_id(root, info, **kwargs):
-		id = kwargs.get("id");
-		return ParentModel.objects.get(pk=id)
+	# def resolve_parent_by_id(root, info, **kwargs):
+	# 	id = kwargs.get("id");
+	# 	return ParentModel.objects.get(pk=id)
 
-	# lấy thông tin của gia sư theo id
-	tutor_by_id = graphene.Field(TutorType, id=graphene.Int(), token=graphene.String(required=False))
+	# # lấy thông tin của gia sư theo id
+	# tutor_by_id = graphene.Field(TutorType, id=graphene.Int(), token=graphene.String(required=False))
 
-	def resolve_tutor_by_id(root, info, **kwargs):
-		id = kwargs.get("id");
-		return TutorModel.objects.get(pk=id)
+	# def resolve_tutor_by_id(root, info, **kwargs):
+	# 	id = kwargs.get("id");
+	# 	return TutorModel.objects.get(pk=id)
 
 	# lấy tất cả các lớp học
 	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False))
@@ -231,5 +311,7 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 
 		return paginator_function(ParentRoomModel.objects.all(), 2, page)
+
+
 
 schema = graphene.Schema(query=Query)

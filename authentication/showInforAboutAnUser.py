@@ -1,4 +1,4 @@
-from findTutor.checkTutorAndParent import isTutor, isParent
+from findTutor.permissions import isTutor, isParent
 from findTutor.models import TutorModel, ParentModel
 
 def inforAboutUser(user):

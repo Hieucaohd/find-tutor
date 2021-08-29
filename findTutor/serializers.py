@@ -40,6 +40,34 @@ class TutorSerializer(serializers.ModelSerializer):
         }
 
 
+class ImagePrivateUserSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = ImagePrivateUserModel
+        fields = '__all__'
+
+        extra_kwargs = {
+            'avatar': {
+                'required': False
+            },
+            'identity_card': {
+                'required': False
+            },
+            'student_card': {
+                'required': False
+            }
+        }
+
+
+class ImageOfUserSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(source='user.username', read_only="True")
+
+    class Meta:
+        model = ImageOfUserModel
+        fields = '__all__'
+
+
 class ParentSerializer(serializers.ModelSerializer):
 
     user = serializers.ReadOnlyField(source='user.username')
