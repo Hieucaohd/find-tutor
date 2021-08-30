@@ -8,15 +8,46 @@ from ..serializers import ImagePrivateUserSerializer
 
 from ..permissions import is_owner
 
+from django.conf.settings import USE_FIREBASE
+from ..firebaseConfig import storage
+
 
 class ImagePrivateUserList(CreateBaseView):
 	modelBase = ImagePrivateUserModel
 	serializerBase = ImagePrivateUserSerializer
 
+	def get_url(self, file, folder):
+		path = f"{folder}/{file.name}"
+
+		file_uploaded = storage.child(path).put(file)
+		file_token = file_uploaded.get('downloadTokens')
+		file_url = storage.child(path).get_url(token=file_token)
+		return file_url
+
 	def post(self, request, format=None):
 		serializer = self.serializerBase(data=request.data)
 		if serializer.is_valid():
-			serializer.save(user=request.user)
+
+			if USE_FIREBASE:
+				# lay du lieu
+				avatar = request.data.get('avatar')
+				identity_card = request.data.get('identity_card')
+				student_card = request.data.get('student_card')
+
+				avatar_url = None
+				if avatar:
+					avatar_url = self.get_url(avatar, "avatar")
+
+				identity_card_url = None
+				if identity_card:
+					identity_card_url = self.get_url(identity_card, "identity_card")
+
+				student_card_url = None
+				if student_card:
+					student_card_url = self.get_url(student_card, "student_card")
+
+				serializer.save(user=request.user, avatar=avatar_url, identity_card=identity_card_url, student_card=student_card_url)
+			
 			return Response(serializer.data)
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,11 +67,6 @@ class ImagePrivateUserDetail(UpdateBaseView, DeleteBaseView):
 		avatar = request.data.get('avatar')
 		identity_card = request.data.get('identity_card')
 		student_card = request.data.get('student_card')
-
-
-		print(avatar)
-		print(identity_card)
-		print(student_card)
 
 		if serializer.is_valid():
 			array_item = []

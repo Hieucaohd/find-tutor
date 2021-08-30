@@ -203,3 +203,4 @@ EMAIL_HOST_PASSWORD = 'phaithanhcong1'
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+USE_FIREBASE = True
