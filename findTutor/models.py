@@ -191,7 +191,7 @@ def before_image_private_user_delete(sender, instance, **kwargs):
         old_student_card = OldImagePrivateUserModel()
         old_student_card.image = instance.student_card
         old_student_card.type_image = OldImagePrivateUserModel.type_image_array[2]  # student_card
-        array_item.append(student_card)
+        array_item.append(old_student_card)
 
     for item in array_item:
         item.type_action = OldImagePrivateUserModel.type_action_array[1]

@@ -3,6 +3,8 @@ from rest_framework.authtoken.models import Token
 from authentication.models import User
 from .models import *
 
+from django.conf.settings import USE_FIREBASE
+
 
 class TutorSerializer(serializers.ModelSerializer):
 
@@ -58,6 +60,22 @@ class ImagePrivateUserSerializer(serializers.ModelSerializer):
                 'required': False
             }
         }
+
+        if USE_FIREBASE:
+            extra_kwargs = {
+                'avatar': {
+                    'required': False,
+                    'read_only': True,
+                },
+                'identity_card': {
+                    'required': False,
+                    'read_only': True,
+                },
+                'student_card': {
+                    'required': False,
+                    'read_only': True,
+                }
+            }
 
 
 class ImageOfUserSerializer(serializers.ModelSerializer):
