@@ -3,7 +3,7 @@ from rest_framework.authtoken.models import Token
 from authentication.models import User
 from .models import *
 
-from django.conf.settings import USE_FIREBASE
+from django.conf import settings
 
 
 class TutorSerializer(serializers.ModelSerializer):
@@ -61,7 +61,7 @@ class ImagePrivateUserSerializer(serializers.ModelSerializer):
             }
         }
 
-        if USE_FIREBASE:
+        if settings.USE_FIREBASE:
             extra_kwargs = {
                 'avatar': {
                     'required': False,
