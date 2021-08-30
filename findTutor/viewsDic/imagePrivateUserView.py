@@ -8,7 +8,7 @@ from ..serializers import ImagePrivateUserSerializer
 
 from ..permissions import is_owner
 
-from django.conf.settings import USE_FIREBASE
+from django.conf import settings
 from ..firebaseConfig import storage
 
 
@@ -28,7 +28,7 @@ class ImagePrivateUserList(CreateBaseView):
 		serializer = self.serializerBase(data=request.data)
 		if serializer.is_valid():
 
-			if USE_FIREBASE:
+			if settings.USE_FIREBASE:
 				# lay du lieu
 				avatar = request.data.get('avatar')
 				identity_card = request.data.get('identity_card')
