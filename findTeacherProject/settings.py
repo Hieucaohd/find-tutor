@@ -128,10 +128,21 @@ WSGI_APPLICATION = 'findTeacherProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd74bo08e99e5db',
+        'HOST': 'ec2-18-235-45-217.compute-1.amazonaws.com',
+        'PORT': '5432',
+        'USER': 'tmqrxlemxuovow',
+        'PASSWORD': '96a635d0c9e5890ecfba39e49e1f78cef4858f393f83d18b6b0ec7a8577dfb91',
     }
 }
 

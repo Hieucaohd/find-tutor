@@ -21,3 +21,5 @@ graphene_django
 django-graphql-jwt-using-rest-framework-jwt==1.2.0
 gunicorn
 whitenoise
+dj-database-url
+psycopg2
