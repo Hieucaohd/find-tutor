@@ -5,6 +5,8 @@ from multiselectfield import MultiSelectField
 from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
 # Create your models here.
 
+from django.conf import settings
+
 
 # bảng gia sư
 class TutorModel(models.Model):
@@ -101,7 +103,10 @@ OLD_IMAGE_PRIVATE_USER = 'old_image_private_user/'  # thư mục lưu trữ ản
 class OldImagePrivateUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    image = models.ImageField()
+    if settings.USE_FIREBASE:
+        image = models.TextField()
+    else:
+        image = models.ImageField()
 
     type_image_array = ['avatar', 'identity_card', 'student_card']
     type_image_choices = ((item, item) for item in type_image_array)
@@ -124,17 +129,26 @@ class ImagePrivateUserModel(models.Model):
     # ảnh đại diện của người dùng
     # không yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
-    avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
+    if settings.USE_FIREBASE:
+        avatar = models.TextField(null=True, blank=True)
+    else:
+        avatar = models.ImageField(upload_to=AVATAR_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
 
     # ảnh thẻ căn cước của người dùng
     # không yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
-    identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
+    if settings.USE_FIREBASE:
+        identity_card = models.TextField(null=True, blank=True)
+    else:
+        identity_card = models.ImageField(upload_to=IDENTITY_CARD_FOLDER ,null=True, blank=IS_BLANK_IMAGE_USER)
 
     # ảnh thẻ sinh viên
     # không yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ người dùng và những người người dùng cho phép mới có thể thấy
-    student_card = models.ImageField(upload_to=STUDENT_CARD_FOLDER, null=True, blank=IS_BLANK_IMAGE_USER)
+    if settings.USE_FIREBASE:
+        student_card = models.TextField(null=True, blank=True)
+    else:
+        student_card = models.ImageField(upload_to=STUDENT_CARD_FOLDER, null=True, blank=IS_BLANK_IMAGE_USER)
 
     # thời gian tải lên
     create_at = models.DateTimeField(auto_now_add=True)
@@ -153,8 +167,11 @@ class ImageOfUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # ảnh 
-    # yêu cầu cung cấp 
-    image = models.ImageField(upload_to=IMAGE_OF_USER_FOLDER, null=False, blank=False)
+    # yêu cầu cung cấp
+    if settings.USE_FIREBASE:
+        image = models.TextField()
+    else: 
+        image = models.ImageField(upload_to=IMAGE_OF_USER_FOLDER, null=False, blank=False)
 
     # loại của ảnh
     # không yêu cầu cung cấp
