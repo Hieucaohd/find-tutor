@@ -293,7 +293,7 @@ class ParentRoomModel(models.Model):
     # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
     # yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
-    detail_location = models.CharField(max_length=500, null=False, blank=False)
+    detail_location = models.CharField(max_length=500, null=True, blank=True)
 
     # môn học
     # yêu cầu cung cấp
