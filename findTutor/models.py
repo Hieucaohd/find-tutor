@@ -166,7 +166,7 @@ class ImageOfUserModel(models.Model):
     # ảnh 
     # yêu cầu cung cấp
     if settings.USE_FIREBASE:
-        image = models.TextField()
+        image = models.TextField(null=True, blank=True)
     else: 
         image = models.ImageField(upload_to=IMAGE_OF_USER_FOLDER, null=False, blank=False)
 
@@ -178,7 +178,7 @@ class ImageOfUserModel(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
     # người khác có thể xem được không
-    is_public = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
 
     # cho biet la anh cu hay anh moi
     is_using = models.BooleanField(default=True)
@@ -222,20 +222,17 @@ def before_image_private_user_delete(sender, instance, **kwargs):
 
 pre_delete.connect(before_image_private_user_delete, sender=ImagePrivateUserModel)
 
-# def before_image_private_user_update(sender, instance, **kwargs):
-#     print("before")
-#     print(instance.avatar.path)
-#     print(instance.identity_card.path)
-#     print(instance.student_card.path)
+def before_image_of_user_delete(sender, instance, **kwargs):
+    old_image = ImageOfUserModel()
+    old_image.image = instance.image
+    old_image.user = instance.user
+    old_image.type_image = instance.type_image
+    old_image.is_public = False
+    old_image.is_using = False
+    old_image.is_deleted = True
+    old_image.save()
 
-# def after_image_private_user_update(sender, instance, **kwargs):
-#     print("after")
-#     print(instance.avatar.path)
-#     print(instance.identity_card.path)
-#     print(instance.student_card.path)
-
-# pre_save.connect(before_image_private_user_update, sender=ImagePrivateUserModel)
-# post_save.connect(after_image_private_user_update, sender=ImagePrivateUserModel)
+pre_delete.connect(before_image_of_user_delete, sender=ImageOfUserModel)
 
 class ParentModel(models.Model):
     # nhạy cảm
