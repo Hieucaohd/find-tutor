@@ -85,6 +85,37 @@ class ImageOfUserSerializer(serializers.ModelSerializer):
         model = ImageOfUserModel
         fields = '__all__'
 
+        extra_kwargs = {
+            "image": {
+                "required": True,
+            },
+            "type_image": {
+                "required": False,
+            },
+            "is_using": {
+                "read_only": True,
+            },
+            "is_deleted": {
+                "read_only": True,
+            },
+        }
+
+        if settings.USE_FIREBASE:
+            extra_kwargs = {
+                "image": {
+                    "read_only": True,
+                },
+                "type_image": {
+                    "required": False,
+                },
+                "is_using": {
+                    "read_only": True,
+                },
+                "is_deleted": {
+                    "read_only": True,
+                },
+            }
+
 
 class ParentSerializer(serializers.ModelSerializer):
 

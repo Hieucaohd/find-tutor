@@ -94,6 +94,7 @@ class TutorType(DjangoObjectType):
 		if is_owner(self, info):
 			return self.number_of_identity_card
 
+
 class OldImagePrivateUserType(DjangoObjectType):
 	class Meta:
 		model = OldImagePrivateUserModel
@@ -139,6 +140,7 @@ class ImagePrivateUserType(DjangoObjectType):
 		if is_owner(self, info):
 			return self.student_card
 
+
 class ImageOfUserType(DjangoObjectType):
 	class Meta:
 		model = ImageOfUserModel
@@ -146,6 +148,7 @@ class ImageOfUserType(DjangoObjectType):
 				 "image",
 				 "type_image",
 				 "create_at",
+				 "is_using",
 				 )
 
 	def resolve_image(self, info):
@@ -160,7 +163,7 @@ class ImageOfUserType(DjangoObjectType):
 	def get_queryset(cls, queryset, info):
 		request = info.context
 
-		condition = Q(is_using=True) & Q(is_deleted=False)
+		condition = Q(is_deleted=False)
 		queryset = queryset.filter(condition)
 
 		page = request.GET.get("page_image_of_user", 1)
@@ -317,7 +320,6 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 
 		return paginator_function(ParentRoomModel.objects.all(), 2, page)
-
 
 
 schema = graphene.Schema(query=Query)

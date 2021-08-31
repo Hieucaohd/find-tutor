@@ -9,18 +9,8 @@ from ..serializers import ImagePrivateUserSerializer
 from ..permissions import is_owner
 
 from django.conf import settings
-from ..firebaseConfig import storage
+from ..firebaseConfig import storage, get_url
 
-def get_url(file, folder):
-	try:
-		path = f"{folder}/{file.name}"
-
-		file_uploaded = storage.child(path).put(file)
-		file_token = file_uploaded.get('downloadTokens')
-		file_url = storage.child(path).get_url(token=file_token)
-		return file_url
-	except:
-		return None
 
 class ImagePrivateUserList(CreateBaseView):
 	modelBase = ImagePrivateUserModel

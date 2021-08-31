@@ -1,6 +1,12 @@
 from django.urls import path, include
 # from rest_framework.authtoken import views
-from .viewsDic import tutorView, userAuthView, parentView, parentRoomView, priceView, waitingTutorView, customAuthToken, listInvitedView, tryTeachingView, tutorTeachingView, informationAboutRoomOfTutor, imagePrivateUserView
+from .viewsDic import (
+                       tutorView, userAuthView, parentView, 
+                       parentRoomView, priceView, waitingTutorView, 
+                       customAuthToken, listInvitedView, tryTeachingView, 
+                       tutorTeachingView, informationAboutRoomOfTutor, 
+                       imagePrivateUserView, imageOfUserView, 
+                      )
 
 from graphene_django.views import GraphQLView
 from .schema import schema
@@ -48,15 +54,7 @@ urlpatterns = [
     path('imagePrivateUserList/', imagePrivateUserView.ImagePrivateUserList.as_view()),
     path('imagePrivateUserDetail/', imagePrivateUserView.ImagePrivateUserDetail.as_view()),
 
-    # # user
-    # path('userList/', userAuthView.UserList.as_view(), name='user-list'),
-    # path('userDetail/<int:pk>', userAuthView.UserDetail.as_view(), name='user-detail'),
+    # image of user
+    path('imageOfUserList/', imageOfUserView.ImageOfUserList.as_view()),
+    path('imageOfUserDetail/<int:pk>', imageOfUserView.ImageOfUserDetail.as_view()),
 ]
-
-# urlpatterns += [
-#     path('api-auth/', include('rest_framework.urls')),
-# ]
-#
-# urlpatterns += [
-#     path('getToken/', customAuthToken.CustomAuthToken.as_view())
-# ]
