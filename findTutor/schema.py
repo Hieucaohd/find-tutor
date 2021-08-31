@@ -8,6 +8,8 @@ from authentication.models import User
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from django.db.models import Q
+
 
 def paginator_function(query_set, num_in_page, page):
 	paginator = Paginator(query_set, num_in_page)
@@ -157,6 +159,10 @@ class ImageOfUserType(DjangoObjectType):
 	@classmethod
 	def get_queryset(cls, queryset, info):
 		request = info.context
+
+		condition = Q(is_using=True) & Q(is_deleted=False)
+		queryset = queryset.filter(condition)
+
 		page = request.GET.get("page_image_of_user", 1)
 		paginator = paginator_function(queryset, 10, page)
 		return paginator
