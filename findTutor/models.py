@@ -160,9 +160,6 @@ class ImagePrivateUserModel(models.Model):
 IMAGE_OF_USER_FOLDER = "user_image/"
 
 
-# class OldImageOfUserModel(models.Model):
-
-
 class ImageOfUserModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -182,6 +179,12 @@ class ImageOfUserModel(models.Model):
 
     # người khác có thể xem được không
     is_public = models.BooleanField(default=False)
+
+    # cho biet la anh cu hay anh moi
+    is_using = models.BooleanField(default=True)
+
+    # cho biet day co phai la anh nguoi dung da xoa hay khong
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.type_image + " cua " + self.user.username
