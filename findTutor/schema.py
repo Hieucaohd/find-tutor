@@ -6,6 +6,8 @@ from graphql_jwt.decorators import login_required
 from .models import *
 from authentication.models import User
 
+#from comment.schema import *
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.db.models import Q
@@ -43,6 +45,9 @@ class UserType(DjangoObjectType):
 				  "imageprivateusermodel",
 				  "oldimageprivateusermodel_set",
 				  "imageofusermodel_set",
+
+				  # # comment ve user
+				  # "commentaboutusermodel_set",
 				  )
 
 
@@ -232,7 +237,11 @@ class ParentRoomType(DjangoObjectType):
 				  "pricemodel_set",
 
 				  # phụ huynh tạo ra lớp học
-				  "parent"
+				  "parent",
+
+				  # # comment ve lop hoc
+				  # "commentaboutparentroommodel_set"
+
 				  )
 		convert_choices_to_enum = []
 

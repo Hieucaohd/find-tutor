@@ -42,7 +42,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('social-auth/', include('socialAuth.urls')),
     path('search/', include('search.urls')),
-    path('comment/', include('comment.urls')),
+    #path('comment/', include('comment.urls')),
 ]
 
 urlpatterns += [

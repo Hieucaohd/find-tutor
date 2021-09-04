@@ -2,10 +2,11 @@ from django.shortcuts import render
 
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer, GetInforByTokenSerializer
 from .models import User
 from .utils import Util
 
@@ -95,3 +96,14 @@ class Logout(generics.GenericAPIView):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GetInforByToken(generics.GenericAPIView):
+    serializer_class = GetInforByTokenSerializer
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        return Response(inforAboutUser(request.user))
+
+

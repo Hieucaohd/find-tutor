@@ -74,3 +74,12 @@ class LogoutSerializer(serializers.Serializer):
         except TokenError:
             self.fail("bad_token")
 
+
+class GetInforByTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+    def validate(self, attrs):
+        self.token = attrs['token']
+
+        return attrs
+
