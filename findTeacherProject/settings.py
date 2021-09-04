@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-x6ru6j*)01lp-x+sr$%%afgo+wfbnecjb403xi+vx2tk=gy1)a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost']
 
@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'socialAuth',
     'search',
     'rest_framework_simplejwt.token_blacklist',
-    'comment',
     'graphene_django',
 ]
 
@@ -101,12 +100,9 @@ GRAPHQL_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-
-
     "http://localhost:3000",
     "http://192.168.29.102:3000",
     "https://timgiasu.vercel.app",
-
 ]
 
 ROOT_URLCONF = 'findTeacherProject.urls'
@@ -212,8 +208,12 @@ if USE_FIREBASE:
 if DEBUG:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'testdb',
+            'USER': 'hieucao192',
+            'PASSWORD': "192",
+            'HOST': 'localhost',
+            'PORT': 5432
         }
     }
 
