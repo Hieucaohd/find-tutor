@@ -10,6 +10,11 @@ from .models import SearchModel
 
 from django.db.models import Q
 
+from rapidfuzz import fuzz
+import rapidfuzz
+import pylcs
+
+
 class Search(APIView):
 
     def normal_search_infor(self, search_infor):
@@ -49,29 +54,29 @@ class Search(APIView):
         result_3 = 0
         result_3_3 = 0
         if len(source) != 0:
-            #result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-            #result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
-            pass
+            result_3 = pylcs.lcs2(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
+            result_3_3 = pylcs.lcs(self.normal_search_infor(source), self.normal_search_infor(have)) / len(source) * 100
         print(f'pylcs: {result_3}, {result_3_3}')
 
         score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
         print('max score: ', score)
 
-        limit = 75
+        # limit = 75
 
-        return (result_1 >= limit) or \
-               (result_1_1 >= limit) or \
-               (result_2 >= limit) or \
-               (result_2_2 >= limit) or \
-               (result_3 >= limit) or \
-               (result_3_3 >= limit)
+        # return (result_1 >= limit) or \
+        #        (result_1_1 >= limit) or \
+        #        (result_2 >= limit) or \
+        #        (result_2_2 >= limit) or \
+        #        (result_3 >= limit) or \
+        #        (result_3_3 >= limit)
+        return max_score
 
     
     def condition_for_search_infor(self, search_infor='', fields=[]):
-        for field in fields:
-            if self.test_for_string(search_infor, field):
-                return True
-        return False
+        max_result = max(self.test_for_string(search_infor, field) for field in fields)
+        # for field in fields:
+        #     return self.test_for_string(search_infor, field) > 0
+        return max_result
 
     def condition_for_lop(self, lop=[], field_lop=[]):
         set_1 = set(lop)
@@ -83,22 +88,30 @@ class Search(APIView):
             return False
 
     def condition(self, search_infor='', fields=[], lop=[], field_lop=[]):
+        limit = 0
         if lop:
-            return self.condition_for_search_infor(search_infor, fields) and self.condition_for_lop(lop, field_lop)
+            return self.condition_for_search_infor(search_infor, fields) > limit and self.condition_for_lop(lop, field_lop)
         else:
-            return self.condition_for_search_infor(search_infor, fields)
+            return self.condition_for_search_infor(search_infor, fields) > limit
 
     def search_engine(self, model, serializer, location_query, search_infor, fields, lop, field_lop):
         list_result = []
 
         if location_query:
-            list_result = (item for item in model.objects.filter(location_query) if 
+            list_result = list({'item':item, 'result': self.condition_for_search_infor(search_infor, fields(item))} for item in model.objects.filter(location_query) if 
                             self.condition(search_infor, fields(item), lop, field_lop(item)))
         else:
-            list_result = (item for item in model.objects.all() if
+            list_result = list({'item':item, 'result': self.condition_for_search_infor(search_infor, fields(item))} for item in model.objects.all() if
                             self.condition(search_infor, fields(item), lop, field_lop(item)))
 
-        data = serializer(list_result, many=True).data
+        def get_result(item):
+            return item.get('result')
+
+        list_result.sort(key=get_result, reverse=True)
+
+        list_item = (item.get('item') for item in list_result)
+
+        data = serializer(list_item, many=True).data
 
         return data
 
@@ -217,6 +230,87 @@ class Search(APIView):
                 })
 
 
+class SearchImprove(Search):
+    def test_for_string(self, search_infor, have):
+        replace_what = [{'word_replace': 'mon ', 'with': ''}]
+
+        search_infor = self.normal_search_infor(search_infor)
+        have = self.normal_search_infor(have)
+
+        for item in replace_what:
+            search_infor.replace(item.get('word_replace'), item.get('with'))
+            have.replace(item.get('word_replace'), item.get('with'))
+        
+        print(f'search_infor: {search_infor}')
+        print(f'have: {have}\n')
+
+        levenshtein_dis = rapidfuzz.string_metric.levenshtein(search_infor, have)
+
+        common_substring= pylcs.lcs2(search_infor, have)
+        common_substring_phan_tram = common_substring / len(search_infor) * 100
+
+        common_subsequen = pylcs.lcs(search_infor, have)
+        common_subsequen_phan_tram = common_subsequen / len(search_infor) * 100
+
+        # thông số thử nghiệm:
+        # hamming 
+        limit_same_length_hamming = 2
+        score_same_length_hamming = 1000
+
+        # levenshtein same length
+        limit_same_length_levenshtein = 3
+        score_same_length_levenshtein = 300
+
+        # substring
+        limit_same_length_substring = 40 # phan tram
+        score_same_length_substring = 2
+        limit_diff_length_substring = 50 # phan tram
+        score_diff_length_substring = score_same_length_substring * 0.5
+
+        # levenshtein diff length
+        limit_diff_length_levenshtein = 2
+        score_diff_length_levenshtein = 40
+
+        # subsequense
+        limit_diff_length_subsequen = 40 # phan tram
+        score_diff_length_subsequen = score_same_length_substring * 0.3
+        # end
+
+        hamming_dis = 0
+        result = 0
+        if len(search_infor) == len(have):
+            hamming_dis = rapidfuzz.string_metric.hamming(search_infor, have)
+            print('same length')
+
+            if hamming_dis <= limit_same_length_hamming:
+                result = (limit_same_length_hamming + 1 - hamming_dis) * score_same_length_hamming
+                print('\thamming')
+            elif levenshtein_dis <= limit_same_length_levenshtein:
+                result = (limit_same_length_levenshtein + 1 - levenshtein_dis) * score_same_length_levenshtein
+                print('\tlevenshtein')
+            elif common_substring_phan_tram >= limit_same_length_substring: 
+                print('\tsubstring')
+                result = common_substring_phan_tram * score_same_length_substring
+        else:
+            # phan_tram_length = len(search_infor) / len(have)
+            # compute_length = phan_tram_length * 100 if phan_tram_length < 1 else 1/phan_tram_length * 100
+
+            print('not same length')
+            if levenshtein_dis <= limit_diff_length_levenshtein:
+                print('\tlevenshtein')
+                result = (limit_diff_length_levenshtein + 1 - levenshtein_dis) * score_diff_length_levenshtein
+            elif common_substring_phan_tram >= limit_diff_length_substring:
+                print('\tsubstring')
+                result = common_substring_phan_tram * score_diff_length_substring
+            elif common_subsequen_phan_tram >= limit_diff_length_subsequen:
+                print('\tsubsequen')
+                result = common_subsequen_phan_tram * score_diff_length_subsequen
+
+                
+        print(f'\t\tresult {result}\n')
+        return result
 
 
+class SearchShow(SearchImprove):
+    pass
 
