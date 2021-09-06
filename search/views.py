@@ -6,6 +6,8 @@ from findTutor.serializers import TutorSerializer, ParentSerializer, ParentRoomS
 from findTutor.models import TutorModel, ParentModel, ParentRoomModel
 from findTutor.checkTutorAndParent import isTutor, isParent
 
+from django.conf import settings
+
 from .models import SearchModel
 
 from django.db.models import Q
@@ -20,14 +22,18 @@ import unidecode
 class Search(APIView):
 
     def normal_search_infor(self, search_infor):
-        search_infor = re.sub(r'[^\w\s]', '', search_infor)
-        search_infor = search_infor.lower()
-        list_word = search_infor.split()
+        result = search_infor
+        try:
+            search_infor = re.sub(r'[^\w\s]', '', search_infor)
+            search_infor = search_infor.lower()
+            list_word = search_infor.split()
 
-        list_word_normal = (re.sub(r'[^\w\s]', '', word) for word in list_word)
+            list_word_normal = (re.sub(r'[^\w\s]', '', word) for word in list_word)
 
-        result = " ".join(list_word_normal)
-        result = unidecode.unidecode(result)
+            result = " ".join(list_word_normal)
+            result = unidecode.unidecode(result)
+        except Exception:
+            pass
         return result
 
     def test_for_string(self, source, have):
@@ -66,7 +72,15 @@ class Search(APIView):
 
     def condition_for_lop(self, lop=[], field_lop=[]):
         if lop:
+            if settings.DEBUG: print(lop)
+
             set_1 = set(lop)
+            field_lop = list(int(item) for item in field_lop)
+
+            if settings.DEBUG:
+                print(field_lop)
+                print(type(field_lop))
+
             set_2 = set(field_lop)
 
             if (set_1 & set_2):
@@ -100,7 +114,7 @@ class Search(APIView):
 
         list_result.sort(key=get_result, reverse=True)
 
-        list_item = (item.get('item') for item in list_result)
+        list_item = (item.get('item') for item in list_result if item.get('result') > 40)
 
         return list_item
 
@@ -222,9 +236,10 @@ class SearchImprove(Search):
         for item in replace_what:
             search_infor.replace(item.get('word_replace'), item.get('with'))
             have.replace(item.get('word_replace'), item.get('with'))
-        
-        # print(f'search_infor: {search_infor}')
-        # print(f'have: {have}\n')
+
+        if settings.DEBUG:
+            print(f'search_infor: {search_infor}')
+            print(f'have: {have}\n')
 
         levenshtein_dis = rapidfuzz.string_metric.levenshtein(search_infor, have)
 
@@ -264,34 +279,35 @@ class SearchImprove(Search):
         result = 0
         if len(search_infor) == len(have):
             hamming_dis = rapidfuzz.string_metric.hamming(search_infor, have)
-            # print('same length')
+
+            if settings.DEBUG: print('same length')
 
             if hamming_dis <= limit_same_length_hamming:
                 result = (limit_same_length_hamming + 1 - hamming_dis) * score_same_length_hamming
-                # print('\thamming')
+                if settings.DEBUG: print('\thamming')
             elif levenshtein_dis <= limit_same_length_levenshtein:
                 result = (limit_same_length_levenshtein + 1 - levenshtein_dis) * score_same_length_levenshtein
-                # print('\tlevenshtein')
+                if settings.DEBUG: print('\tlevenshtein')
             elif common_substring_phan_tram >= limit_same_length_substring: 
-                # print('\tsubstring')
+                if settings.DEBUG: print('\tsubstring')
                 result = common_substring_phan_tram * score_same_length_substring
         else:
             # phan_tram_length = len(search_infor) / len(have)
             # compute_length = phan_tram_length * 100 if phan_tram_length < 1 else 1/phan_tram_length * 100
 
-            # print('not same length')
+            if settings.DEBUG: print('not same length')
             if levenshtein_dis <= limit_diff_length_levenshtein:
-                # print('\tlevenshtein')
+                if settings.DEBUG: print('\tlevenshtein')
                 result = (limit_diff_length_levenshtein + 1 - levenshtein_dis) * score_diff_length_levenshtein
             elif common_substring_phan_tram >= limit_diff_length_substring:
-                # print('\tsubstring')
+                if settings.DEBUG: print('\tsubstring')
                 result = common_substring_phan_tram * score_diff_length_substring
             elif common_subsequen_phan_tram >= limit_diff_length_subsequen:
-                # print('\tsubsequen')
+                if settings.DEBUG: print('\tsubsequen')
                 result = common_subsequen_phan_tram * score_diff_length_subsequen
 
                 
-        # print(f'\t\tresult {result}\n')
+        if settings.DEBUG: print(f'\t\tresult {result}\n')
         return result
 
 

@@ -456,7 +456,7 @@ class Query(graphene.ObjectType):
 			return [item.full_name]
 
 		def field_lop(item):
-			return list()
+			return []
 
 		return resolve_search(info, ParentModel, fields, field_lop, kwargs)
 

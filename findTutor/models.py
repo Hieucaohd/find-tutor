@@ -66,11 +66,7 @@ class TutorModel(models.Model):
     # không yêu cầu cung cấp
     LOP_DAY_CHOICES = []
     for i in range(1, 18):
-        if i <= 12:
-            ten_lop = 'lop_' + str(i)
-        else:
-            ten_lop = 'nam_' + str(i-12)
-        LOP_DAY_CHOICES.append((i, ten_lop))
+        LOP_DAY_CHOICES.append((i, i))
     lop_day = MultiSelectField(choices=LOP_DAY_CHOICES, min_choices=0)
 
     # khu vực có thể dạy của gia sư 
@@ -79,10 +75,7 @@ class TutorModel(models.Model):
 
     CAP_DAY_CHOICES = []
     for i in range(1, 5):
-        ten_cap = 'cap_' + str(i)
-        if i == 4:
-            ten_cap = 'dai_hoc'
-        CAP_DAY_CHOICES.append((i, ten_cap))
+        CAP_DAY_CHOICES.append((i, i))
     cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, min_choices=0)
 
     @property
