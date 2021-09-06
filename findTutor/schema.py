@@ -10,6 +10,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.db.models import Q
 
+from search.views import SearchShow
+
 
 def paginator_function(query_set, num_in_page, page):
 	paginator = Paginator(query_set, num_in_page)
@@ -60,6 +62,7 @@ class TutorType(DjangoObjectType):
 				  "ward_code",
 
 				  # đia chỉ chi tiết cũng nhạy cảm
+				  # private
 				  "detail_location",
 
 				  "profession",
@@ -70,7 +73,9 @@ class TutorType(DjangoObjectType):
 				  "khu_vuc_day",
 
 				  # thông tin cực kì nhạy cảm
+				  # private
 				  "number_phone",
+				  #	private
 				  "number_of_identity_card",
 
 				  # thong tin ve lop
@@ -84,7 +89,7 @@ class TutorType(DjangoObjectType):
 
 	# self là một đối tượng của TutorModel, không phải là đối tượng của TutorType
 
-	# private
+	
 	def resolve_detail_location(self, info):
 		if is_owner(self, info):
 			return self.detail_location
@@ -103,6 +108,9 @@ class OldImagePrivateUserType(DjangoObjectType):
 		model = OldImagePrivateUserModel
 		fields = (
 				 "id",
+
+				 # type = avatar => public
+				 # type = identity_card, student_card => private
 				 "image",
 				 "type_image",
 				 "type_action",
@@ -133,8 +141,14 @@ class ImagePrivateUserType(DjangoObjectType):
 		model = ImagePrivateUserModel
 		fields = (
 				 "id",
+
+				 # public
 				 "avatar",
+
+				 # private
 				 "identity_card",
+
+				 # private
 				 "student_card",
 				 "create_at",
 				 )
@@ -349,6 +363,31 @@ def who_is(request):
 		print("khong co mat khau")
 
 
+def resolve_search(info, model, fields, field_lop, kwargs):
+	province_code = kwargs.get('province_code')
+	district_code = kwargs.get('district_code')
+	ward_code 	  = kwargs.get('ward_code')
+	lop 		  = kwargs.get('lop')
+	search_infor  = kwargs.get('search_infor')
+
+	if not lop:
+		lop = []
+
+	location_query = None
+	if ward_code:
+		location_query = Q(ward_code=ward_code)
+	elif district_code:
+		location_query = Q(district_code=district_code)
+	elif province_code:
+		location_query = Q(province_code=province_code)
+
+	search_instance = SearchShow()
+
+	if search_infor:
+		return search_instance.search_engine(model, location_query, search_infor, fields, lop, field_lop)
+	else:
+		return search_instance.search_with_no_search_infor(model, location_query, search_infor, fields, lop, field_lop)
+
 class Query(graphene.ObjectType):
 
 	# lấy thông tin của user qua id
@@ -356,6 +395,7 @@ class Query(graphene.ObjectType):
 
 	def resolve_user_by_id(root, info, **kwargs):
 		id = kwargs.get('id')
+		who_is(info.context)
 		return User.objects.get(pk=id)
 
 	"""
@@ -368,6 +408,57 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 
 		return paginator_function(ParentRoomModel.objects.all(), 16, page)
+
+	# tim kiem lop hoc
+	search_room = graphene.List(ParentRoomType, province_code = graphene.Int(required=False),
+												district_code = graphene.Int(required=False),
+												ward_code	  = graphene.Int(required=False),
+												lop 		  = graphene.List(graphene.Int, required=False),
+												search_infor  = graphene.String(required=False),
+								)
+
+	def resolve_search_room(root, info, **kwargs):
+		def fields(item):
+			return [item.subject, item.other_require]
+
+		def field_lop(item):
+		    return [item.lop]
+
+		return resolve_search(info, ParentRoomModel, fields, field_lop, kwargs)
+
+	# tim kiem gia su
+	search_tutor = graphene.List(TutorType, province_code = graphene.Int(required=False),
+											district_code = graphene.Int(required=False),
+											ward_code	  = graphene.Int(required=False),
+											lop 		  = graphene.List(graphene.Int, required=False),
+											search_infor  = graphene.String(required=False),
+								)
+
+	def resolve_search_tutor(root, info, **kwargs):
+		def fields_tutor(item):
+			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
+
+		def field_lop_tutor(item):
+			return list(item.lop_day)
+
+		return resolve_search(info, TutorModel, fields, field_lop, kwargs)
+
+	# tim kiem phu huynh
+	search_parent = graphene.List(ParentType, province_code = graphene.Int(required=False),
+											  district_code = graphene.Int(required=False),
+											  ward_code	    = graphene.Int(required=False),
+											  lop 		    = graphene.List(graphene.Int, required=False),
+											  search_infor  = graphene.String(required=False),
+								)
+
+	def resolve_search_parent(root, info, **kwargs):
+		def fields_parent(item):
+			return [item.full_name]
+
+		def field_lop_parent(item):
+			return list()
+
+		return resolve_search(info, ParentModel, fields, field_lop, kwargs)
 
 
 schema = graphene.Schema(query=Query, auto_camelcase=False)

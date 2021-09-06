@@ -57,46 +57,43 @@ class Search(APIView):
         score = max(result_1, result_1_1, result_2, result_2_2, result_3, result_3_3)
         print('max score: ', score)
 
-        # limit = 75
-
-        # return (result_1 >= limit) or \
-        #        (result_1_1 >= limit) or \
-        #        (result_2 >= limit) or \
-        #        (result_2_2 >= limit) or \
-        #        (result_3 >= limit) or \
-        #        (result_3_3 >= limit)
         return max_score
 
     
-    def condition_for_search_infor(self, search_infor='', fields=[]):
+    def get_result_search_infor(self, search_infor='', fields=[]):
         max_result = max(self.test_for_string(search_infor, field) for field in fields)
         return max_result
 
     def condition_for_lop(self, lop=[], field_lop=[]):
-        set_1 = set(lop)
-        set_2 = set(field_lop)
-
-        if (set_1 & set_2):
-            return True
-        else:
-            return False
-
-    def condition(self, search_infor='', fields=[], lop=[], field_lop=[]):
-        limit = 0
         if lop:
-            return self.condition_for_search_infor(search_infor, fields) > limit and self.condition_for_lop(lop, field_lop)
+            set_1 = set(lop)
+            set_2 = set(field_lop)
+
+            if (set_1 & set_2):
+                return True
+            else:
+                return False
         else:
-            return self.condition_for_search_infor(search_infor, fields) > limit
+            return True
 
-    def search_engine(self, model, serializer, location_query, search_infor, fields, lop, field_lop):
-        list_result = []
-
+    def get_query_set_with_location_query(self, location_query, model):
         if location_query:
-            list_result = list({'item':item, 'result': self.condition_for_search_infor(search_infor, fields(item))} for item in model.objects.filter(location_query) if 
-                            self.condition(search_infor, fields(item), lop, field_lop(item)))
+            return model.objects.filter(location_query)
         else:
-            list_result = list({'item':item, 'result': self.condition_for_search_infor(search_infor, fields(item))} for item in model.objects.all() if
-                            self.condition(search_infor, fields(item), lop, field_lop(item)))
+            return model.objects.all()
+
+    def search_engine(self, model, location_query, search_infor, fields, lop, field_lop):
+        search_infor = self.normal_search_infor(search_infor)
+
+        query_set = self.get_query_set_with_location_query(location_query, model)
+        
+        list_result = list( {
+                                'item':item, 
+                                'result': self.get_result_search_infor(search_infor, fields(item))
+                            } 
+                            for item in query_set if
+                            self.condition_for_lop(lop, field_lop(item))
+                        )
 
         def get_result(item):
             return item.get('result')
@@ -105,29 +102,15 @@ class Search(APIView):
 
         list_item = (item.get('item') for item in list_result)
 
-        data = serializer(list_item, many=True).data
+        return list_item
 
-        return data
+    def search_with_no_search_infor(self, model, location_query, search_infor, fields, lop, field_lop):
+        query_set = self.get_query_set_with_location_query(location_query, model)
 
-    def condition_for_lop_no_search_infor(self, lop=[], field_lop=[]):
-        if lop:
-            return self.condition_for_lop(lop, field_lop)
-        else:
-            return True
+        list_result = (item for item in query_set if 
+                            self.condition_for_lop(lop, field_lop(item)))
 
-    def search_with_no_search_infor(self, model, serializer, location_query, search_infor, fields, lop, field_lop):
-        list_result = []
-
-        if location_query:
-            list_result = (item for item in model.objects.filter(location_query) if 
-                            self.condition_for_lop_no_search_infor(lop, field_lop(item)))
-        else:
-            list_result = (item for item in model.objects.all() if 
-                            self.condition_for_lop_no_search_infor(lop, field_lop(item)))
-
-        data = serializer(list_result, many=True).data
-
-        return data
+        return list_result
 
     def get(self, request, format=None):
         province_code = request.query_params.get('province_code', 0)
@@ -188,10 +171,13 @@ class Search(APIView):
             def field_lop(item):
                 return [item.lop]
 
+            list_room = []
             if search_infor:
-                return Response(self.search_engine(ParentRoomModel, ParentRoomSerializer, location_query, search_infor, fields, lop, field_lop))
+                list_room = self.search_engine(ParentRoomModel, location_query, search_infor, fields, lop, field_lop)
             else:
-                return Response(self.search_with_no_search_infor(ParentRoomModel, ParentRoomSerializer, location_query, search_infor, fields, lop, field_lop))
+                list_room = self.search_with_no_search_infor(ParentRoomModel, location_query, search_infor, fields, lop, field_lop)
+
+            return ParentRoomSerializer(list_room, many=True).data
         elif type_search == 'people':
 
             # truong cua tutor
@@ -211,15 +197,15 @@ class Search(APIView):
             list_tutor = []
             list_parent = []
             if search_infor:
-                list_tutor  = self.search_engine(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
-                list_parent = self.search_engine(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
+                list_tutor  = self.search_engine(TutorModel , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
+                list_parent = self.search_engine(ParentModel, location_query, search_infor, fields_parent, lop, field_lop_parent)
             else:
-                list_tutor  = self.search_with_no_search_infor(TutorModel , TutorSerializer , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
-                list_parent = self.search_with_no_search_infor(ParentModel, ParentSerializer, location_query, search_infor, fields_parent, lop, field_lop_parent)
+                list_tutor  = self.search_with_no_search_infor(TutorModel , location_query, search_infor, fields_tutor , lop, field_lop_tutor)
+                list_parent = self.search_with_no_search_infor(ParentModel, location_query, search_infor, fields_parent, lop, field_lop_parent)
 
             return Response({
-                    'list_tutor': list_tutor,
-                    'list_parent': list_parent
+                    'list_tutor': TutorSerializer(list_tutor, many=True).data,
+                    'list_parent': ParentSerializer(list_parent, many=True).data,
                 })
 
 
@@ -231,15 +217,14 @@ class SearchImprove(Search):
 
         replace_what = [{'word_replace': 'mon ', 'with': ''}]
 
-        search_infor = self.normal_search_infor(search_infor)
         have = self.normal_search_infor(have)
 
         for item in replace_what:
             search_infor.replace(item.get('word_replace'), item.get('with'))
             have.replace(item.get('word_replace'), item.get('with'))
         
-        print(f'search_infor: {search_infor}')
-        print(f'have: {have}\n')
+        # print(f'search_infor: {search_infor}')
+        # print(f'have: {have}\n')
 
         levenshtein_dis = rapidfuzz.string_metric.levenshtein(search_infor, have)
 
@@ -279,34 +264,34 @@ class SearchImprove(Search):
         result = 0
         if len(search_infor) == len(have):
             hamming_dis = rapidfuzz.string_metric.hamming(search_infor, have)
-            print('same length')
+            # print('same length')
 
             if hamming_dis <= limit_same_length_hamming:
                 result = (limit_same_length_hamming + 1 - hamming_dis) * score_same_length_hamming
-                print('\thamming')
+                # print('\thamming')
             elif levenshtein_dis <= limit_same_length_levenshtein:
                 result = (limit_same_length_levenshtein + 1 - levenshtein_dis) * score_same_length_levenshtein
-                print('\tlevenshtein')
+                # print('\tlevenshtein')
             elif common_substring_phan_tram >= limit_same_length_substring: 
-                print('\tsubstring')
+                # print('\tsubstring')
                 result = common_substring_phan_tram * score_same_length_substring
         else:
             # phan_tram_length = len(search_infor) / len(have)
             # compute_length = phan_tram_length * 100 if phan_tram_length < 1 else 1/phan_tram_length * 100
 
-            print('not same length')
+            # print('not same length')
             if levenshtein_dis <= limit_diff_length_levenshtein:
-                print('\tlevenshtein')
+                # print('\tlevenshtein')
                 result = (limit_diff_length_levenshtein + 1 - levenshtein_dis) * score_diff_length_levenshtein
             elif common_substring_phan_tram >= limit_diff_length_substring:
-                print('\tsubstring')
+                # print('\tsubstring')
                 result = common_substring_phan_tram * score_diff_length_substring
             elif common_subsequen_phan_tram >= limit_diff_length_subsequen:
-                print('\tsubsequen')
+                # print('\tsubsequen')
                 result = common_subsequen_phan_tram * score_diff_length_subsequen
 
                 
-        print(f'\t\tresult {result}\n')
+        # print(f'\t\tresult {result}\n')
         return result
 
 
