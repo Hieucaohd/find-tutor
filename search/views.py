@@ -13,14 +13,13 @@ from django.db.models import Q
 from rapidfuzz import fuzz
 import rapidfuzz
 import pylcs
+import re
+import unidecode
 
 
 class Search(APIView):
 
     def normal_search_infor(self, search_infor):
-        import re
-        import unidecode
-
         search_infor = re.sub(r'[^\w\s]', '', search_infor)
         search_infor = search_infor.lower()
         list_word = search_infor.split()
@@ -32,9 +31,6 @@ class Search(APIView):
         return result
 
     def test_for_string(self, source, have):
-        from rapidfuzz import fuzz
-        #import pylcs
-
         print('source: ', source)
         print('have: ', have)
 
@@ -74,8 +70,6 @@ class Search(APIView):
     
     def condition_for_search_infor(self, search_infor='', fields=[]):
         max_result = max(self.test_for_string(search_infor, field) for field in fields)
-        # for field in fields:
-        #     return self.test_for_string(search_infor, field) > 0
         return max_result
 
     def condition_for_lop(self, lop=[], field_lop=[]):
@@ -156,7 +150,6 @@ class Search(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         search_infor = request.query_params.get('search', '')
-        search_infor = self.normal_search_infor(search_infor)
         
         can_tim_kiem = f'''Can tim kiem: 
                             \tsearch: {search_infor}
@@ -232,6 +225,10 @@ class Search(APIView):
 
 class SearchImprove(Search):
     def test_for_string(self, search_infor, have):
+        """
+        
+        """
+
         replace_what = [{'word_replace': 'mon ', 'with': ''}]
 
         search_infor = self.normal_search_infor(search_infor)
@@ -261,9 +258,11 @@ class SearchImprove(Search):
         limit_same_length_levenshtein = 3
         score_same_length_levenshtein = 300
 
-        # substring
+        # substring same length
         limit_same_length_substring = 40 # phan tram
         score_same_length_substring = 2
+
+        # substring diff length
         limit_diff_length_substring = 50 # phan tram
         score_diff_length_substring = score_same_length_substring * 0.5
 

@@ -6,8 +6,6 @@ from graphql_jwt.decorators import login_required
 from .models import *
 from authentication.models import User
 
-#from comment.schema import *
-
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.db.models import Q
@@ -45,9 +43,6 @@ class UserType(DjangoObjectType):
 				  "imageprivateusermodel",
 				  "oldimageprivateusermodel_set",
 				  "imageofusermodel_set",
-
-				  # # comment ve user
-				  # "commentaboutusermodel_set",
 				  )
 
 
@@ -55,6 +50,7 @@ class TutorType(DjangoObjectType):
 	class Meta:
 		model = TutorModel
 		fields =  (
+				  "id",
 				  "first_name", 
 				  "last_name",
 				  "birthday",
@@ -83,10 +79,12 @@ class TutorType(DjangoObjectType):
 				  'tryteachingmodel_set',
 				  'tutorteachingmodel_set',
 				  )
+		convert_choices_to_enum = []
 
 
 	# self là một đối tượng của TutorModel, không phải là đối tượng của TutorType
 
+	# private
 	def resolve_detail_location(self, info):
 		if is_owner(self, info):
 			return self.detail_location
@@ -104,11 +102,14 @@ class OldImagePrivateUserType(DjangoObjectType):
 	class Meta:
 		model = OldImagePrivateUserModel
 		fields = (
+				 "id",
 				 "image",
 				 "type_image",
 				 "type_action",
 				 "create_at",
 				 )
+
+		convert_choices_to_enum = []
 
 	def resolve_image(self, info):
 		if is_owner(self, info):
@@ -131,11 +132,13 @@ class ImagePrivateUserType(DjangoObjectType):
 	class Meta:
 		model = ImagePrivateUserModel
 		fields = (
+				 "id",
 				 "avatar",
 				 "identity_card",
 				 "student_card",
 				 "create_at",
 				 )
+		convert_choices_to_enum = []
 
 	def resolve_identity_card(self, info):
 		if is_owner(self, info):
@@ -150,11 +153,14 @@ class ImageOfUserType(DjangoObjectType):
 	class Meta:
 		model = ImageOfUserModel
 		fields = (
+				 "id",
 				 "image",
 				 "type_image",
 				 "create_at",
 				 "is_using",
+				 "is_public",
 				 )
+		convert_choices_to_enum = []
 
 	def resolve_image(self, info):
 		if is_owner(self, info):
@@ -180,6 +186,7 @@ class ParentType(DjangoObjectType):
 	class Meta:
 		model = ParentModel
 		fields = (
+				  "id",
 				  "first_name",
 				  "last_name",
 				  "birthday",
@@ -199,6 +206,7 @@ class ParentType(DjangoObjectType):
 				  "parentroommodel_set",
 
 				  )
+		convert_choices_to_enum = []
 
 
 	# self là một đối tượng của ParentModel, không phải là đối tượng của ParentType
@@ -236,11 +244,14 @@ class ParentRoomType(DjangoObjectType):
 				  # gia ca
 				  "pricemodel_set",
 
+				  # thong tin cac danh sach
+				  "waitingtutormodel_set",
+				  "listinvitedmodel_set",
+				  "tryteachingmodel",
+				  "tutorteachingmodel",
+
 				  # phụ huynh tạo ra lớp học
 				  "parent",
-
-				  # # comment ve lop hoc
-				  # "commentaboutparentroommodel_set"
 
 				  )
 		convert_choices_to_enum = []
@@ -250,26 +261,72 @@ class OldLocationType(DjangoObjectType):
 	class Meta:
 		model = OldLocationModel
 
+		convert_choices_to_enum = []
+
 
 class PriceType(DjangoObjectType):
 	class Meta:
 		model = PriceModel
+		fields = (
+				 "id",
+				 "parent_room",
+				 "time_in_one_day",
+				 "money",
+				 "time_price_pay_for",
+				 "teacher",
+				 "sex_of_teacher",
+				 )
+		convert_choices_to_enum = []
 
 class WaitingTutorType(DjangoObjectType):
 	class Meta:
 		model = WaitingTutorModel
+		fields = (
+				 "id",
+				 "parent_room",
+				 "tutor",
+				 "create_at",
+				 "time_expired",
+				 "parent_invite",
+				 )
+		convert_choices_to_enum = []
 
 class ListInvitedType(DjangoObjectType):
 	class Meta:
 		model = ListInvitedModel
+		fields = (
+				 "id",
+				 "tutor",
+				 "parent_room",
+				 "tutor_agree",
+				 "create_at"
+				 )
+		convert_choices_to_enum = []
 
 class TryTeachingType(DjangoObjectType):
 	class Meta:
 		model = TryTeachingModel
+		fields = (
+				 "id",
+				 "tutor",
+				 "parent_room",
+				 "tutor_agree",
+				 "parent_agree",
+				 "create_at",
+				 "time_expired",
+				 )
+		convert_choices_to_enum = []
 
 class TutorTeachingType(DjangoObjectType):
 	class Meta:
 		model = TutorTeachingModel
+		fields = (
+				 "id",
+				 "tutor",
+				 "parent_room",
+				 "create_at",
+				 )
+		convert_choices_to_enum = []
 
 
 # for test
@@ -293,42 +350,24 @@ def who_is(request):
 
 
 class Query(graphene.ObjectType):
-	# lay thong tin cua user
-	get_user = graphene.Field(UserType, token=graphene.String(required=False))
 
-	@login_required
-	def resolve_get_user(root, info, **kwargs):
-		request = info.context
-		return User.objects.get(pk=request.user.id)
-
-	# lay thong tin cua user public
+	# lấy thông tin của user qua id
 	user_by_id = graphene.Field(UserType, id=graphene.Int(required=True))
 
 	def resolve_user_by_id(root, info, **kwargs):
 		id = kwargs.get('id')
 		return User.objects.get(pk=id)
 
-	# # lấy thông tin của phụ huynh theo id  
-	# parent_by_id = graphene.Field(ParentType, id=graphene.Int())
-
-	# def resolve_parent_by_id(root, info, **kwargs):
-	# 	id = kwargs.get("id");
-	# 	return ParentModel.objects.get(pk=id)
-
-	# # lấy thông tin của gia sư theo id
-	# tutor_by_id = graphene.Field(TutorType, id=graphene.Int(), token=graphene.String(required=False))
-
-	# def resolve_tutor_by_id(root, info, **kwargs):
-	# 	id = kwargs.get("id");
-	# 	return TutorModel.objects.get(pk=id)
-
-	# lấy tất cả các lớp học
+	"""
+	lấy danh sach các lớp học
+	sẽ chia ra thành các page, mỗi page sẽ có 16 lớp
+	"""
 	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False))
 
 	def resolve_all_room(root, info, **kwargs):
 		page = kwargs.get("page", 1)
 
-		return paginator_function(ParentRoomModel.objects.all(), 2, page)
+		return paginator_function(ParentRoomModel.objects.all(), 16, page)
 
 
-schema = graphene.Schema(query=Query)
+schema = graphene.Schema(query=Query, auto_camelcase=False)
