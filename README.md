@@ -29,5 +29,8 @@
 - các bảng được liên kết với nhau bằng các đường thẳng có mũi tên:
   - mũi tên một chiều: quan hệ one-to-many. Vd: một parent sẽ có nhiều paren-room
   - mũi tên 2 chiều: quan hệ one-to-one. Vd: mỗi user chỉ có một parent
+- link test: 
+  - Graphiql: http://tim-gia-su.herokuapp.com/findTutor/graphql
+  - Hoặc postman.
 
 
