@@ -21,4 +21,13 @@
 - Sau đó lại cd tới thư mục chứa project vừa pull về (cd findTutor), nhập lệnh: pip install -r requirements.txt
 - Để chạy server, nhập lệnh: python manage.py runserver.
 
+# đọc biểu đồ graphQL:
+
+## link diagram: https://drive.google.com/file/d/1X963zE-qAiYTSULvq8bAS9IiedaGeXnF/view?usp=sharing
+
+## Sự liên quan giữa các bảng:
+- các bảng được liên kết với nhau bằng các đường thẳng có mũi tên:
+  - mũi tên một chiều: quan hệ one-to-many. Vd: một parent sẽ có nhiều paren-room
+  - mũi tên 2 chiều: quan hệ one-to-one. Vd: mỗi user chỉ có một parent
+
 
