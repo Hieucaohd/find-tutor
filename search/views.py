@@ -232,6 +232,7 @@ class SearchImprove(Search):
         replace_what = [{'word_replace': 'mon ', 'with': ''}]
 
         have = self.normal_search_infor(have)
+        print(f"have truoc do {have}")
 
         is_testing = True
 
