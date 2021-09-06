@@ -233,11 +233,13 @@ class SearchImprove(Search):
 
         have = self.normal_search_infor(have)
 
+        is_testing = True
+
         for item in replace_what:
             search_infor.replace(item.get('word_replace'), item.get('with'))
             have.replace(item.get('word_replace'), item.get('with'))
 
-        if settings.DEBUG:
+        if settings.DEBUG or is_testing:
             print(f'search_infor: {search_infor}')
             print(f'have: {have}\n')
 
@@ -280,34 +282,34 @@ class SearchImprove(Search):
         if len(search_infor) == len(have):
             hamming_dis = rapidfuzz.string_metric.hamming(search_infor, have)
 
-            if settings.DEBUG: print('same length')
+            if settings.DEBUG or is_testing: print('same length')
 
             if hamming_dis <= limit_same_length_hamming:
                 result = (limit_same_length_hamming + 1 - hamming_dis) * score_same_length_hamming
-                if settings.DEBUG: print('\thamming')
+                if settings.DEBUG or is_testing: print('\thamming')
             elif levenshtein_dis <= limit_same_length_levenshtein:
                 result = (limit_same_length_levenshtein + 1 - levenshtein_dis) * score_same_length_levenshtein
-                if settings.DEBUG: print('\tlevenshtein')
+                if settings.DEBUG or is_testing: print('\tlevenshtein')
             elif common_substring_phan_tram >= limit_same_length_substring: 
-                if settings.DEBUG: print('\tsubstring')
+                if settings.DEBUG or is_testing: print('\tsubstring')
                 result = common_substring_phan_tram * score_same_length_substring
         else:
             # phan_tram_length = len(search_infor) / len(have)
             # compute_length = phan_tram_length * 100 if phan_tram_length < 1 else 1/phan_tram_length * 100
 
-            if settings.DEBUG: print('not same length')
+            if settings.DEBUG or is_testing: print('not same length')
             if levenshtein_dis <= limit_diff_length_levenshtein:
-                if settings.DEBUG: print('\tlevenshtein')
+                if settings.DEBUG or is_testing: print('\tlevenshtein')
                 result = (limit_diff_length_levenshtein + 1 - levenshtein_dis) * score_diff_length_levenshtein
             elif common_substring_phan_tram >= limit_diff_length_substring:
-                if settings.DEBUG: print('\tsubstring')
+                if settings.DEBUG or is_testing: print('\tsubstring')
                 result = common_substring_phan_tram * score_diff_length_substring
             elif common_subsequen_phan_tram >= limit_diff_length_subsequen:
-                if settings.DEBUG: print('\tsubsequen')
+                if settings.DEBUG or is_testing: print('\tsubsequen')
                 result = common_subsequen_phan_tram * score_diff_length_subsequen
 
                 
-        if settings.DEBUG: print(f'\t\tresult {result}\n')
+        if settings.DEBUG or is_testing: print(f'\t\tresult {result}\n')
         return result
 
 
