@@ -435,10 +435,10 @@ class Query(graphene.ObjectType):
 								)
 
 	def resolve_search_tutor(root, info, **kwargs):
-		def fields_tutor(item):
+		def fields(item):
 			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
-		def field_lop_tutor(item):
+		def field_lop(item):
 			return list(item.lop_day)
 
 		return resolve_search(info, TutorModel, fields, field_lop, kwargs)
@@ -452,10 +452,10 @@ class Query(graphene.ObjectType):
 								)
 
 	def resolve_search_parent(root, info, **kwargs):
-		def fields_parent(item):
+		def fields(item):
 			return [item.full_name]
 
-		def field_lop_parent(item):
+		def field_lop(item):
 			return list()
 
 		return resolve_search(info, ParentModel, fields, field_lop, kwargs)
