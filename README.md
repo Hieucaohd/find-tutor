@@ -30,7 +30,7 @@
   - mũi tên một chiều: quan hệ one-to-many. Vd: một parent sẽ có nhiều paren-room
   - mũi tên 2 chiều: quan hệ one-to-one. Vd: mỗi user chỉ có một parent
 - link test: 
-  - Graphiql: http://tim-gia-su.herokuapp.com/findTutor/graphql
+  - Graphiql: http://tim-gia-su.herokuapp.com/findTutor/graphql (nhấn ctrl+space để xem các gợi ý)
   - Hoặc postman.
 
 
