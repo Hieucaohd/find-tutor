@@ -228,16 +228,13 @@ class SearchImprove(Search):
         """
         
         """
-        have = self.normal_search_infor(have)
+        
         if not have:
             return 0
 
+        have = self.normal_search_infor(have)
+
         is_testing = False
-
-        replace_what = [{'word_replace': 'mon ', 'with': ''}]
-
-        for item in replace_what:
-            have.replace(item.get('word_replace'), item.get('with'))
 
         if settings.DEBUG or is_testing:
             print(f'search_infor: {search_infor}')
