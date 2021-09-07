@@ -235,7 +235,7 @@ class SearchImprove(Search):
         if not have:
             return 0
 
-        is_testing = False
+        is_testing = True
 
         for item in replace_what:
             search_infor.replace(item.get('word_replace'), item.get('with'))
@@ -265,18 +265,18 @@ class SearchImprove(Search):
         # substring same length
         limit_same_length_substring = 40 # phan tram
         score_same_length_substring = 2
-
-        # substring diff length
-        limit_diff_length_substring = 50 # phan tram
-        score_diff_length_substring = score_same_length_substring * 0.5
-
+        
         # levenshtein diff length
         limit_diff_length_levenshtein = 2
         score_diff_length_levenshtein = 40
 
+        # substring diff length
+        limit_diff_length_substring = 50 # phan tram
+        score_diff_length_substring = score_same_length_substring * 0.8
+
         # subsequense
         limit_diff_length_subsequen = 40 # phan tram
-        score_diff_length_subsequen = score_same_length_substring * 0.3
+        score_diff_length_subsequen = score_same_length_substring * 0.4
         # end
 
         hamming_dis = 0
