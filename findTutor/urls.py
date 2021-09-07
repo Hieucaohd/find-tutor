@@ -11,6 +11,8 @@ from .viewsDic import (
 from graphene_django.views import GraphQLView
 from .schema import schema
 
+from django.views.decorators.csrf import csrf_exempt
+
 urlpatterns = [
     # tutor
     path('tutorList/', tutorView.TutorList.as_view(), name='tutor-list'),
@@ -48,7 +50,7 @@ urlpatterns = [
     path('informationAboutRoomOfTutorList/', informationAboutRoomOfTutor.InforAboutRoomOfTutorList.as_view()),
 
     # for graphQL
-    path('graphql', GraphQLView.as_view(graphiql=True, schema=schema)),
+    path('graphql', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
 
     # image private user
     path('imagePrivateUserList/', imagePrivateUserView.ImagePrivateUserList.as_view()),

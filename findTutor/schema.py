@@ -362,7 +362,7 @@ def who_is(request):
 	except:
 		print("khong co mat khau")
 
-
+search_instance = SearchShow()
 def resolve_search(info, model, fields, field_lop, kwargs):
 	province_code = kwargs.get('province_code')
 	district_code = kwargs.get('district_code')
@@ -381,8 +381,6 @@ def resolve_search(info, model, fields, field_lop, kwargs):
 	elif province_code:
 		location_query = Q(province_code=province_code)
 
-	search_instance = SearchShow()
-
 	if search_infor:
 		return search_instance.search_engine(model, location_query, search_infor, fields, lop, field_lop)
 	else:
@@ -395,7 +393,7 @@ class Query(graphene.ObjectType):
 
 	def resolve_user_by_id(root, info, **kwargs):
 		id = kwargs.get('id')
-		who_is(info.context)
+		# who_is(info.context)
 		return User.objects.get(pk=id)
 
 	"""
@@ -418,6 +416,16 @@ class Query(graphene.ObjectType):
 								)
 
 	def resolve_search_room(root, info, **kwargs):
+		search_infor = kwargs.get('search_infor')
+		if search_infor:
+			kwargs['search_infor'] = search_instance.normal_search_infor(search_infor)
+
+			replace_what = [{'word_replace': 'mon ', 'with': ''}, 
+                        	{'word_replace': ' hoc', 'with': ''}]
+
+			for item in replace_what:
+				kwargs['search_infor'] = kwargs['search_infor'].replace(item.get('word_replace'), item.get('with'))
+
 		def fields(item):
 			return [item.subject, item.other_require]
 
@@ -435,6 +443,7 @@ class Query(graphene.ObjectType):
 								)
 
 	def resolve_search_tutor(root, info, **kwargs):
+
 		def fields(item):
 			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
