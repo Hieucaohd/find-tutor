@@ -12,6 +12,8 @@ from django.db.models import Q
 
 from search.views import SearchShow
 
+search_instance = SearchShow()
+
 
 def paginator_function(query_set, num_in_page, page):
 	paginator = Paginator(query_set, num_in_page)
@@ -285,9 +287,8 @@ class PriceType(DjangoObjectType):
 				 "id",
 				 "parent_room",
 				 "time_in_one_day",
-				 "money",
-				 "time_price_pay_for",
-				 "teacher",
+				 "money_per_day",
+				 "type_teacher",
 				 "sex_of_teacher",
 				 )
 		convert_choices_to_enum = []
@@ -362,29 +363,124 @@ def who_is(request):
 	except:
 		print("khong co mat khau")
 
-search_instance = SearchShow()
-def resolve_search(info, model, fields, field_lop, kwargs):
-	province_code = kwargs.get('province_code')
-	district_code = kwargs.get('district_code')
-	ward_code 	  = kwargs.get('ward_code')
-	lop 		  = kwargs.get('lop')
-	search_infor  = kwargs.get('search_infor')
+class ResolveSearch:
+	def __init__(self, model, fields, kwargs):
+		self.model = model
+		self.fields = fields
+		self.kwargs = kwargs
 
-	if not lop:
-		lop = []
+		self.list_query = []
 
-	location_query = None
-	if ward_code:
-		location_query = Q(ward_code=ward_code)
-	elif district_code:
-		location_query = Q(district_code=district_code)
-	elif province_code:
-		location_query = Q(province_code=province_code)
+		self.get_location_query()
 
-	if search_infor:
-		return search_instance.search_engine(model, location_query, search_infor, fields, lop, field_lop)
-	else:
-		return search_instance.search_with_no_search_infor(model, location_query, search_infor, fields, lop, field_lop)
+	def get_location_query(self):
+		province_code = self.kwargs.get('province_code')
+		district_code = self.kwargs.get('district_code')
+		ward_code = self.kwargs.get('ward_code')
+
+		if ward_code:
+			self.list_query.append(Q(ward_code=ward_code))
+		elif district_code:
+			self.list_query.append(Q(district_code=district_code))
+		elif province_code:
+			self.list_query.append(Q(province_code=province_code))
+
+	def resolve_search(self):
+
+		search_infor = self.kwargs.get('search_infor')
+
+		if search_infor:
+			search_infor = search_instance.normal_search_infor(search_infor)
+			return search_instance.search_engine(model=self.model, list_query=self.list_query, search_infor=search_infor, fields=self.fields)
+		else:
+			return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
+
+
+class ResolveSearchForRoom(ResolveSearch):
+
+	def __init__(self, model, fields, kwargs):
+		# call super init
+		ResolveSearch.__init__(self, model=model, fields=fields, kwargs=kwargs)
+
+		self.get_price_query()
+		self.get_type_teacher_query()
+		self.get_sex_of_teacher_query()
+		self.get_lop_query()
+
+	@staticmethod
+	def normal_search_infor(search_infor):
+		if search_infor:
+			search_infor = search_instance.normal_search_infor(search_infor)
+
+			replace_what = [{'word_replace': 'mon ', 'with': ''}, 
+	                    	{'word_replace': ' hoc', 'with': ''}]
+
+			for item in replace_what:
+				search_infor = search_infor.replace(item.get('word_replace'), item.get('with'))
+
+		return search_infor
+
+	def get_price_query(self):
+		price = self.kwargs.get('price')
+		if len(price) >= 2:
+			min_price = min(price)
+			max_price = max(price)
+
+			self.list_query.append(Q(pricemodel__money__gte=min_price) & Q(pricemodel__money__lte=max_price))
+
+	def get_type_teacher_query(self):
+		type_teachers = self.kwargs.get('type_teacher')
+		type_teacher_query = Q()
+		if type_teachers:
+			for type_teacher in type_teachers:
+				type_teacher_query &= Q(pricemodel__type_teacher__icontains=type_teacher)
+			self.list_query.append(type_teacher_query)
+
+
+	def get_sex_of_teacher_query(self):
+		sex_of_teacher = self.kwargs.get('sex_of_teacher')
+		if sex_of_teacher:
+			self.list_query.append(Q(pricemodel__sex_of_teacher__icontains=sex_of_teacher))
+
+	def get_lop_query(self):
+		lops = self.kwargs.get("lop")
+		lop_query = Q()
+		if lops:
+			for lop in lops:
+				lop_query |= Q(lop=lop)
+			self.list_query.append(lop_query)
+
+	def resolve_search(self):
+
+		search_infor = self.kwargs.get('search_infor')
+
+		if search_infor:
+			search_infor = self.normal_search_infor(search_infor)
+			return search_instance.search_engine(model=self.model, list_query=self.list_query, search_infor=search_infor, fields=self.fields)
+		else:
+			return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
+
+
+
+class ResolveSearchForTutor(ResolveSearch):
+	def __init__(self, model, fields, kwargs):
+		# call parent init
+		ResolveSearch.__init__(self, model=model, fields=fields, kwargs=kwargs)
+
+		self.get_lop_query()
+
+	def get_lop_query(self):
+		lops = self.kwargs.get("lop")
+		lop_query = Q()
+		if lops:
+			for lop in lops:
+				lop_query |= Q(lop_day__icontains=str(lop))
+			self.list_query.append(lop_query)
+
+
+class ResolveSearchForParent(ResolveSearch):
+	pass
+
 
 class Query(graphene.ObjectType):
 
@@ -412,27 +508,20 @@ class Query(graphene.ObjectType):
 												district_code = graphene.Int(required=False),
 												ward_code	  = graphene.Int(required=False),
 												lop 		  = graphene.List(graphene.Int, required=False),
+												price 		  = graphene.List(graphene.Int, required=False),
+												sex_of_teacher= graphene.String(required=False),
+												type_teacher  = graphene.List(graphene.String, required=False),
 												search_infor  = graphene.String(required=False),
 								)
 
 	def resolve_search_room(root, info, **kwargs):
-		search_infor = kwargs.get('search_infor')
-		if search_infor:
-			kwargs['search_infor'] = search_instance.normal_search_infor(search_infor)
-
-			replace_what = [{'word_replace': 'mon ', 'with': ''}, 
-                        	{'word_replace': ' hoc', 'with': ''}]
-
-			for item in replace_what:
-				kwargs['search_infor'] = kwargs['search_infor'].replace(item.get('word_replace'), item.get('with'))
 
 		def fields(item):
 			return [item.subject, item.other_require]
 
-		def field_lop(item):
-		    return [item.lop]
+		search_room = ResolveSearchForRoom(model=ParentRoomModel, fields=fields, kwargs=kwargs)
 
-		return resolve_search(info, ParentRoomModel, fields, field_lop, kwargs)
+		return search_room.resolve_search()
 
 	# tim kiem gia su
 	search_tutor = graphene.List(TutorType, province_code = graphene.Int(required=False),
@@ -447,16 +536,14 @@ class Query(graphene.ObjectType):
 		def fields(item):
 			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
-		def field_lop(item):
-			return list(item.lop_day)
+		search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
-		return resolve_search(info, TutorModel, fields, field_lop, kwargs)
+		return search_tutor.resolve_search()
 
 	# tim kiem phu huynh
 	search_parent = graphene.List(ParentType, province_code = graphene.Int(required=False),
 											  district_code = graphene.Int(required=False),
 											  ward_code	    = graphene.Int(required=False),
-											  lop 		    = graphene.List(graphene.Int, required=False),
 											  search_infor  = graphene.String(required=False),
 								)
 
@@ -464,10 +551,9 @@ class Query(graphene.ObjectType):
 		def fields(item):
 			return [item.full_name]
 
-		def field_lop(item):
-			return []
+		search_parent = ResolveSearchForParent(model=ParentModel, fields=fields, kwargs=kwargs)
 
-		return resolve_search(info, ParentModel, fields, field_lop, kwargs)
+		return search_parent.resolve_search()
 
 
 schema = graphene.Schema(query=Query, auto_camelcase=False)

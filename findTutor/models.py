@@ -324,6 +324,9 @@ class ParentRoomModel(models.Model):
     # không yêu cầu cung cấp 
     other_require = models.TextField(null=True, blank=True)
 
+    def get_max_price(self):
+        pass
+
     def __str__(self):
         return 'lop ' + str(self.subject)
 
@@ -344,21 +347,16 @@ class PriceModel(models.Model):
     parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
 
     time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1, null=False)  # (hour)
-    money = models.IntegerField(null=False)
-    PER_CHOICES = [
-        ('buoi', 'BUOI'),
-        ('tieng', 'TIENG'),
-    ]
-    time_price_pay_for = models.CharField(max_length=20, choices=PER_CHOICES, null=False)
+    money_per_day = models.IntegerField(null=False)
 
     TEACHER_CHOICES = [('sv', 'Sinh Vien'), ('gv', 'Giao Vien')]
-    teacher = models.CharField(choices=TEACHER_CHOICES, max_length=20, null=False)
+    type_teacher = MultiSelectField(choices=TEACHER_CHOICES, min_choices=1, null=False)
 
     SEX_OF_TEACHER_CHOICES = [('nu', 'NU'), ('nam', 'NAM')]
     sex_of_teacher = MultiSelectField(choices=SEX_OF_TEACHER_CHOICES, min_choices=1, null=False)
 
     def __str__(self):
-        return str(self.parent_room) + ' ' + str(self.money)
+        return str(self.parent_room) + ' : ' + str(self.time_in_one_day) +' tieng/buoi' +' : ' + str(self.money_per_day) + ' / buoi' + " cho gia su: " + str(self.sex_of_teacher) + ' ' + str(self.type_teacher)
 
 
 class WaitingTutorModel(models.Model):

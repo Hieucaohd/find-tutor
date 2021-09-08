@@ -22,18 +22,14 @@ import unidecode
 class Search(APIView):
 
     def normal_search_infor(self, search_infor):
-        result = search_infor
-        try:
-            search_infor = re.sub(r'[^\w\s]', '', search_infor)
-            search_infor = search_infor.lower()
-            list_word = search_infor.split()
+        search_infor = re.sub(r'[^\w\s]', '', search_infor)
+        search_infor = search_infor.lower()
+        list_word = search_infor.split()
 
-            list_word_normal = (re.sub(r'[^\w\s]', '', word) for word in list_word)
+        list_word_normal = (re.sub(r'[^\w\s]', '', word) for word in list_word)
 
-            result = " ".join(list_word_normal)
-            result = unidecode.unidecode(result)
-        except Exception:
-            pass
+        result = " ".join(list_word_normal)
+        result = unidecode.unidecode(result)
         return result
 
     def test_for_string(self, source, have):
@@ -70,43 +66,12 @@ class Search(APIView):
         max_result = max(self.test_for_string(search_infor, field) for field in fields)
         return max_result
 
-    def condition_for_lop(self, lop=[], field_lop=[]):
-        if lop:
-            if settings.DEBUG: print(lop)
-
-            set_1 = set(lop)
-            field_lop = list(int(item) for item in field_lop)
-
-            if settings.DEBUG:
-                print(field_lop)
-                print(type(field_lop))
-
-            set_2 = set(field_lop)
-
-            if (set_1 & set_2):
-                return True
-            else:
-                return False
-        else:
-            return True
-
-    def get_query_set_with_location_query(self, location_query, model):
-        if location_query:
-            return model.objects.filter(location_query)
-        else:
-            return model.objects.all()
-
-    def search_engine(self, model, location_query, search_infor, fields, lop, field_lop):
-        search_infor = self.normal_search_infor(search_infor)
-
-        query_set = self.get_query_set_with_location_query(location_query, model)
-        
+    def get_list_result_sorted(self, query_set, search_infor, fields):
         list_result = list( {
                                 'item':item, 
                                 'result': self.get_result_search_infor(search_infor, fields(item))
                             } 
-                            for item in query_set if
-                            self.condition_for_lop(lop, field_lop(item))
+                            for item in query_set
                         )
 
         def get_result(item):
@@ -118,13 +83,18 @@ class Search(APIView):
 
         return list_item
 
-    def search_with_no_search_infor(self, model, location_query, search_infor, fields, lop, field_lop):
-        query_set = self.get_query_set_with_location_query(location_query, model)
+    def get_query_set(self, model, list_query):
+        sum_query = Q()
+        for query in list_query:
+            sum_query &= query
+        return model.objects.filter(sum_query)
 
-        list_result = (item for item in query_set if 
-                            self.condition_for_lop(lop, field_lop(item)))
+    def search_engine(self, model, list_query, search_infor, fields):
+        query_set = self.get_query_set(model, list_query)
+        return self.get_list_result_sorted(query_set, search_infor, fields)
 
-        return list_result
+    def search_with_no_search_infor(self, model, list_query):
+        return self.get_query_set(model, list_query)
 
     def get(self, request, format=None):
         province_code = request.query_params.get('province_code', 0)
@@ -232,7 +202,10 @@ class SearchImprove(Search):
         if not have:
             return 0
 
-        have = self.normal_search_infor(have)
+        try:
+            have = self.normal_search_infor(have)
+        except Exception:
+            pass
 
         is_testing = False
 
