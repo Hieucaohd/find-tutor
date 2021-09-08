@@ -422,7 +422,7 @@ class ResolveSearchForRoom(ResolveSearch):
 
 	def get_price_query(self):
 		price = self.kwargs.get('price')
-		if len(price) >= 2:
+		if price and len(price) >= 2:
 			min_price = min(price)
 			max_price = max(price)
 
