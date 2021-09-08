@@ -496,12 +496,20 @@ class Query(graphene.ObjectType):
 	lấy danh sach các lớp học
 	sẽ chia ra thành các page, mỗi page sẽ có 16 lớp
 	"""
-	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False))
+	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
 
 	def resolve_all_room(root, info, **kwargs):
 		page = kwargs.get("page", 1)
+		num_in_page = kwargs.get("num_in_page", 16)
 
-		return paginator_function(ParentRoomModel.objects.all(), 16, page)
+		return paginator_function(ParentRoomModel.objects.all(), num_in_page, page)
+
+	# lay tong so page
+	sum_rooms = graphene.Int()
+
+	def resolve_sum_rooms(root, info, **kwargs):
+		return ParentRoomModel.objects.count()
+
 
 	# tim kiem lop hoc
 	search_room = graphene.List(ParentRoomType, province_code = graphene.Int(required=False),
