@@ -85,6 +85,9 @@ class TutorType(DjangoObjectType):
 				  'listinvitedmodel_set',
 				  'tryteachingmodel_set',
 				  'tutorteachingmodel_set',
+
+				  # user
+				  'user',
 				  )
 		convert_choices_to_enum = []
 
@@ -220,6 +223,9 @@ class ParentType(DjangoObjectType):
 
 				  # các lớp mà phụ huynh tạo
 				  "parentroommodel_set",
+
+				  # user
+				  'user',
 
 				  )
 		convert_choices_to_enum = []
@@ -492,10 +498,7 @@ class Query(graphene.ObjectType):
 		# who_is(info.context)
 		return User.objects.get(pk=id)
 
-	"""
-	lấy danh sach các lớp học
-	sẽ chia ra thành các page, mỗi page sẽ có 16 lớp
-	"""
+	# lấy danh sach các lớp học
 	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
 
 	def resolve_all_room(root, info, **kwargs):
@@ -503,6 +506,23 @@ class Query(graphene.ObjectType):
 		num_in_page = kwargs.get("num_in_page", 16)
 
 		return paginator_function(ParentRoomModel.objects.all(), num_in_page, page)
+
+	# lay room thong qua id
+	room_by_id = graphene.Field(ParentRoomType, id=graphene.Int(required=True))
+
+	def resolve_room_by_id(root, info, **kwargs):
+		id = kwargs.get('id')
+		return ParentRoomModel.objects.get(pk=id)
+
+
+	# lay danh sach cac tutor
+	all_tutor = graphene.List(TutorType, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
+
+	def resolve_all_tutor(root, info, **kwargs):
+		page = kwargs.get("page", 1)
+		num_in_page = kwargs.get("num_in_page", 16)
+
+		return paginator_function(TutorModel.objects.all(), num_in_page, page)
 
 	# lay tong so page
 	sum_rooms = graphene.Int()
@@ -542,7 +562,7 @@ class Query(graphene.ObjectType):
 	def resolve_search_tutor(root, info, **kwargs):
 
 		def fields(item):
-			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
+			return [item.full_name, item.experience, item.achievement, item.university, item.profession, item.mon_day]
 
 		search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 

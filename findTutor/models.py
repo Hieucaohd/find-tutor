@@ -73,6 +73,9 @@ class TutorModel(models.Model):
     # không yêu cầu cung cấp 
     khu_vuc_day = models.TextField(null=True, blank=True)
 
+    # mon day
+    mon_day = models.TextField(null=True, blank=True)
+
     CAP_DAY_CHOICES = []
     for i in range(1, 5):
         CAP_DAY_CHOICES.append((i, i))
