@@ -426,7 +426,7 @@ class ResolveSearchForRoom(ResolveSearch):
 			min_price = min(price)
 			max_price = max(price)
 
-			self.list_query.append(Q(pricemodel__money_per_day__gte=min_price) & Q(pricemodel__money__lte=max_price))
+			self.list_query.append(Q(pricemodel__money_per_day__gte=min_price) & Q(pricemodel__money_per_day__lte=max_price))
 
 	def get_type_teacher_query(self):
 		type_teachers = self.kwargs.get('type_teacher')
