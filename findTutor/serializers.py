@@ -170,7 +170,10 @@ class OldLocationSerializer(serializers.ModelSerializer):
 class PriceSerializer(serializers.ModelSerializer):
 
     SEX_OF_TEACHER_CHOICES = PriceModel.SEX_OF_TEACHER_CHOICES
-    sex_of_teacher = serializers.MultipleChoiceField(choices=SEX_OF_TEACHER_CHOICES)
+    sex_of_teacher = serializers.MultipleChoiceField(choices=SEX_OF_TEACHER_CHOICES, required=False)
+
+    TEACHER_CHOICES = PriceModel.TEACHER_CHOICES
+    type_teacher = serializers.MultipleChoiceField(choices=TEACHER_CHOICES, required=False)
 
     parent_room = serializers.PrimaryKeyRelatedField(read_only='True', source='parent_room.id')
 
@@ -181,6 +184,9 @@ class PriceSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'sex_id_teacher': {
                 'required': False,
+            },
+            'time_in_one_day': {
+                'required': False
             }
         }
 
