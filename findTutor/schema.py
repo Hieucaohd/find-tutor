@@ -88,6 +88,9 @@ class TutorType(DjangoObjectType):
 
 				  # user
 				  'user',
+
+				  # mon day
+				  'mon_day',
 				  )
 		convert_choices_to_enum = []
 
@@ -227,6 +230,9 @@ class ParentType(DjangoObjectType):
 				  # user
 				  'user',
 
+				  # mon hoc quan tam
+				  "subject_care",
+
 				  )
 		convert_choices_to_enum = []
 
@@ -274,7 +280,6 @@ class ParentRoomType(DjangoObjectType):
 
 				  # phụ huynh tạo ra lớp học
 				  "parent",
-
 				  )
 		convert_choices_to_enum = []
 
@@ -413,8 +418,37 @@ class ResolveSearchForRoom(ResolveSearch):
 		self.get_sex_of_teacher_query()
 		self.get_lop_query()
 
-	@staticmethod
-	def normal_search_infor(search_infor):
+	def string_is_number(self, string_number):
+		try:
+			string_number = int(string_number)
+			return True
+		except ValueError:
+			return False
+
+	def tach_lop(self, search_infor):
+		last_index = len(search_infor) - 1
+		b = search_infor.find('lop')	# b
+
+		if last_index >= b+5:
+			word_b4 = search_infor[b+4]
+			word_b5 = search_infor[b+5]
+
+			if self.string_is_number(word_b5) and self.string_is_number(word_b4):
+				return int(word_b4+word_b5)
+			elif self.string_is_number(word_b4):
+				return int(word_b4)
+			else:
+				return None
+		elif last_index == b+4:
+			word_b4 = search_infor[b+4]
+			if self.string_is_number(word_b4):
+				return int(word_b4)
+			else:
+				return None
+		else:
+			return None
+
+	def normal_search_infor(self, search_infor):
 		if search_infor:
 			search_infor = search_instance.normal_search_infor(search_infor)
 
@@ -423,6 +457,22 @@ class ResolveSearchForRoom(ResolveSearch):
 
 			for item in replace_what:
 				search_infor = search_infor.replace(item.get('word_replace'), item.get('with'))
+
+			if 'lop' in search_infor:
+				number_lop = self.tach_lop(search_infor)
+
+				search_infor = search_infor.replace('lop', '', 1)
+
+				if number_lop:
+					lop_from_kwargs = self.kwargs.get('lop')
+					if lop_from_kwargs:
+						lop_from_kwargs.append(number_lop)
+						self.get_lop_query()
+					else:
+						self.kwargs['lop'] = [number_lop]
+						self.get_lop_query()
+
+					search_infor = search_infor.replace(str(number_lop), '', 1)
 
 		return search_infor
 
@@ -467,7 +517,6 @@ class ResolveSearchForRoom(ResolveSearch):
 			return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
 
 
-
 class ResolveSearchForTutor(ResolveSearch):
 	def __init__(self, model, fields, kwargs):
 		# call parent init
@@ -507,6 +556,12 @@ class Query(graphene.ObjectType):
 
 		return paginator_function(ParentRoomModel.objects.all(), num_in_page, page)
 
+	# lay tong so page cua all_room
+	sum_rooms = graphene.Int()
+
+	def resolve_sum_rooms(root, info, **kwargs):
+		return ParentRoomModel.objects.count()
+
 	# lay room thong qua id
 	room_by_id = graphene.Field(ParentRoomType, id=graphene.Int(required=True))
 
@@ -524,11 +579,11 @@ class Query(graphene.ObjectType):
 
 		return paginator_function(TutorModel.objects.all(), num_in_page, page)
 
-	# lay tong so page
-	sum_rooms = graphene.Int()
+	# lay tong so page cua all_tutor
+	sum_tutors = graphene.Int()
 
-	def resolve_sum_rooms(root, info, **kwargs):
-		return ParentRoomModel.objects.count()
+	def resolve_sum_tutors(root, info, **kwargs):
+		return TutorModel.objects.count()
 
 
 	# tim kiem lop hoc

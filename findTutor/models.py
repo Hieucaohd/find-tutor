@@ -266,6 +266,9 @@ class ParentModel(models.Model):
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
     detail_location = models.CharField(max_length=500, null=True, blank=True)
 
+    # cac mon hoc parent quan tam
+    subject_care = models.TextField(null=True, blank=True)
+
     @property
     def full_name(self):
         return str(self.first_name) + ' ' + str(self.last_name)
