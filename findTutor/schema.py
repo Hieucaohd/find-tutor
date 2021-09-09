@@ -449,30 +449,34 @@ class ResolveSearchForRoom(ResolveSearch):
 			return None
 
 	def normal_search_infor(self, search_infor):
-		if search_infor:
-			search_infor = search_instance.normal_search_infor(search_infor)
+		search_infor = search_instance.normal_search_infor(search_infor)
 
-			replace_what = [{'word_replace': 'mon ', 'with': ''}, 
-	                    	{'word_replace': ' hoc', 'with': ''}]
+		replace_what = [{'word_replace': 'mon ', 'with': ''}, 
+                    	{'word_replace': ' hoc', 'with': ''}]
 
-			for item in replace_what:
-				search_infor = search_infor.replace(item.get('word_replace'), item.get('with'))
+		for item in replace_what:
+			search_infor = search_infor.replace(item.get('word_replace'), item.get('with'))
 
-			if 'lop' in search_infor:
-				number_lop = self.tach_lop(search_infor)
 
+		if 'lop' in search_infor:
+			number_lop = self.tach_lop(search_infor)
+
+			if number_lop:
+				lop_from_kwargs = self.kwargs.get('lop')
+				if lop_from_kwargs:
+					lop_from_kwargs.append(number_lop)
+					self.get_lop_query()
+				else:
+					self.kwargs['lop'] = [number_lop]
+					self.get_lop_query()
+
+				search_infor = search_infor.replace(' ' + str(number_lop), '', 1)
+
+			b = search_infor.find('lop')
+			if b == 0:
 				search_infor = search_infor.replace('lop', '', 1)
-
-				if number_lop:
-					lop_from_kwargs = self.kwargs.get('lop')
-					if lop_from_kwargs:
-						lop_from_kwargs.append(number_lop)
-						self.get_lop_query()
-					else:
-						self.kwargs['lop'] = [number_lop]
-						self.get_lop_query()
-
-					search_infor = search_infor.replace(str(number_lop), '', 1)
+			else:
+				search_infor = search_infor.replace(' lop', '', 1)
 
 		return search_infor
 
@@ -509,9 +513,10 @@ class ResolveSearchForRoom(ResolveSearch):
 	def resolve_search(self):
 
 		search_infor = self.kwargs.get('search_infor')
-
 		if search_infor:
 			search_infor = self.normal_search_infor(search_infor)
+
+		if search_infor:
 			return search_instance.search_engine(model=self.model, list_query=self.list_query, search_infor=search_infor, fields=self.fields)
 		else:
 			return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)

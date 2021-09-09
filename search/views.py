@@ -236,7 +236,7 @@ class SearchImprove(Search):
         
         # levenshtein diff length
         limit_diff_length_levenshtein = 2
-        score_diff_length_levenshtein = 40
+        score_diff_length_levenshtein = 50
 
         # substring diff length
         limit_diff_length_substring = 50 # phan tram
