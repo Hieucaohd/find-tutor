@@ -542,6 +542,28 @@ class ResolveSearchForParent(ResolveSearch):
 	pass
 
 
+
+class ResultAllRoom(graphene.ObjectType):
+	result = graphene.List(ParentRoomType)
+	num_pages = graphene.Int()
+
+class ResultAllTutor(graphene.ObjectType):
+	result = graphene.List(TutorType)
+	num_pages = graphene.Int()
+
+class ResultSearchRoom(graphene.ObjectType):
+	result = graphene.List(ParentRoomType)
+	num_pages = graphene.Int()
+
+class ResultSearchTutor(graphene.ObjectType):
+	result = graphene.List(TutorType)
+	num_pages = graphene.Int()
+
+class ResultSearchParent(graphene.ObjectType):
+	result = graphene.List(ParentType)
+	num_pages = graphene.Int()
+
+
 class Query(graphene.ObjectType):
 
 	# lấy thông tin của user qua id
@@ -553,19 +575,18 @@ class Query(graphene.ObjectType):
 		return User.objects.get(pk=id)
 
 	# lấy danh sach các lớp học
-	all_room = graphene.List(ParentRoomType, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
+	all_room = graphene.Field(ResultAllRoom, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
 
 	def resolve_all_room(root, info, **kwargs):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
 
-		return paginator_function(ParentRoomModel.objects.all(), num_in_page, page)
+		result = paginator_function(ParentRoomModel.objects.all(), num_in_page, page)
 
-	# lay tong so page cua all_room
-	sum_rooms = graphene.Int()
-
-	def resolve_sum_rooms(root, info, **kwargs):
-		return ParentRoomModel.objects.count()
+		return {
+			'result': result,
+			'num_pages': result.paginator.num_pages
+		}
 
 	# lay room thong qua id
 	room_by_id = graphene.Field(ParentRoomType, id=graphene.Int(required=True))
@@ -576,23 +597,22 @@ class Query(graphene.ObjectType):
 
 
 	# lay danh sach cac tutor
-	all_tutor = graphene.List(TutorType, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
+	all_tutor = graphene.Field(ResultAllTutor, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
 
 	def resolve_all_tutor(root, info, **kwargs):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
 
-		return paginator_function(TutorModel.objects.all(), num_in_page, page)
+		result = paginator_function(TutorModel.objects.all(), num_in_page, page)
 
-	# lay tong so page cua all_tutor
-	sum_tutors = graphene.Int()
-
-	def resolve_sum_tutors(root, info, **kwargs):
-		return TutorModel.objects.count()
+		return {
+			'result': result,
+			'num_pages': result.paginator.num_pages
+		}
 
 
 	# tim kiem lop hoc
-	search_room = graphene.List(ParentRoomType, province_code = graphene.Int(required=False),
+	search_room = graphene.Field(ResultSearchRoom, province_code = graphene.Int(required=False),
 												district_code = graphene.Int(required=False),
 												ward_code	  = graphene.Int(required=False),
 												lop 		  = graphene.List(graphene.Int, required=False),
@@ -600,48 +620,82 @@ class Query(graphene.ObjectType):
 												sex_of_teacher= graphene.String(required=False),
 												type_teacher  = graphene.List(graphene.String, required=False),
 												search_infor  = graphene.String(required=False),
+
+												# phan trang
+												page 		  = graphene.Int(required=False), 
+												num_in_page	  = graphene.Int(required=False),
 								)
 
 	def resolve_search_room(root, info, **kwargs):
+		page = kwargs.get("page", 1)
+		num_in_page = kwargs.get("num_in_page", 16)
 
 		def fields(item):
 			return [item.subject, item.other_require]
 
 		search_room = ResolveSearchForRoom(model=ParentRoomModel, fields=fields, kwargs=kwargs)
 
-		return search_room.resolve_search()
+		result = paginator_function(list(search_room.resolve_search()), num_in_page, page)
+
+		return {
+			'result': result,
+			'num_pages': result.paginator.num_pages
+		}
 
 	# tim kiem gia su
-	search_tutor = graphene.List(TutorType, province_code = graphene.Int(required=False),
+	search_tutor = graphene.Field(ResultSearchTutor, province_code = graphene.Int(required=False),
 											district_code = graphene.Int(required=False),
 											ward_code	  = graphene.Int(required=False),
 											lop 		  = graphene.List(graphene.Int, required=False),
 											search_infor  = graphene.String(required=False),
+
+											# phan trang
+											page 		  = graphene.Int(required=False), 
+											num_in_page	  = graphene.Int(required=False),
 								)
 
 	def resolve_search_tutor(root, info, **kwargs):
+		page = kwargs.get("page", 1)
+		num_in_page = kwargs.get("num_in_page", 16)
 
 		def fields(item):
 			return [item.full_name, item.experience, item.achievement, item.university, item.profession, item.mon_day]
 
 		search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
-		return search_tutor.resolve_search()
+		result = paginator_function(list(search_tutor.resolve_search()), num_in_page, page)
+
+		return {
+			'result': result,
+			'num_pages': result.paginator.num_pages
+		}
 
 	# tim kiem phu huynh
-	search_parent = graphene.List(ParentType, province_code = graphene.Int(required=False),
+	search_parent = graphene.Field(ResultSearchParent, province_code = graphene.Int(required=False),
 											  district_code = graphene.Int(required=False),
 											  ward_code	    = graphene.Int(required=False),
 											  search_infor  = graphene.String(required=False),
+
+											  # phan trang
+											  page 		    = graphene.Int(required=False), 
+											  num_in_page	= graphene.Int(required=False),
 								)
 
 	def resolve_search_parent(root, info, **kwargs):
+		page = kwargs.get("page", 1)
+		num_in_page = kwargs.get("num_in_page", 16)
+
 		def fields(item):
 			return [item.full_name]
 
 		search_parent = ResolveSearchForParent(model=ParentModel, fields=fields, kwargs=kwargs)
 
-		return search_parent.resolve_search()
+		result = paginator_function(list(search_parent.resolve_search()), num_in_page, page)
+
+		return {
+			'result': result,
+			'num_pages': result.paginator.num_pages
+		}
 
 
 schema = graphene.Schema(query=Query, auto_camelcase=False)
