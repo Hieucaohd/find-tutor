@@ -9,7 +9,8 @@ from ..serializers import ImageOfUserSerializer
 from ..permissions import is_owner
 
 from django.conf import settings
-from ..firebaseConfig import storage, get_url
+from ..firebaseConfig import StoreToFirebase
+
 
 
 class ImageOfUserList(CreateBaseView):
@@ -25,7 +26,8 @@ class ImageOfUserList(CreateBaseView):
 
 				image_url = None
 				if image:
-					image_url = get_url(image, "user_image")
+					storage = StoreToFirebase()
+					image_url = storage.get_url(image, "user_image")
 
 				serializer.save(user=request.user, image=image_url)
 

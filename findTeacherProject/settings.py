@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'search',
     'rest_framework_simplejwt.token_blacklist',
     'graphene_django',
+    'analysisUser',
 ]
 
 REST_FRAMEWORK = {

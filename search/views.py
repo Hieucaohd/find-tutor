@@ -8,8 +8,6 @@ from findTutor.checkTutorAndParent import isTutor, isParent
 
 from django.conf import settings
 
-from .models import SearchModel
-
 from django.db.models import Q
 
 from rapidfuzz import fuzz
@@ -17,6 +15,14 @@ import rapidfuzz
 import pylcs
 import re
 import unidecode
+
+from multiprocessing import Process, Queue
+import threading, queue
+
+
+class ThreadingForLoop:
+    def __init__(self):
+        pass
 
 
 class Search(APIView):
@@ -63,16 +69,71 @@ class Search(APIView):
 
     
     def get_result_search_infor(self, search_infor='', fields=[]):
-        max_result = max(self.test_for_string(search_infor, field) for field in fields)
-        return max_result
+        # max_result = max(self.test_for_string(search_infor, field) for field in fields)
+        # return max_result
+        expected = len(fields)
+        queue_result = queue.Queue()
+        stdoutMutex = threading.Lock()
+        threads = []
+
+        for field in fields:
+            get_result = threading.Thread(target=self.test_for_string, args=(search_infor, field, queue_result, stdoutMutex))
+            get_result.start()
+            threads.append(get_result)
+
+        list_result = []
+        while expected:
+            try:
+                data = queue_result.get(block=False)
+            except queue.Empty:
+                pass
+            else:
+                list_result.append(data)
+                expected -= 1
+
+        for thread in threads:
+            thread.join()
+
+        return max(list_result)
+
+
+    def get_item_after_calculate(self, item, search_infor, fields, queue_result, stdoutMutex ):
+        queue_result.put({
+                'item': item,
+                'result': self.get_result_search_infor(search_infor, fields(item))
+            })
+
 
     def get_list_result_sorted(self, query_set, search_infor, fields):
-        list_result = list( {
-                                'item':item, 
-                                'result': self.get_result_search_infor(search_infor, fields(item))
-                            } 
-                            for item in query_set
-                        )
+        expected = len(list(query_set))
+        queue_result = queue.Queue()
+        stdoutMutex = threading.Lock()
+        threads = []
+
+        for item in query_set:
+            get_result = threading.Thread(target=self.get_item_after_calculate, args=(item, search_infor, fields, queue_result, stdoutMutex))
+            get_result.start()
+            threads.append(get_result)
+
+        list_result = []
+        while expected:
+            try:
+                data = queue_result.get(block=False)
+            except queue.Empty:
+                pass
+            else:
+                list_result.append(data)
+                expected -= 1
+
+        for thread in threads:
+            thread.join()
+
+        # list_result = list( {
+        #                         'item':item, 
+        #                         'result': self.get_result_search_infor(search_infor, fields(item))
+        #                     } 
+        #                     for item in query_set
+        #                 )
 
         def get_result(item):
             return item.get('result')
@@ -144,8 +205,6 @@ class Search(APIView):
             except:
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
-        if request.user.is_authenticated and search_infor:
-            SearchModel.objects.create(user=request.user, content_search=search_infor)
 
         if type_search == 'room':
 
@@ -194,12 +253,13 @@ class Search(APIView):
 
 
 class SearchImprove(Search):
-    def test_for_string(self, search_infor, have):
+    def test_for_string(self, search_infor, have, queue_result, stdoutMutex):
         """
         
         """
         
         if not have:
+            queue_result.put(0)
             return 0
 
         try:
@@ -209,9 +269,10 @@ class SearchImprove(Search):
 
         is_testing = False
 
-        if settings.DEBUG or is_testing:
-            print(f'search_infor: {search_infor}')
-            print(f'have: {have}\n')
+        # if settings.DEBUG or is_testing:
+        #     with stdoutMutex:
+        #         print(f'search_infor: {search_infor}')
+        #         print(f'have: {have}\n')
 
         levenshtein_dis = rapidfuzz.string_metric.levenshtein(search_infor, have)
 
@@ -252,34 +313,59 @@ class SearchImprove(Search):
         if len(search_infor) == len(have):
             hamming_dis = rapidfuzz.string_metric.hamming(search_infor, have)
 
-            if settings.DEBUG or is_testing: print('same length')
+            # if settings.DEBUG or is_testing: 
+            #     with stdoutMutex:
+            #         print('same length')
 
             if hamming_dis <= limit_same_length_hamming:
                 result = (limit_same_length_hamming + 1 - hamming_dis) * score_same_length_hamming
-                if settings.DEBUG or is_testing: print('\thamming')
+
+                # if settings.DEBUG or is_testing:
+                #     with stdoutMutex:
+                #         print('\thamming')
+
             elif levenshtein_dis <= limit_same_length_levenshtein:
                 result = (limit_same_length_levenshtein + 1 - levenshtein_dis) * score_same_length_levenshtein
-                if settings.DEBUG or is_testing: print('\tlevenshtein')
+
+                # if settings.DEBUG or is_testing: 
+                #     with stdoutMutex:
+                #         print('\tlevenshtein')
+
             elif common_substring_phan_tram >= limit_same_length_substring: 
-                if settings.DEBUG or is_testing: print('\tsubstring')
+
+                # if settings.DEBUG or is_testing: 
+                #     with stdoutMutex:
+                #         print('\tsubstring')
+
                 result = common_substring_phan_tram * score_same_length_substring
         else:
             # phan_tram_length = len(search_infor) / len(have)
             # compute_length = phan_tram_length * 100 if phan_tram_length < 1 else 1/phan_tram_length * 100
 
-            if settings.DEBUG or is_testing: print('not same length')
+            # if settings.DEBUG or is_testing:
+            #     with stdoutMutex:
+            #         print('not same length')
             if levenshtein_dis <= limit_diff_length_levenshtein:
-                if settings.DEBUG or is_testing: print('\tlevenshtein')
+                # if settings.DEBUG or is_testing:
+                #     with stdoutMutex:
+                #         print('\tlevenshtein')
                 result = (limit_diff_length_levenshtein + 1 - levenshtein_dis) * score_diff_length_levenshtein
             elif common_substring_phan_tram >= limit_diff_length_substring:
-                if settings.DEBUG or is_testing: print('\tsubstring')
+                # if settings.DEBUG or is_testing:
+                #     with stdoutMutex:
+                #         print('\tsubstring')
                 result = common_substring_phan_tram * score_diff_length_substring
             elif common_subsequen_phan_tram >= limit_diff_length_subsequen:
-                if settings.DEBUG or is_testing: print('\tsubsequen')
+                # if settings.DEBUG or is_testing:
+                #     with stdoutMutex:
+                #         print('\tsubsequen')
                 result = common_subsequen_phan_tram * score_diff_length_subsequen
 
                 
-        if settings.DEBUG or is_testing: print(f'\t\tresult {result}\n')
+        # if settings.DEBUG or is_testing: 
+        #     with stdoutMutex:
+        #         print(f'\t\tresult {result}\n')
+        queue_result.put(result)
         return result
 
 
