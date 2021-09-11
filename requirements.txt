@@ -24,5 +24,4 @@ whitenoise
 dj-database-url
 psycopg2
 pyrebase
-pymongo
-dnspython
+pymongo[srv]
