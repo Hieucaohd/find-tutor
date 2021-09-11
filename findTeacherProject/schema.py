@@ -400,7 +400,7 @@ def save_search_to_mongo(request, model, kwargs, take_result=False):
 		if kwargs.get("num_in_page"):
 			del data_search["num_in_page"]
 
-		SearchRoomModel(user_id=request.user.id, content_search=data_search).create(take_result)
+		model(user_id=request.user.id, content_search=data_search).create(take_result)
 
 
 
