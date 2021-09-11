@@ -13,7 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from search.resolveSearch import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
 
-from search.mongoModels import SearchRoomModel
+from search.mongoModels import SearchRoomModel, SearchTutorModel, SearchParentModel
 import copy
 
 
@@ -391,6 +391,19 @@ class ResultSearchParent(graphene.ObjectType):
 	num_pages = graphene.Int()
 
 
+def save_search_to_mongo(request, model, kwargs, take_result=False):
+	if request.user.is_authenticated:
+		data_search = copy.deepcopy(kwargs)
+		if kwargs.get("page"):
+			del data_search["page"]
+
+		if kwargs.get("num_in_page"):
+			del data_search["num_in_page"]
+
+		SearchRoomModel(user_id=request.user.id, content_search=data_search).create(take_result)
+
+
+
 class Query(graphene.ObjectType):
 
 	# lấy thông tin của user qua id
@@ -459,16 +472,7 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
 
-		request = info.context
-		if request.user.is_authenticated:
-			data_search = copy.deepcopy(kwargs)
-			if kwargs.get("page"):
-				del data_search["page"]
-
-			if kwargs.get("num_in_page"):
-				del data_search["num_in_page"]
-
-			SearchRoomModel(user_id=request.user.id, content_search=data_search).create()
+		save_search_to_mongo(request=info.context, model=SearchRoomModel, kwargs=kwargs, take_result=False)
 
 		def fields(item):
 			return [item.subject, item.other_require]
@@ -499,6 +503,8 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
 
+		save_search_to_mongo(request=info.context, model=SearchTutorModel, kwargs=kwargs, take_result=False)
+
 		def fields(item):
 			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
@@ -526,6 +532,8 @@ class Query(graphene.ObjectType):
 	def resolve_search_parent(root, info, **kwargs):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
+
+		save_search_to_mongo(request=info.context, model=SearchParentModel, kwargs=kwargs, take_result=False)
 
 		def fields(item):
 			return [item.full_name]
