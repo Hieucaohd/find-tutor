@@ -66,7 +66,7 @@ class Search(APIView):
     def get_result_search_infor(self, search_infor='', fields=[]):
         # max_result = max(self.test_for_string(search_infor, field) for field in fields)
         # return max_result
-        create_thread = threading.Thread
+        create_thread = Process
 
         expected = len(fields)
         queue_result = Queue()
