@@ -13,6 +13,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from search.resolveSearch import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
 
+from search.mongoModels import SearchRoomModel
+import copy
+
 
 def paginator_function(query_set, num_in_page, page):
 	paginator = Paginator(query_set, num_in_page)
@@ -456,12 +459,16 @@ class Query(graphene.ObjectType):
 		page = kwargs.get("page", 1)
 		num_in_page = kwargs.get("num_in_page", 16)
 
-		# request = info.context
-		# if request.user.is_authenticated:
-		# 	UserSearchModel.objects.create(user=request.user, 
-		# 								   type='user search room', 
-		# 								   content_search=kwargs.get('search_infor')
-		# 								   )
+		request = info.context
+		if request.user.is_authenticated:
+			data_search = copy.deepcopy(kwargs)
+			if kwargs.get("page"):
+				del data_search["page"]
+
+			if kwargs.get("num_in_page"):
+				del data_search["num_in_page"]
+
+			SearchRoomModel(user_id=request.user.id, content_search=data_search).create()
 
 		def fields(item):
 			return [item.subject, item.other_require]
