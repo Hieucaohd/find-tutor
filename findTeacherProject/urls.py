@@ -23,6 +23,10 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 
+from graphene_django.views import GraphQLView
+from .schema import schema
+from django.views.decorators.csrf import csrf_exempt
+
 schema_view = get_schema_view(
    openapi.Info(
       title="Snippets API",
@@ -42,7 +46,9 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('social-auth/', include('socialAuth.urls')),
     path('search/', include('search.urls')),
-    #path('comment/', include('comment.urls')),
+
+    # for graphQL
+    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
 ]
 
 urlpatterns += [

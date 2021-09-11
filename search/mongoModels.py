@@ -1,18 +1,30 @@
-import threading
-from .mongoConfig import db
+import threading, queue
+from multiprocessing import Process, Queue
+from .mongoConfig import client
 
-def get_varname(varname):
-	return f'{varname=}'.split('=')[0]
+# def get_varname(varname):
+# 	return f'{varname=}'.split('=')[0]
 
-class MongoModelBase(threading.Thread):
+class SearchBaseModel():
 	def __init__(self):
-		threading.Thread.__init__(self)
+		self.db = client.userSearch
 
-class SearchRoomModel(MongoModelBase):
-	fields_array = ['userId', 'contentSearch', 'createAt']
-	def __init__(self):
+	def create(self):
 		pass
 
-	def run(self):
+class SearchRoomModel(SearchBaseModel):
+	def __init__(self):
+		SearchBaseModel.__init__(self)
+		self.collection = self.db.searchRoom
+
+	def get(self):
 		pass
 
+	def create(self):
+		pass
+
+	def update(self):
+		pass
+
+	def delete(self):
+		pass

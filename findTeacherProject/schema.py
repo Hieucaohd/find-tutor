@@ -3,7 +3,7 @@ from graphene_django import DjangoObjectType
 
 from graphql_jwt.decorators import login_required
 
-from .models import *
+from findTutor.models import *
 
 from authentication.models import User
 from analysisUser.models import UserSearchModel
@@ -87,9 +87,6 @@ class TutorType(DjangoObjectType):
 
 				  # user
 				  'user',
-
-				  # mon day
-				  'mon_day',
 				  )
 		convert_choices_to_enum = []
 
@@ -228,10 +225,6 @@ class ParentType(DjangoObjectType):
 
 				  # user
 				  'user',
-
-				  # mon hoc quan tam
-				  "subject_care",
-
 				  )
 		convert_choices_to_enum = []
 
@@ -500,7 +493,7 @@ class Query(graphene.ObjectType):
 		num_in_page = kwargs.get("num_in_page", 16)
 
 		def fields(item):
-			return [item.full_name, item.experience, item.achievement, item.university, item.profession, item.mon_day]
+			return [item.full_name, item.experience, item.achievement, item.university, item.profession]
 
 		search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
