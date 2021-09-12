@@ -403,7 +403,6 @@ def save_search_to_mongo(request, model, kwargs, take_result=False):
 		model(user_id=request.user.id, content_search=data_search).create(take_result)
 
 
-
 class Query(graphene.ObjectType):
 
 	# lấy thông tin của user qua id

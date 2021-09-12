@@ -1,5 +1,6 @@
 import pyrebase
 import threading
+import urllib.parse
 
 
 class StoreToFirebase:
@@ -23,7 +24,12 @@ class StoreToFirebase:
 
             file_uploaded = self.storage.child(path).put(file)
             file_token = file_uploaded.get('downloadTokens')
-            file_url = self.storage.child(path).get_url(token=file_token)
+            
+            # file_url = self.storage.child(path).get_url(token=file_token)
+
+            bucket = file_uploaded.get("bucket")
+            path_encode = urllib.parse.quote(path, safe='')
+            file_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path_encode}?alt=media&token={file_token}"
             return file_url
         except:
             return None

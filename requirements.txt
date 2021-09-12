@@ -25,3 +25,4 @@ dj-database-url
 psycopg2
 pyrebase
 pymongo[srv]
+django-connect-mongo==1.3.0
