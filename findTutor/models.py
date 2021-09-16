@@ -284,7 +284,7 @@ class ParentRoomModel(models.Model):
     ward_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_ward], default=1)
 
     # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
-    # yêu cầu cung cấp
+    # khong yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
     detail_location = models.CharField(max_length=500, null=True, blank=True)
 
@@ -346,8 +346,8 @@ class OldLocationModel(models.Model):
 class PriceModel(models.Model):
     parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
 
-    time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1, null=False)  # (hour)
-    money_per_day = models.IntegerField(null=False)
+    time_in_one_day = models.DecimalField(max_digits=2, decimal_places=1, null=False, blank=False)  # (hour)
+    money_per_day = models.IntegerField(null=False, blank=False)
 
     TEACHER_CHOICES = [('sv', 'Sinh Vien'), ('gv', 'Giao Vien')]
     type_teacher = MultiSelectField(choices=TEACHER_CHOICES, min_choices=1, null=False)

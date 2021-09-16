@@ -24,4 +24,3 @@ class SearchParentModel(MongoBaseModel):
 	db_name = "userSearch"
 	collection_name = "searchParent"
 
-
