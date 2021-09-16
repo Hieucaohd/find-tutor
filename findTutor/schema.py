@@ -25,8 +25,7 @@ class Query(graphene.ObjectType):
         query_set = ParentRoomModel.objects.all()
 
         request = info.context
-        if isTutor(request.user):
-            print("ban la tutor")
+
         if (request.user.is_authenticated) and isTutor(request.user):
             user_not_in_list = (~Q(waitingtutormodel__tutor__user=request.user) & 
                                 ~Q(listinvitedmodel__tutor__user=request.user) &
@@ -35,7 +34,6 @@ class Query(graphene.ObjectType):
                                 )
             query_set = query_set.filter(user_not_in_list)
 
-        print(query_set.count())
         result = paginator_function(query_set, num_in_page, page)
 
         return {
