@@ -33,6 +33,7 @@ class Query(graphene.ObjectType):
                                 )
             query_set = query_set.filter(user_not_in_list)
 
+        print(query_set.count())
         result = paginator_function(query_set, num_in_page, page)
 
         return {
