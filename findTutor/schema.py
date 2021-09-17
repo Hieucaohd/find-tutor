@@ -10,13 +10,16 @@ from findTutor.mutations import *
 
 from django.db.models import Q
 
-from .checkTutorAndParent import isTutor
+from .checkTutorAndParent import isTutor, isParent
 
 
 class Query(graphene.ObjectType):
 
     # lấy danh sach các lớp học
-    all_room = graphene.Field(ResultAllRoom, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
+    all_room = graphene.Field(ResultAllRoom, 
+                              token=graphene.String(required=False),
+                              page=graphene.Int(required=False), 
+                              num_in_page=graphene.Int(required=False))
 
     def resolve_all_room(root, info, **kwargs):
         page = kwargs.get("page", 1)
@@ -27,12 +30,17 @@ class Query(graphene.ObjectType):
         request = info.context
 
         if (request.user.is_authenticated) and isTutor(request.user):
-            user_not_in_list = (~Q(waitingtutormodel__tutor__user=request.user) & 
-                                ~Q(listinvitedmodel__tutor__user=request.user) &
-                                ~Q(tryteachingmodel__tutor__user=request.user) &
-                                ~Q(tutorteachingmodel__tutor__user=request.user)
-                                )
-            query_set = query_set.filter(user_not_in_list)
+            tutor_not_known_room = (~Q(waitingtutormodel__tutor__user=request.user) & 
+                                    ~Q(listinvitedmodel__tutor__user=request.user) &
+                                    ~Q(tryteachingmodel__tutor__user=request.user) &
+                                    ~Q(tutorteachingmodel__tutor__user=request.user)
+                                    )
+            query_set = query_set.filter(tutor_not_known_room)
+
+        if (request.user.is_authenticated) and isParent(request.user):
+            parent_not_create_room = (~Q(parent__user=request.user)
+                                      )
+            query_set = query_set.filter(parent_not_create_room)
 
         result = paginator_function(query_set, num_in_page, page)
 
@@ -43,7 +51,9 @@ class Query(graphene.ObjectType):
 
 
     # lay room thong qua id
-    room_by_id = graphene.Field(ParentRoomType, id=graphene.Int(required=True))
+    room_by_id = graphene.Field(ParentRoomType, 
+                                token=graphene.String(required=False),
+                                id=graphene.Int(required=True))
 
     def resolve_room_by_id(root, info, **kwargs):
         id = kwargs.get('id')
@@ -51,7 +61,10 @@ class Query(graphene.ObjectType):
 
 
     # lay danh sach cac tutor
-    all_tutor = graphene.Field(ResultAllTutor, page=graphene.Int(required=False), num_in_page=graphene.Int(required=False))
+    all_tutor = graphene.Field(ResultAllTutor, 
+                               token=graphene.String(required=False),
+                               page=graphene.Int(required=False), 
+                               num_in_page=graphene.Int(required=False))
 
     def resolve_all_tutor(root, info, **kwargs):
         page = kwargs.get("page", 1)

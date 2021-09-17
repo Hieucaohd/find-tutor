@@ -53,16 +53,21 @@ class Query(graphene.ObjectType):
                                                    # phan trang
                                                    page           = graphene.Int(required=False), 
                                                    num_in_page    = graphene.Int(required=False),
+                              token=graphene.String(required=False),
                                 )
 
     def resolve_search_room(root, info, **kwargs):
         page = kwargs.get("page", 1)
         num_in_page = kwargs.get("num_in_page", 16)
 
-        save_search_to_mongo(request=info.context, model=SearchRoomModel, kwargs=kwargs, take_result=False)
+        request = info.context
+
+        save_search_to_mongo(request=request, model=SearchRoomModel, kwargs=kwargs, take_result=False)
 
         def fields(item):
             return [item.subject, item.other_require]
+        
+        kwargs['request'] = request
 
         search_room = ResolveSearchForRoom(model=ParentRoomModel, fields=fields, kwargs=kwargs)
 
@@ -84,6 +89,7 @@ class Query(graphene.ObjectType):
                                                      # phan trang
                                                      page          = graphene.Int(required=False), 
                                                      num_in_page   = graphene.Int(required=False),
+                              token=graphene.String(required=False),
                                 )
 
     def resolve_search_tutor(root, info, **kwargs):
@@ -114,6 +120,7 @@ class Query(graphene.ObjectType):
                                                        # phan trang
                                                        page          = graphene.Int(required=False), 
                                                        num_in_page   = graphene.Int(required=False),
+                              token=graphene.String(required=False),
                                 )
 
     def resolve_search_parent(root, info, **kwargs):

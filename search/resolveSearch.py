@@ -1,3 +1,4 @@
+from findTutor.checkTutorAndParent import isTutor
 from .views import SearchShow
 from django.db.models import Q
 search_instance = SearchShow()
@@ -30,9 +31,13 @@ class ResolveSearch:
 
         if search_infor:
             search_infor = search_instance.normal_search_infor(search_infor)
-            return search_instance.search_engine(model=self.model, list_query=self.list_query, search_infor=search_infor, fields=self.fields)
+            return search_instance.search_engine(model=self.model, 
+                                                 list_query=self.list_query, 
+                                                 search_infor=search_infor, 
+                                                 fields=self.fields)
         else:
-            return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
+            return search_instance.search_with_no_search_infor(model=self.model, 
+                                                               list_query=self.list_query)
 
 
 class ResolveSearchForRoom(ResolveSearch):
@@ -45,6 +50,7 @@ class ResolveSearchForRoom(ResolveSearch):
         self.get_type_teacher_query()
         self.get_sex_of_teacher_query()
         self.get_lop_query()
+        self.get_suitable_room_query()
 
     def string_is_number(self, string_number):
         try:
@@ -138,6 +144,16 @@ class ResolveSearchForRoom(ResolveSearch):
                 lop_query |= Q(lop=lop)
             self.list_query.append(lop_query)
 
+    def get_suitable_room_query(self):
+        request = kwargs.get('request')
+        if request.user.is_authenticated and isTutor(request.user):
+            user_not_in_list = (~Q(waitingtutormodel__tutor__user=request.user) & 
+                                ~Q(listinvitedmodel__tutor__user=request.user) &
+                                ~Q(tryteachingmodel__tutor__user=request.user) &
+                                ~Q(tutorteachingmodel__tutor__user=request.user)
+                                )
+            self.list_query.append(user_not_in_list)
+
     def resolve_search(self):
 
         search_infor = self.kwargs.get('search_infor')
@@ -145,7 +161,10 @@ class ResolveSearchForRoom(ResolveSearch):
             search_infor = self.normal_search_infor(search_infor)
 
         if search_infor:
-            return search_instance.search_engine(model=self.model, list_query=self.list_query, search_infor=search_infor, fields=self.fields)
+            return search_instance.search_engine(model=self.model, 
+                                                 list_query=self.list_query, 
+                                                 search_infor=search_infor, 
+                                                 fields=self.fields)
         else:
             return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
 
