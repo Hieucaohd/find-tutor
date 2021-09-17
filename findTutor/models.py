@@ -363,6 +363,8 @@ class WaitingTutorModel(models.Model):
     parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
     create_at = models.DateTimeField(auto_now_add=True)
+    
+    # tam thoi chua quan tam
     time_expired = models.BooleanField(default=False)
     parent_invite = models.BooleanField(default=False)
 
@@ -370,21 +372,29 @@ class WaitingTutorModel(models.Model):
 class ListInvitedModel(models.Model):
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
     parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
+
+    # tam thoi chua quan tam
     tutor_agree = models.BooleanField(default=False)
+    
     create_at = models.DateTimeField(auto_now_add=True)
 
 
 class TryTeachingModel(models.Model):
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
-    parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
+    parent_room = models.ForeignKey(ParentRoomModel, on_delete=models.CASCADE)
+
     tutor_agree = models.BooleanField(default=False)
     parent_agree = models.BooleanField(default=False)
+
     create_at = models.DateTimeField(auto_now_add=True)
+
+    # tam thoi chua quan tam
     time_expired = models.BooleanField(default=False)
 
 
 class TutorTeachingModel(models.Model):
     parent_room = models.OneToOneField(ParentRoomModel, on_delete=models.CASCADE)
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
+    
     create_at = models.DateTimeField(auto_now_add=True)
 

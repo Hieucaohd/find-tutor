@@ -145,7 +145,7 @@ class ResolveSearchForRoom(ResolveSearch):
             self.list_query.append(lop_query)
 
     def get_suitable_room_query(self):
-        request = kwargs.get('request')
+        request = self.kwargs.get('request')
         if request.user.is_authenticated and isTutor(request.user):
             user_not_in_list = (~Q(waitingtutormodel__tutor__user=request.user) & 
                                 ~Q(listinvitedmodel__tutor__user=request.user) &

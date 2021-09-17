@@ -6,8 +6,6 @@ from .baseView import CreateBaseView, UpdateBaseView, DeleteBaseView
 from ..models import ImagePrivateUserModel, OldImagePrivateUserModel
 from ..serializers import ImagePrivateUserSerializer
 
-from ..permissions import is_owner
-
 from django.conf import settings
 from ..firebaseConfig import UploadImage
 
