@@ -35,3 +35,8 @@ class TutorNotInvited(Exception):
 
     def __str__(self):
         return f"Bạn không phải gia sư được mời dạy ở lớp học này"
+
+class WrongInput(Exception):
+
+    def __str__(self):
+        return f"input cua ban co van de"

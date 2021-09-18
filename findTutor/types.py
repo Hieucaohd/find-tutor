@@ -1,15 +1,24 @@
 import graphene
 from graphene_django import DjangoObjectType
 
+from django.db.models import Q
+
 from findTutor.models import *
 
 from findTutor.paginator import paginator_function
 
 
-def is_owner(people, info):
-    if info.context.user == people.user:
-        return True
-    return False
+def is_owner(record_item, info):
+    owner = info.context.user
+    return record_item.user == owner
+
+def for_tutor_in_try_teaching(parent, info):
+    user_of_tutor = info.context.user
+    return parent.parentroommodel_set.filter(tryteachingmodel__tutor__user = user_of_tutor).exists()
+
+def for_parent_in_try_teaching(tutor, info):
+    user_of_parent = info.context
+    return tutor.tryteachingmodel_set.filter(parent_room__parent__user = user_of_parent).exists()
 
 
 class TutorType(DjangoObjectType):
@@ -58,11 +67,11 @@ class TutorType(DjangoObjectType):
 
     
     def resolve_detail_location(self, info):
-        if is_owner(self, info):
+        if is_owner(self, info) or for_parent_in_try_teaching(self, info):
             return self.detail_location
     
     def resolve_number_phone(self, info):
-        if is_owner(self, info):
+        if is_owner(self, info) or for_parent_in_try_teaching(self, info):
             return self.number_phone
 
     def resolve_number_of_identity_card(self, info):
@@ -140,6 +149,7 @@ class ImageOfUserType(DjangoObjectType):
                  "create_at",
                  "is_using",
                  "is_public",
+                 "user",
                  )
         convert_choices_to_enum = []
 
@@ -152,7 +162,12 @@ class ImageOfUserType(DjangoObjectType):
             return ''
 
     @classmethod
-    def get_queryset(cls, queryset, info):
+    def get_queryset(cls, queryset, info, **kwargs):
+        print(cls)
+        print(dir(cls))
+        print(cls.__doc__)
+        print("kwargs =", kwargs)
+
         request = info.context
 
         condition = Q(is_deleted=False)
@@ -195,11 +210,11 @@ class ParentType(DjangoObjectType):
     # self là một đối tượng của ParentModel, không phải là đối tượng của ParentType
 
     def resolve_detail_location(self, info):
-        if is_owner(self, info):
+        if is_owner(self, info) or for_tutor_in_try_teaching(self, info):
             return self.detail_location
     
     def resolve_number_phone(self, info):
-        if is_owner(self, info):
+        if is_owner(self, info) or for_tutor_in_try_teaching(self, info):
             return self.number_phone
 
     def resolve_number_of_identity_card(self, info):

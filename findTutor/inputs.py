@@ -24,12 +24,12 @@ class ParentRoomInput(graphene.InputObjectType):
 
 
 class ListInvitedInput(graphene.InputObjectType):
-    id_user_of_tutor = graphene.Int(required=True)
-    id_parent_room = graphene.Int(required=True)
+    id_user_of_tutor = graphene.ID(required=True)
+    id_parent_room = graphene.ID(required=True)
 
 
 class TryTeachingInput(graphene.InputObjectType):
-    id_waiting_list = graphene.Int(required=False)
-    id_list_invited = graphene.Int(required=False)
+    id_waiting_list = graphene.ID(required=False)
+    id_list_invited = graphene.ID(required=False)
 
 
