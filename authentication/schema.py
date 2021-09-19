@@ -7,11 +7,11 @@ from authentication.types import *
 
 class Query(graphene.ObjectType):
 
-	# lấy thông tin của user qua id
-	user_by_id = graphene.Field(UserType, 
+    # lấy thông tin của user qua id
+    user_by_id = graphene.Field(UserType, 
                                     token=graphene.String(required=False),
                                     id=graphene.Int(required=True))
 
-	def resolve_user_by_id(root, info, **kwargs):
-		id = kwargs.get('id')
-		return User.objects.get(pk=id)
+    def resolve_user_by_id(root, info, **kwargs):
+        id = kwargs.get('id')
+        return User.objects.get(pk=id)

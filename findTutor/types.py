@@ -78,6 +78,26 @@ class TutorType(DjangoObjectType):
         if is_owner(self, info):
             return self.number_of_identity_card
 
+    number_waiting = graphene.Int()
+    
+    def resolve_number_waiting(root, info, **kwargs):
+        return WaitingTutorModel.objects.filter(tutor__id=root.id).count()
+
+    number_invited = graphene.Int()
+
+    def resolve_number_invited(root, info, **kwargs):
+        return ListInvitedModel.objects.filter(tutor__id=root.id).count()
+
+    number_try_teaching = graphene.Int()
+
+    def resolve_number_try_teaching(root, info, **kwargs):
+        return TryTeachingModel.objects.filter(tutor__id=root.id).count()
+
+    number_teaching = graphene.Int()
+
+    def resolve_number_teaching(root, info, **kwargs):
+        return TutorTeachingModel.objects.filter(tutor__id=root.id).count()
+
 
 class OldImagePrivateUserType(DjangoObjectType):
     class Meta:
@@ -220,7 +240,7 @@ class ParentType(DjangoObjectType):
     def resolve_number_of_identity_card(self, info):
         if is_owner(self, info):
             return self.number_of_identity_card
-
+    
 
 class ParentRoomType(DjangoObjectType):
     class Meta:
@@ -252,6 +272,21 @@ class ParentRoomType(DjangoObjectType):
                   "parent",
                   )
         convert_choices_to_enum = []
+
+    number_waiting = graphene.Int()
+    
+    def resolve_number_waiting(root, info, **kwargs):
+        return WaitingTutorModel.objects.filter(parent_room__id=root.id).count()
+
+    number_invited = graphene.Int()
+
+    def resolve_number_invited(root, info, **kwargs):
+        return ListInvitedModel.objects.filter(parent_room__id=root.id).count()
+
+    number_try_teaching = graphene.Int()
+
+    def resolve_number_try_teaching(root, info, **kwargs):
+        return TryTeachingModel.objects.filter(parent_room__id=root.id).count()
 
 
 class OldLocationType(DjangoObjectType):

@@ -8,21 +8,25 @@ from findTutor.types import ImageOfUserType
 
 
 class UserType(DjangoObjectType):
-	class Meta:
-		model = User
-		fields = (
-				  "id",
-				  "username",
-				  "tutormodel",
-				  "parentmodel",
-				  "imageprivateusermodel",
-				  "oldimageprivateusermodel_set",
-				  )
+    class Meta:
+        model = User
+        fields = (
+                  "id",
+                  "username",
+                  "tutormodel",
+                  "parentmodel",
+                  "imageprivateusermodel",
+                  "oldimageprivateusermodel_set",
+                  )
+    number_image_of_user = graphene.Int()
 
-	imageofusermodel_set = graphene.List(ImageOfUserType, 
-										 number_images=graphene.Int(required=False))
+    def resolve_number_image_of_user(root, info, **kwargs):
+        return ImageOfUserModel.objects.filter(user=root).count()
 
-	def resolve_imageofusermodel_set(root, info, **kwargs):
-		number_images = kwargs.get("number_images", 8)
-		return ImageOfUserModel.objects.filter(user=root)[:number_images]
-		
+    imageofusermodel_set = graphene.List(ImageOfUserType, 
+                                         number_images=graphene.Int(required=False))
+
+    def resolve_imageofusermodel_set(root, info, **kwargs):
+        number_images = kwargs.get("number_images", 8)
+        return ImageOfUserModel.objects.filter(user=root)[:number_images]
+        

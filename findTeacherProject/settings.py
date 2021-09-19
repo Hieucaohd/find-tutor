@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'graphene_django',
     'analysisUser',
+    'channels',
 ]
 
 REST_FRAMEWORK = {
@@ -88,7 +89,7 @@ GRAPHENE = {
     "MIDDLEWARE": [
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
-    'GRAPHIQL_HEADER_EDITOR_ENABLED': False,
+    'GRAPHIQL_HEADER_EDITOR_ENABLED': True,
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -126,6 +127,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'findTeacherProject.wsgi.application'
+ASGI_APPLICATION = 'findTeacherProject.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        }
+    }
+}
 
 
 # Database
