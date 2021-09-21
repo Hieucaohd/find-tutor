@@ -23,6 +23,10 @@ class ParentRoomInput(graphene.InputObjectType):
     prices = graphene.List(PriceInput, required=False)
 
 
+class WaitingTutorInput(graphene.InputObjectType):
+    id_parent_room = graphene.ID(required=True)
+
+
 class ListInvitedInput(graphene.InputObjectType):
     id_user_of_tutor = graphene.ID(required=True)
     id_parent_room = graphene.ID(required=True)

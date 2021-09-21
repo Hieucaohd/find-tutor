@@ -82,3 +82,6 @@ class Mutation(graphene.ObjectType):
     create_parent_room = CreateParentRoomMutation.Field()
     create_list_invited = CreateListInvitedMutation.Field()
     create_try_teaching = CreateTryTeachingMutation.Field()
+    create_waiting_tutor = CreateWaitingTutorMutation.Field()
+
+

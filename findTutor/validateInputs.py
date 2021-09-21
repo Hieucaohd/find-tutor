@@ -123,5 +123,36 @@ class ValidateForTryTeachingInput:
             return self.validate_for_tutor()
         elif isParent(self.user):
             return self.validate_for_parent()
-            
+
+
+class ValidateForWaitingTutorInput:
+    def __init__(self, input_fields, info):
+        self.user = info.context.user
+        self.input_fields = input_fields
+
+        if not info.context.user.is_authenticated:
+            raise NeedAuthentication
+
+    def validate(self):
+        id_parent_room = self.input_fields.id_parent_room
+        parent_room = ParentRoomModel.objects.get(pk=id_parent_room)
+        tutor = TutorModel.objects.get(user=self.user)
         
+        if (parent_room.waitingtutormodel_set.filter(tutor=tutor).exists()):
+            raise TutorWasInWaitingList
+
+        elif (parent_room.listinvitedmodel_set.filter(tutor=tutor).exists()):
+            raise TutorWasInListInvited
+
+        elif (parent_room.tryteachingmodel_set.filter(tutor=tutor).exists()):
+            raise TutorWasInTryTeaching
+
+        elif is_tutor_teaching_room(parent_room, tutor):
+            raise TutorWasInTutorTeaching
+
+        else:  
+            return {
+                "tutor": tutor,
+                "parent_room": parent_room
+            }
+

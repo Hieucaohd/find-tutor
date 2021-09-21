@@ -62,3 +62,16 @@ class CreateTryTeachingMutation(graphene.Mutation):
         attr = ValidateForTryTeachingInput(input_fields=input_fields, info=info).validate()
         try_teaching = TryTeachingModel.objects.create(**attr)
         return CreateTryTeachingMutation(try_teaching=try_teaching)
+
+
+class CreateWaitingTutorMutation(graphene.Mutation):
+    class Arguments:
+        input_fields = WaitingTutorInput(required=True)
+
+    waiting_tutor = graphene.Field(WaitingTutorType)
+
+    @classmethod
+    def mutate(cls, root, info, input_fields):
+        attr = ValidateForWaitingTutorInput(input_fields=input_fields, info=info).validate()
+        waiting_tutor = WaitingTutorModel.objects.create(**attr)
+        return CreateWaitingTutorMutation(waiting_tutor=waiting_tutor)

@@ -1,8 +1,8 @@
 from mongo_model_base import MongoBaseModel
+from django.conf import settings
 
-import urllib
 
-url = "mongodb+srv://hieucao192:" + urllib.parse.quote("Caotrunghieu@192") + "@authenticationtest.6lh8w.mongodb.net/userSearch?retryWrites=true&w=majority"
+url = settings.MONGO_URL
 
 class SearchRoomModel(MongoBaseModel):
 	fields = ['user_id', 'content_search']
