@@ -81,7 +81,11 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_parent_room = CreateParentRoomMutation.Field()
     create_list_invited = CreateListInvitedMutation.Field()
+    
     create_try_teaching = CreateTryTeachingMutation.Field()
+    update_try_teaching = UpdateTryTeachingMutation.Field()
+
     create_waiting_tutor = CreateWaitingTutorMutation.Field()
+    create_tutor_teaching = CreateTutorTeachingMutation.Field()
 
 

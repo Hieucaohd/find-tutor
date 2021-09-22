@@ -80,7 +80,7 @@ class ValidateForTryTeachingInput:
         parent_room = waiting_item.parent_room
         tutor = waiting_item.tutor
 
-        if not parent_room.parent.user == user:
+        if not parent_room.parent.user == self.user:
             raise ParentNotOwnerRoom
 
         elif parent_room.tryteachingmodel_set.filter(tutor=tutor).exists():
@@ -156,3 +156,68 @@ class ValidateForWaitingTutorInput:
                 "parent_room": parent_room
             }
 
+
+class ValidateForTutorTeachingInput:
+    def __init__(self, input_fields, info) -> None:
+        self.user = info.context.user
+        self.input_fields = input_fields
+
+        if not info.context.user.is_authenticated:
+            raise NeedAuthentication
+
+    def validate(self):
+        id_try_teaching = self.input_fields.id_try_teaching
+        try_teaching = TryTeachingModel.objects.get(pk=id_try_teaching)
+        parent_room = try_teaching.parent_room
+
+        attr = {
+            "tutor": try_teaching.tutor,
+            "parent_room": try_teaching.parent_room
+        }
+
+        try:
+            tutor_teaching = parent_room.tutorteachingmodel
+            raise ParentRoomIsTeaching
+        except AttributeError:
+            if try_teaching.tutor_agree and try_teaching.parent_agree:
+                if isTutor(self.user) and try_teaching.tutor.user == self.user:
+                    try_teaching.delete()
+                    return attr
+                elif isParent(self.user) and try_teaching.parent_room.parent.user == self.user:
+                    try_teaching.delete()
+                    return attr
+                else:
+                    raise Exception("Ban khong duoc phep thuc hien hanh dong nay.")
+            else:
+                raise Exception("phu huynh hoac gia su chua dong y de day chinh thuc.")
+
+
+class ValidateForUpdateTryTeachingInput:
+    def __init__(self, input_fields, info) -> None:
+        self.user = info.context.user
+        self.input_fields = input_fields
+
+        if not info.context.user.is_authenticated:
+            raise NeedAuthentication
+
+    def validate(self):
+        id_try_teaching = self.input_fields.id_try_teaching
+        try_teaching = TryTeachingModel.objects.get(pk=id_try_teaching)
+        parent_room = try_teaching.parent_room
+
+        try:
+            tutor_teaching = parent_room.tutorteachingmodel
+            raise ParentRoomIsTeaching
+        except AttributeError:
+            if isTutor(self.user) and try_teaching.tutor.user == self.user:
+                if hasattr(self.input_fields, "tutor_agree"):
+                    try_teaching.tutor_agree = self.input_fields.tutor_agree
+                    try_teaching.save()
+                return try_teaching
+            elif isParent(self.user) and try_teaching.parent_room.parent.user == self.user:
+                if hasattr(self.input_fields, "parent_agree"):
+                    try_teaching.parent_agree = self.input_fields.parent_agree
+                    try_teaching.save()
+                return try_teaching
+            else:
+                raise Exception("Ban khong the thuc hien hanh dong nay.")

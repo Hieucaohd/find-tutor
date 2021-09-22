@@ -288,6 +288,15 @@ class ParentRoomType(DjangoObjectType):
     def resolve_number_try_teaching(root, info, **kwargs):
         return TryTeachingModel.objects.filter(parent_room__id=root.id).count()
 
+    number_tutor_teaching = graphene.Int()
+
+    def resolve_number_tutor_teaching(root, info, **kwargs):
+        try:
+            tutor_teaching = root.tutorteachingmodel
+            return 1
+        except AttributeError:
+            return 0
+
 
 class OldLocationType(DjangoObjectType):
     class Meta:

@@ -64,6 +64,18 @@ class CreateTryTeachingMutation(graphene.Mutation):
         return CreateTryTeachingMutation(try_teaching=try_teaching)
 
 
+class UpdateTryTeachingMutation(graphene.Mutation):
+    class Arguments:
+        input_fields = UpdateTryTeachingInput(required=True)
+
+    try_teaching = graphene.Field(TryTeachingType)
+
+    @classmethod
+    def mutate(cls, root, info, input_fields):
+        attr = ValidateForUpdateTryTeachingInput(input_fields=input_fields, info=info).validate()
+        return UpdateTryTeachingMutation(try_teaching=attr)
+
+
 class CreateWaitingTutorMutation(graphene.Mutation):
     class Arguments:
         input_fields = WaitingTutorInput(required=True)
@@ -75,3 +87,16 @@ class CreateWaitingTutorMutation(graphene.Mutation):
         attr = ValidateForWaitingTutorInput(input_fields=input_fields, info=info).validate()
         waiting_tutor = WaitingTutorModel.objects.create(**attr)
         return CreateWaitingTutorMutation(waiting_tutor=waiting_tutor)
+
+
+class CreateTutorTeachingMutation(graphene.Mutation):
+    class Arguments:
+        input_fields = TutorTeachingInput(required=True)
+
+    tutor_teaching = graphene.Field(TutorTeachingType)
+
+    @classmethod
+    def mutate(cls, root, info, input_fields):
+        attr = ValidateForTutorTeachingInput(input_fields=input_fields, info=info).validate()
+        tutor_teaching = TutorTeachingModel.objects.create(**attr)
+        return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)

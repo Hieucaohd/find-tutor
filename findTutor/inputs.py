@@ -37,3 +37,13 @@ class TryTeachingInput(graphene.InputObjectType):
     id_list_invited = graphene.ID(required=False)
 
 
+class UpdateTryTeachingInput(graphene.InputObjectType):
+    id_try_teaching = graphene.ID(required=True)
+    tutor_agree = graphene.Boolean(required=False)
+    parent_agree = graphene.Boolean(required=False)
+
+
+class TutorTeachingInput(graphene.InputObjectType):
+    id_try_teaching = graphene.ID(required=True)
+
+

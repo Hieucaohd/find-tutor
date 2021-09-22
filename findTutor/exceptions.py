@@ -40,3 +40,9 @@ class WrongInput(Exception):
 
     def __str__(self):
         return f"input cua ban co van de"
+
+
+class ParentRoomIsTeaching(Exception):
+
+    def __str__(self) -> str:
+        return "lop hoc dang co nguoi day roi"
