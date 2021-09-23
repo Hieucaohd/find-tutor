@@ -17,12 +17,15 @@ tutor:
     - another want to be friend
 
     - parent kick him/her from waiting list 
-    - parent accept/not accept him/her to try teaching
     - parent accept/not accept him/her to teaching
+
+    - parent change the room that tutor being.
     
     - parent invited him/her
-
 parent:
-    - tutor apply to him/her room
+    - another people reply his/her comment
+    - another want to be friend
 
+    - tutor apply to him/her room
+    - tutor ok to teaching
 """

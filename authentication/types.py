@@ -29,4 +29,22 @@ class UserType(DjangoObjectType):
     def resolve_imageofusermodel_set(root, info, **kwargs):
         number_images = kwargs.get("number_images", 8)
         return ImageOfUserModel.objects.filter(user=root)[:number_images]
+
+    first_name = graphene.String()
+
+    def resovle_first_name(root, info, **kwargs):
+        if hasattr(root, "tutormodel"):
+            return root.tutormodel.first_name
+
+        if hasattr(root, "parentmodel"):
+            return root.parentmodel.first_name
+
+    last_name = graphene.String()
+
+    def resolve_last_name(root, info, **kwargs):
+        if hasattr(root, "tutormodel"):
+            return root.tutormodel.last_name
+
+        if hasattr(root, "parentmodel"):
+            return root.parentmodel.last_name
         
