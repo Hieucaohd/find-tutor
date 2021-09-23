@@ -10,3 +10,19 @@ class FriendModel(MongoBaseModel):
     url = url
     db_name = db_name
     collection_name = "friends"
+
+"""
+tutor:
+    - another people reply his/her comment
+    - another want to be friend
+
+    - parent kick him/her from waiting list 
+    - parent accept/not accept him/her to try teaching
+    - parent accept/not accept him/her to teaching
+    
+    - parent invited him/her
+
+parent:
+    - tutor apply to him/her room
+
+"""

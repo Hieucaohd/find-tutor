@@ -37,6 +37,19 @@ class CreateParentRoomMutation(graphene.Mutation):
         return CreateParentRoomMutation(parent_room=parent_room)
 
 
+class CreateWaitingTutorMutation(graphene.Mutation):
+    class Arguments:
+        input_fields = WaitingTutorInput(required=True)
+
+    waiting_tutor = graphene.Field(WaitingTutorType)
+
+    @classmethod
+    def mutate(cls, root, info, input_fields):
+        attr = ValidateForWaitingTutorInput(input_fields=input_fields, info=info).validate()
+        waiting_tutor = WaitingTutorModel.objects.create(**attr)
+        return CreateWaitingTutorMutation(waiting_tutor=waiting_tutor)
+
+
 class CreateListInvitedMutation(graphene.Mutation):
     class Arguments:
         input_fields = ListInvitedInput(required=True)
@@ -51,6 +64,19 @@ class CreateListInvitedMutation(graphene.Mutation):
         return CreateListInvitedMutation(list_invited=invited)
 
 
+class CreateTutorTeachingMutation(graphene.Mutation):
+    class Arguments:
+        input_fields = TutorTeachingInput(required=True)
+
+    tutor_teaching = graphene.Field(TutorTeachingType)
+
+    @classmethod
+    def mutate(cls, root, info, input_fields):
+        attr = ValidateForTutorTeachingInput(input_fields=input_fields, info=info).validate()
+        tutor_teaching = TutorTeachingModel.objects.create(**attr)
+        return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
+
+"""
 class CreateTryTeachingMutation(graphene.Mutation):
     class Arguments:
         input_fields = TryTeachingInput(required=True)
@@ -74,29 +100,7 @@ class UpdateTryTeachingMutation(graphene.Mutation):
     def mutate(cls, root, info, input_fields):
         attr = ValidateForUpdateTryTeachingInput(input_fields=input_fields, info=info).validate()
         return UpdateTryTeachingMutation(try_teaching=attr)
+"""
 
 
-class CreateWaitingTutorMutation(graphene.Mutation):
-    class Arguments:
-        input_fields = WaitingTutorInput(required=True)
 
-    waiting_tutor = graphene.Field(WaitingTutorType)
-
-    @classmethod
-    def mutate(cls, root, info, input_fields):
-        attr = ValidateForWaitingTutorInput(input_fields=input_fields, info=info).validate()
-        waiting_tutor = WaitingTutorModel.objects.create(**attr)
-        return CreateWaitingTutorMutation(waiting_tutor=waiting_tutor)
-
-
-class CreateTutorTeachingMutation(graphene.Mutation):
-    class Arguments:
-        input_fields = TutorTeachingInput(required=True)
-
-    tutor_teaching = graphene.Field(TutorTeachingType)
-
-    @classmethod
-    def mutate(cls, root, info, input_fields):
-        attr = ValidateForTutorTeachingInput(input_fields=input_fields, info=info).validate()
-        tutor_teaching = TutorTeachingModel.objects.create(**attr)
-        return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
