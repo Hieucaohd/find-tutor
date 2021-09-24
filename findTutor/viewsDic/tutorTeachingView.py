@@ -46,7 +46,20 @@ class TutorTeachingList(ListBaseView):
 
 
 class TutorTeachingDetail(RetrieveUpdateDeleteBaseView):
-    pass
+    permission_classes = [permissions.IsAuthenticated]
+
+    modelBase = TutorTeachingModel
+    serializerBase = TutorTeachingSerializer
+
+    def delete(self, request, pk, format=None):
+        item = self.get_object(pk)
+        
+        if request.user == item.parent_room.parent.user:
+            return super().delete(request, pk)
+        elif request.user == item.tutor.user:
+            return super().delete(request, pk)
+        
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 

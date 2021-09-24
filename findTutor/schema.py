@@ -41,7 +41,8 @@ class Query(graphene.ObjectType):
             parent_not_create_room = (~Q(parent__user=request.user)
                                       )
             query_set = query_set.filter(parent_not_create_room)
-
+        
+        query_set = query_set.filter(tutorteachingmodel = None)
         result = paginator_function(query_set, num_in_page, page)
 
         return {
