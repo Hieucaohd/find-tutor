@@ -45,7 +45,7 @@ class TutorTeachingList(ListBaseView):
             return self.get_for_tutor(request)
 
 
-class TutorTeachingDetail(RetrieveUpdateDeleteBaseView):
+class TutorTeachingDetail(DeleteBaseView):
     permission_classes = [permissions.IsAuthenticated]
 
     modelBase = TutorTeachingModel
