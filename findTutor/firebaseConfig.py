@@ -1,6 +1,9 @@
 import pyrebase
 import threading
 import urllib.parse
+from PIL import Image
+import os
+from django.conf import settings
 
 
 class StoreToFirebase:
@@ -19,20 +22,31 @@ class StoreToFirebase:
         self.storage = firebase.storage()
 
     def get_url(self, file, folder):
-        try:
-            path = f"{folder}/{file.name}"
+        path = f"{folder}/{file.name}"
 
-            file_uploaded = self.storage.child(path).put(file)
-            file_token = file_uploaded.get('downloadTokens')
-            
-            # file_url = self.storage.child(path).get_url(token=file_token)
+        # convert to .webp
+        file_name_webp = file.name + ".webp"
+        path_tempo_file = "tempo_image/" + file_name_webp
 
-            bucket = file_uploaded.get("bucket")
-            path_encode = urllib.parse.quote(path, safe='')
-            file_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path_encode}?alt=media&token={file_token}"
-            return file_url
-        except:
-            return None
+        img = Image.open(file).convert("RGB")
+        img.save(path_tempo_file, "webp")
+
+        # end convert
+
+        # file_uploaded = self.storage.child(path).put(file)
+        path = path + ".webp"
+        file_uploaded = self.storage.child(path).put(path_tempo_file)
+        os.remove(path_tempo_file)
+
+        file_token = file_uploaded.get('downloadTokens')
+        
+        # file_url = self.storage.child(path).get_url(token=file_token)
+
+        bucket = file_uploaded.get("bucket")
+        path_encode = urllib.parse.quote(path, safe='')
+        file_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path_encode}?alt=media&token={file_token}"
+        return file_url
+        
 
 
 class UploadImage(threading.Thread):

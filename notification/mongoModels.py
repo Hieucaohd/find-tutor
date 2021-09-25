@@ -6,21 +6,35 @@ url = settings.MONGO_URL
 db_name = "notification"
 
 class FriendModel(MongoBaseModel):
-    fields = ["user_id", "list_friends"]
+    fields = {
+        "user_id": { unique: True }, 
+        "list_friends": {},
+    }
+
     url = url
     db_name = db_name
     collection_name = "friends"
 
 
 class FollowModel(MongoBaseModel):
-    fields = ["user_id", "list_follower", "list_user_following", "list_room_following"]
+    fields = {
+        "user_id": { unique: True }, 
+        "list_follower": {}, 
+        "list_user_following": {}, 
+        "list_room_following": {},
+    }
+
     url = url
     db_name = db_name
     collection_name = "follows"
 
 
 class FollowRoomModel(MongoBaseModel):
-    fields = ["room_id", "list_follower"]
+    fields = {
+        "room_id": { unique: True }, 
+        "list_follower": {},
+    }
+
     url = url
     db_name = db_name
     collection_name = "followRoom"

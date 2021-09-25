@@ -43,6 +43,7 @@ class Query(graphene.ObjectType):
             query_set = query_set.filter(parent_not_create_room)
         
         query_set = query_set.filter(tutorteachingmodel = None)
+        query_set = query_set.order_by("-create_at")
         result = paginator_function(query_set, num_in_page, page)
 
         return {
