@@ -6,7 +6,7 @@ import inspect
 import pymongo
 
 from django.conf import settings
-from mongo_model_base import MongoBaseModel
+from connection_to_mongodb import MongoBaseModel
 
 def connect_to_mongodb(dict_class, app_name):
     for class_name, class_item in dict_class.items():

@@ -1,4 +1,4 @@
-from mongo_model_base import MongoBaseModel
+from connection_to_mongodb import MongoBaseModel
 from django.conf import settings
 
 

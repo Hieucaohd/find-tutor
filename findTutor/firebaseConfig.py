@@ -4,6 +4,7 @@ import urllib.parse
 from PIL import Image
 import os
 import sys
+import uuid
 from io import BytesIO
 from django.conf import settings
 
@@ -30,13 +31,14 @@ class StoreToFirebase:
         img = Image.open(file).convert("RGB")
 
         save_sys_stdout = sys.stdout
+        
         file_output = BytesIO()
         sys.stdout = file_output
         
         img.save(file_output, "webp")
         file = file_output
 
-        path = os.path.splitext(path)[0] + ".webp"
+        path = os.path.splitext(path)[0] + uuid.uuid4().hex + ".webp"
         
         sys.stdout = save_sys_stdout
         # end convert

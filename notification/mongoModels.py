@@ -1,5 +1,5 @@
 from django.conf import settings
-from mongo_model_base import MongoBaseModel
+from connection_to_mongodb import MongoBaseModel
 
 url = settings.MONGO_URL
 
@@ -7,7 +7,7 @@ db_name = "notification"
 
 class FriendModel(MongoBaseModel):
     fields = {
-        "user_id": { unique: True }, 
+        "user_id": { "unique": True }, 
         "list_friends": {},
     }
 
@@ -18,7 +18,7 @@ class FriendModel(MongoBaseModel):
 
 class FollowModel(MongoBaseModel):
     fields = {
-        "user_id": { unique: True }, 
+        "user_id": { "unique": True }, 
         "list_follower": {}, 
         "list_user_following": {}, 
         "list_room_following": {},
@@ -31,7 +31,7 @@ class FollowModel(MongoBaseModel):
 
 class FollowRoomModel(MongoBaseModel):
     fields = {
-        "room_id": { unique: True }, 
+        "room_id": { "unique": True }, 
         "list_follower": {},
     }
 
