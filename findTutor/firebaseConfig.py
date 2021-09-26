@@ -3,6 +3,8 @@ import threading
 import urllib.parse
 from PIL import Image
 import os
+import sys
+from io import BytesIO
 from django.conf import settings
 
 
@@ -25,18 +27,23 @@ class StoreToFirebase:
         path = f"{folder}/{file.name}"
 
         # convert to .webp
-        file_name_webp = file.name + ".webp"
-        path_tempo_file = "tempo_image/" + file_name_webp
-
         img = Image.open(file).convert("RGB")
-        img.save(path_tempo_file, "webp")
 
+        save_sys_stdout = sys.stdout
+        file_output = BytesIO()
+        sys.stdout = file_output
+        
+        img.save(file_output, "webp")
+        file = file_output
+
+        path = os.path.splitext(path)[0] + ".webp"
+        
+        sys.stdout = save_sys_stdout
         # end convert
 
         # file_uploaded = self.storage.child(path).put(file)
-        path = path + ".webp"
-        file_uploaded = self.storage.child(path).put(path_tempo_file)
-        os.remove(path_tempo_file)
+        file_uploaded = self.storage.child(path).put(file.getvalue())
+        
 
         file_token = file_uploaded.get('downloadTokens')
         
