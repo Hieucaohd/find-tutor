@@ -1,5 +1,7 @@
 from django.conf import settings
 from connection_to_mongodb import MongoBaseModel
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'findTeacherProject.settings')
 
 url = settings.MONGO_URL
 
