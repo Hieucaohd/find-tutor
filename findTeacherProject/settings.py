@@ -134,14 +134,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'findTeacherProject.wsgi.application'
 ASGI_APPLICATION = 'findTeacherProject.asgi.application'
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         }
-#     }
-# }
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -254,6 +247,15 @@ if DEBUG:
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
+    
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [('127.0.0.1', 6379)],
+            }
+        }
+    }
 
 
 
