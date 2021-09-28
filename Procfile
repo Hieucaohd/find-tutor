@@ -1,1 +1,1 @@
-web: gunicorn findTeacherProject.wsgi --log-file -
+web: daphne -b 0.0.0.0 -p $PORT findTeacherProject.asgi:application

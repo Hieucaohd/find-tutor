@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-x6ru6j*)01lp-x+sr$%%afgo+wfbnecjb403xi+vx2tk=gy1)a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost']
 
@@ -134,14 +134,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'findTeacherProject.wsgi.application'
 ASGI_APPLICATION = 'findTeacherProject.asgi.application'
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         }
+#     }
+# }
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        }
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
+
 
 
 # Database
