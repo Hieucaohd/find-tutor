@@ -1,7 +1,7 @@
 from connection_to_mongodb import MongoBaseModel
-from findTeacherProject import general_config
+from django.conf import settings
 
-url = general_config.MONGO_URL
+url = settings.MONGO_URL
 
 class SearchRoomModel(MongoBaseModel):
     fields = { 
