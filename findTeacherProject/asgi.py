@@ -15,7 +15,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 import notification.routing
 
-from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
+from findTutor.channel_token_auth import TokenAuthMiddlewareStack
 
 
 application = ProtocolTypeRouter({
