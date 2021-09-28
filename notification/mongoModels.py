@@ -40,6 +40,25 @@ class FollowRoomModel(MongoBaseModel):
     collection_name = "followRoom"
 
 
+class ListGroupUserModel(MongoBaseModel):
+    fields = {
+        "user_id": { "unique": True },
+        "my_group": { "unique": True },
+        "following_groups": {},
+    }
+
+    url = url
+    db_name = db_name
+    collection_name = "listGroups"
+
+
+class NotifyModel(MongoBaseModel):
+    fields = {
+        "user_id": {},
+        "from_group": {},
+        "user_send": {},
+    }
+
 """
 tutor:
     - another people reply his/her comment

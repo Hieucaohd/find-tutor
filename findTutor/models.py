@@ -2,10 +2,14 @@ from django.db import models
 from authentication.models import User
 from multiselectfield import MultiSelectField
 
-from .validators import min_code_of_location, max_code_of_province, max_code_of_district, max_code_of_ward
-# Create your models here.
+from .validators import (min_code_of_location, 
+                         max_code_of_province, 
+                         max_code_of_district, 
+                         max_code_of_ward)
 
 from django.conf import settings
+
+from django.db.models.signals import pre_delete, pre_save, post_save
 
 
 # bảng gia sư
@@ -183,49 +187,44 @@ class ImageOfUserModel(models.Model):
         return self.type_image + " cua " + self.user.username
 
 
-from django.db.models.signals import pre_delete, pre_save, post_save
 
-def before_image_private_user_delete(sender, instance, **kwargs):
-    array_item = []
+# def before_image_private_user_delete(sender, instance, **kwargs):
+#     array_item = []
 
-    if instance.avatar:
-        old_avatar = OldImagePrivateUserModel()
-        old_avatar.image = instance.avatar
-        old_avatar.type_image = OldImagePrivateUserModel.type_image_array[0]    # avatar
-        array_item.append(old_avatar)
+#     if instance.avatar:
+#         old_avatar = OldImagePrivateUserModel()
+#         old_avatar.image = instance.avatar
+#         old_avatar.type_image = OldImagePrivateUserModel.type_image_array[0]    # avatar
+#         array_item.append(old_avatar)
 
-    if instance.identity_card:
-        old_identity_card = OldImagePrivateUserModel()
-        old_identity_card.image = instance.identity_card
-        old_identity_card.type_image = OldImagePrivateUserModel.type_image_array[1] # identity_card
-        array_item.append(old_identity_card)
+#     if instance.identity_card:
+#         old_identity_card = OldImagePrivateUserModel()
+#         old_identity_card.image = instance.identity_card
+#         old_identity_card.type_image = OldImagePrivateUserModel.type_image_array[1] # identity_card
+#         array_item.append(old_identity_card)
 
-    if instance.student_card:
-        old_student_card = OldImagePrivateUserModel()
-        old_student_card.image = instance.student_card
-        old_student_card.type_image = OldImagePrivateUserModel.type_image_array[2]  # student_card
-        array_item.append(old_student_card)
+#     if instance.student_card:
+#         old_student_card = OldImagePrivateUserModel()
+#         old_student_card.image = instance.student_card
+#         old_student_card.type_image = OldImagePrivateUserModel.type_image_array[2]  # student_card
+#         array_item.append(old_student_card)
 
-    for item in array_item:
-        item.type_action = OldImagePrivateUserModel.type_action_array[1]
-        item.user = instance.user
-        item.save()
+#     for item in array_item:
+#         item.type_action = OldImagePrivateUserModel.type_action_array[1]
+#         item.user = instance.user
+#         item.save()
 
-    print("ban luu thanh cong")
 
-pre_delete.connect(before_image_private_user_delete, sender=ImagePrivateUserModel)
+# def before_image_of_user_delete(sender, instance, **kwargs):
+#     old_image = ImageOfUserModel()
+#     old_image.image = instance.image
+#     old_image.user = instance.user
+#     old_image.type_image = instance.type_image
+#     old_image.is_public = False
+#     old_image.is_using = False
+#     old_image.is_deleted = True
+#     old_image.save()
 
-def before_image_of_user_delete(sender, instance, **kwargs):
-    old_image = ImageOfUserModel()
-    old_image.image = instance.image
-    old_image.user = instance.user
-    old_image.type_image = instance.type_image
-    old_image.is_public = False
-    old_image.is_using = False
-    old_image.is_deleted = True
-    old_image.save()
-
-pre_delete.connect(before_image_of_user_delete, sender=ImageOfUserModel)
 
 class ParentModel(models.Model):
     # nhạy cảm
@@ -397,4 +396,12 @@ class TutorTeachingModel(models.Model):
     tutor = models.ForeignKey(TutorModel, on_delete=models.CASCADE)
     
     create_at = models.DateTimeField(auto_now_add=True)
+
+
+# signals
+# note: import findTutor.signals to prevent recuise import
+import findTutor.signals
+
+pre_delete.connect(findTutor.signals.before_image_private_user_delete, sender=ImagePrivateUserModel)
+pre_delete.connect(findTutor.signals.before_image_of_user_delete, sender=ImageOfUserModel)
 

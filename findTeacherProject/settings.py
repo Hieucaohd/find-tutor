@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost']
 
 AUTH_USER_MODEL = 'authentication.User'
 
+TOKEN_PREFIX = 'Bearer'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,6 +55,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'analysisUser',
     'channels',
+    'notification',
 ]
 
 REST_FRAMEWORK = {
@@ -68,6 +71,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
+    'AUTH_HEADER_TYPES': (TOKEN_PREFIX, ),
 }
 
 MIDDLEWARE = [
@@ -98,9 +102,10 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
+
 GRAPHQL_JWT = {
     "JWT_ALLOW_ARGUMENT": True,
-    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+    "JWT_AUTH_HEADER_PREFIX": TOKEN_PREFIX,
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -245,3 +250,27 @@ if DEBUG:
     ]
 
 
+
+
+# import sentry_sdk
+# from sentry_sdk.integrations.django import DjangoIntegration
+
+# sentry_sdk.init(
+#     dsn="https://4c788544f3fd4c1b96ea5207a1dd3d61@o1014057.ingest.sentry.io/5979390",
+#     integrations=[DjangoIntegration()],
+
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=1.0,
+
+#     # If you wish to associate users to errors (assuming you are using
+#     # django.contrib.auth) you may enable sending PII data.
+#     send_default_pii=True,
+
+#     # By default the SDK will try to use the SENTRY_RELEASE
+#     # environment variable, or infer a git commit
+#     # SHA as release, however you may want to set
+#     # something more human-readable.
+#     # release="myapp@1.0.0",
+# )
