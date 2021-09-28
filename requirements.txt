@@ -28,4 +28,3 @@ pymongo[srv]
 django-connect-mongo==1.9.0
 channels
 channels_redis
-daphne
