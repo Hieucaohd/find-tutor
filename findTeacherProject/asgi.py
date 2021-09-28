@@ -8,14 +8,16 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 """
 import os
 from django.conf.urls import url
+import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'findTeacherProject.settings')
+django.setup()
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 import notification.routing
 
-from findTutor.channel_token_auth import TokenAuthMiddlewareStack
+from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
 
 
 application = ProtocolTypeRouter({
