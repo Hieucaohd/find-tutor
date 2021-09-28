@@ -19,7 +19,6 @@ import notification.routing
 
 from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
 
-
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": TokenAuthMiddlewareStack(
