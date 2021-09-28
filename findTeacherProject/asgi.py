@@ -18,7 +18,9 @@ from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
 
 
 
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'findTeacherProject.settings')
+
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
