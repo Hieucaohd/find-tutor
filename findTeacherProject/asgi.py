@@ -18,12 +18,6 @@ from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
 
 import django
 
-
-
-
-
-
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'findTeacherProject.settings')
 django.setup()
 

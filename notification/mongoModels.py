@@ -1,7 +1,9 @@
-from django.conf import settings
 from connection_to_mongodb import MongoBaseModel
+from findTeacherProject import general_config
 
-url = settings.MONGO_URL
+url = general_config.MONGO_URL
+
+
 
 db_name = "notification"
 
