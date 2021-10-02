@@ -7,6 +7,10 @@ from rest_framework import status, permissions
 from .relateParentRoomBaseView import ItemRelateListBaseView
 from .baseView import RetrieveUpdateDeleteBaseView
 
+from findTutor.signals import delete_waiting_item
+
+import threading
+
 
 class WaitingTutorList(ItemRelateListBaseView):
     modelBase = WaitingTutorModel
@@ -113,6 +117,7 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
             When parent or tutor don't want to continua waiting.
         """
         if self.isOwnerOfRoom(request, pk):
+            
             return super().delete(request, pk)
         elif self.isTutorCreate(request, pk):
             return super().delete(request, pk)

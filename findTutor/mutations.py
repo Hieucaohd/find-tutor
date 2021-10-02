@@ -4,8 +4,15 @@ from findTutor.inputs import *
 from findTutor.types import *
 from findTutor.models import *
 
+from findTutor.signals import (parent_create_room_signal, )
+
 from findTutor.validateInputs import *
 from findTutor.checkTutorAndParent import isTutor, isParent
+
+from threading import Thread
+from multiprocessing import Process
+
+from django import db
 
 
 class CreateParentRoomMutation(graphene.Mutation):
@@ -34,6 +41,11 @@ class CreateParentRoomMutation(graphene.Mutation):
                                           money_per_day   = price.money_per_day,
                                           type_teacher    = price.type_teacher,
                                           sex_of_teacher  = price.sex_of_teacher)
+        # signal
+        db.connections.close_all()
+        Process(target=parent_create_room_signal.send, kwargs={"sender": ParentRoomModel, 
+                                                               "instance": parent_room, 
+                                                               "info": info}).start()
         return CreateParentRoomMutation(parent_room=parent_room)
 
 
@@ -74,6 +86,8 @@ class CreateTutorTeachingMutation(graphene.Mutation):
     def mutate(cls, root, info, input_fields):
         attr = ValidateForTutorTeachingInput(input_fields=input_fields, info=info).validate()
         tutor_teaching = TutorTeachingModel.objects.create(**attr)
+
+
         return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
 
 """

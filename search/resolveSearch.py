@@ -46,6 +46,8 @@ class ResolveSearchForRoom(ResolveSearch):
         # call super init
         ResolveSearch.__init__(self, model=model, fields=fields, kwargs=kwargs)
 
+        self.list_query.append(Q(tutorteachingmodel = None))
+
         self.get_price_query()
         self.get_type_teacher_query()
         self.get_sex_of_teacher_query()
@@ -155,18 +157,63 @@ class ResolveSearchForRoom(ResolveSearch):
             self.list_query.append(user_not_in_list)
 
     def resolve_search(self):
+        order_by = self.kwargs.get('order_by')
+
+        def order_by_create_at(room):
+            return room.create_at
+
+        def order_by_price_asc(room):
+            if room.pricemodel_set.all():
+                return min(price.money_per_day for price in room.pricemodel_set.all())
+            else:
+                return 0
+
+        def order_by_price_desc(room):
+            if room.pricemodel_set.all():
+                return max(price.money_per_day for price in room.pricemodel_set.all())
+            else:
+                return 0
+
+        func_to_order = {
+            "create_at": {
+                "function": order_by_create_at,
+                "reverse": True
+            },
+            "price_asc": {
+                "function": order_by_price_asc,
+                "reverse": False,
+            },
+            "price_desc": {
+                "function": order_by_price_desc,
+                "reverse": True
+            },
+        }
+
+        have_order = order_by in func_to_order
+
 
         search_infor = self.kwargs.get('search_infor')
         if search_infor:
             search_infor = self.normal_search_infor(search_infor)
 
+        result = None
         if search_infor:
-            return search_instance.search_engine(model=self.model, 
+            result = search_instance.search_engine(model=self.model, 
                                                  list_query=self.list_query, 
                                                  search_infor=search_infor, 
-                                                 fields=self.fields)
+                                                 fields=self.fields,
+                                                 have_order=have_order)
+
         else:
-            return search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
+            result = search_instance.search_with_no_search_infor(model=self.model, list_query=self.list_query)
+
+        if have_order:
+            function = func_to_order[order_by]["function"]
+            reverse = func_to_order[order_by]["reverse"]
+            result = list(result)
+            result.sort(key=function, reverse=reverse)
+
+        return result
 
 
 class ResolveSearchForTutor(ResolveSearch):

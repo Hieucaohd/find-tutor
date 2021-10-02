@@ -398,10 +398,18 @@ class TutorTeachingModel(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
 
-# signals
+####################################### signals ############################################# 
 # note: import findTutor.signals to prevent recuise import
 import findTutor.signals
 
+# ImagePrivateUserModel delete
 pre_delete.connect(findTutor.signals.before_image_private_user_delete, sender=ImagePrivateUserModel)
+
+# ImageOfUserModel delete
 pre_delete.connect(findTutor.signals.before_image_of_user_delete, sender=ImageOfUserModel)
+
+# WaitingTutorModel create
+# post_save.connect(findTutor.signals.after_create_waiting_list_item, sender=WaitingTutorModel)
+
+
 

@@ -1,11 +1,35 @@
 from findTutor.models import *
+
+from authentication.models import User
+
 from notification.mongoModels import *
-from notification.groups import GroupName
+from notification.models import ChannelNameModel
+from notification.groups import GroupName, NotificationHandler
+
+import django.dispatch
+from django.dispatch import receiver
+
+from asgiref.sync import async_to_sync
+
+import copy
+
+import threading
+import multiprocessing
 
 from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
 
 
+######################################################################################
+# defind the signal
+
+parent_create_room_signal = django.dispatch.Signal()
+delete_waiting_item = django.dispatch.Signal()
+
+
+
+
+######################################################################################
 def before_image_private_user_delete(sender, instance, **kwargs):
     array_item = []
 
@@ -45,10 +69,90 @@ def before_image_of_user_delete(sender, instance, **kwargs):
 
 
 def after_create_waiting_list_item(sender, instance, **kwargs):
-	# notify here
-    # notify for parent
+	# what need to do:
+    # - add tutor to room's group
+    # - send message to room's group
+    # - save notification to database
+    parent_room = instance.parent_room
+    user_of_parent = parent_room.parent.user
+    user_of_tutor = instance.tutor.user
 
-	pass
+    room_group = GroupName.generate_group_name_for_all(parent_room)
 
+    notification_content = {
+        "room_id": parent_room.id,
+        "content": "tutor apply in room",
+    }
+
+    create_thread = threading.Thread
+
+    create_thread(target=NotificationHandler.group_add, kwargs={"user": user_of_tutor,
+                                                                "group_name": room_group}).start()
+
+    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_of_tutor,
+                                                           "user_receive": user_of_parent,
+                                                           "content": notification_content,
+                                                           "save_to_model": RoomNotificationModel}).start()
+
+@receiver(delete_waiting_item)
+def before_delete_waiting_list_item(sender, **kwargs):
+    # what need to do:
+    # - discard tutor from room's group
+    # - send message to parent
+    waiting_item = kwargs.get("instance")
+    user_send = kwargs.get("user_send")
+
+    parent_room = waiting_item.parent_room
+    user_of_parent = parent_room.parent.user
+    user_of_tutor = waiting_item.tutor.user
+
+    room_group = GroupName.generate_group_name_for_all(parent_room)
+
+    notification_content = {
+        "room_id": parent_room.id,
+        "content": "tutor out of room"
+    }
+
+    create_thread = threading.Thread
+
+    create_thread(target=NotificationHandler.group_discard, kwargs={"user": user_of_tutor,
+                                                                    "group_name": room_group}).start()
+
+    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_of_tutor,
+                                                           "user_receive": user_of_parent,
+                                                           "content": notification_content,
+                                                           "save_to_model": RoomNotificationModel}).start()
+
+    
+
+
+@receiver(parent_create_room_signal)
+def after_parent_create_room(sender, **kwargs):
+    # what need to do:
+    # - add room's group to FollowModel of parent
+    # - add parent's channel name to room's group
+    # - notify to people who following parent
+    # - save notification to database
+
+    parent_room = kwargs.get("instance")
+    user_of_parent = kwargs.get("info").context.user
+
+    room_group = GroupName.generate_group_name_for_all(parent_room)
+    parent_group = GroupName.generate_group_name_for_all(user_of_parent)
+
+    notification_content = {
+        "room_id": parent_room.id,
+        "content": "create room",
+    }
+
+    create_thread = threading.Thread
+
+    create_thread(target=NotificationHandler.group_add, kwargs={"user": user_of_parent, 
+                                                                "group_name": room_group}).start()
+
+    create_thread(target=NotificationHandler.group_send, kwargs={"user_send": user_of_parent, 
+                                                                 "group_name": parent_group, 
+                                                                 "content": notification_content,
+                                                                 "save_to_model": RoomNotificationModel}).start()
 
 

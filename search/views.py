@@ -101,7 +101,7 @@ class Search(APIView):
             })
 
 
-    def get_list_result_sorted(self, query_set, search_infor, fields):
+    def get_list_result_sorted(self, query_set, search_infor, fields, have_order=False):
         # create_thread = threading.Thread
         # expected = len(list(query_set))
         # queue_result = queue.Queue()
@@ -138,7 +138,11 @@ class Search(APIView):
 
         list_result.sort(key=get_result, reverse=True)
 
-        list_item = (item.get('item') for item in list_result if item.get('result') > 40)
+        list_item = None
+        if have_order:
+            list_item = (item.get('item') for item in list_result if item.get('result') >= 2000)
+        else:
+            list_item = (item.get('item') for item in list_result if item.get('result') > 40)
 
         return list_item
 
@@ -148,12 +152,15 @@ class Search(APIView):
             sum_query &= query
         return model.objects.filter(sum_query)
 
-    def search_engine(self, model, list_query, search_infor, fields):
-        query_set = self.get_query_set(model, list_query)
-        return self.get_list_result_sorted(query_set, search_infor, fields)
+    def search_engine(self, model, list_query, search_infor, fields, have_order=False):
+        query_set = self.get_query_set(model=model, list_query=list_query)
+        return self.get_list_result_sorted(query_set=query_set, 
+                                           search_infor=search_infor, 
+                                           fields=fields, 
+                                           have_order=have_order)
 
     def search_with_no_search_infor(self, model, list_query):
-        return self.get_query_set(model, list_query)
+        return self.get_query_set(model=model, list_query=list_query)
 
     def get(self, request, format=None):
         province_code = request.query_params.get('province_code', 0)

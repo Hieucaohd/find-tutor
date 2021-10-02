@@ -4,12 +4,31 @@ import asyncio
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
-from notification.mongoModels import ListGroupUserModel
+from notification.mongoModels import FollowModel
 from notification.models import ChannelNameModel
 
 from multiprocessing import Process, Queue
 from threading import Thread
+
+
+class DoInThead(Thread):
+    def __init__(self, notify_consumer):
+        self.notify_consumer = notify_consumer
+        Thread.__init__(self)
+
+    def run(self):
+        collection = FollowModel().collection
+        try:
+            list_group = collection.find_one({ "user_id": self.notify_consumer.user.id })
+            self.notify_consumer.following_groups = list_group.following_groups
+        except:
+            self.notify_consumer.following_groups = []
+
+        for group_name in self.notify_consumer.following_groups:
+            sync_to_async(self.notify_consumer.channel_layer.group_add)(group_name, self.notify_consumer.channel_name) 
+
 
 
 class NotifyConsumer(AsyncJsonWebsocketConsumer):
@@ -17,15 +36,17 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
 
-        await self.add_to_group()
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        add_to_group = DoInThead(self)
+        add_to_group.start()
 
         await database_sync_to_async(ChannelNameModel.objects.create)(user=self.user, 
                                                                 channel_name=self.channel_name)
-
-        if not self.user.is_authenticated:
-            await self.close()
-        else:
-            await self.accept()
+        await self.accept()
+        add_to_group.join()
 
 
     async def add_to_group(self):
@@ -41,13 +62,26 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
 
 
     async def disconnect(self, close_code):
+        if not self.user.is_authenticated:
+            return
+
         channel_item = await database_sync_to_async(ChannelNameModel.objects.get)(channel_name=self.channel_name)
         await database_sync_to_async(channel_item.delete)()
 
         await asyncio.gather(*(self.channel_layer.group_discard(group_name, self.channel_name) 
             for group_name in self.following_groups))
 
+    async def receive_json(self, content, **kwargs):
+        content['type'] = "notify.message"
+        a = {
+            "type": "notify.message",
+            "message": "received message"
+        }
+        await self.channel_layer.send(self.channel_name, a)
+
     async def notify_message(self, event):
-        await self.send_json(
-                event
-            )
+        del event['type']
+        await self.send_json(event)
+
+
+

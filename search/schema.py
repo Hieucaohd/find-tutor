@@ -49,6 +49,8 @@ class Query(graphene.ObjectType):
                                                    sex_of_teacher = graphene.String(required=False),
                                                    type_teacher   = graphene.List(graphene.String, required=False),
                                                    search_infor   = graphene.String(required=False),
+                                                   order_by       = graphene.String(required=False),
+
 
                                                    # phan trang
                                                    page           = graphene.Int(required=False), 
@@ -89,6 +91,7 @@ class Query(graphene.ObjectType):
                                                      # phan trang
                                                      page          = graphene.Int(required=False), 
                                                      num_in_page   = graphene.Int(required=False),
+
                               token=graphene.String(required=False),
                                 )
 
