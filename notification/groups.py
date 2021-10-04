@@ -55,7 +55,7 @@ class NotificationHandler:
         })
 
         for member in members:
-            notification_content['user_id_receive'] = member.user_id
+            notification_content['user_id_receive'] = member["user_id"]
             save_to_model(**content).create(take_result=False)
 
     @staticmethod
