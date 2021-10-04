@@ -118,6 +118,8 @@ def after_create_invited_item(sender, instance, **kwargs):
                                                            "user_receive": user_of_tutor,
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
+    create_thread(target.NotificationHandler.group_add, kwargs={"user": user_of_tutor,
+                                                                "group_name": room_group,}).start()
 
 
 @receiver(tutor_out_room)
@@ -197,9 +199,18 @@ def after_create_tutor_teaching(sender, **kwargs):
         "content": kwargs.get("content"),
     }
 
+    notification_content_for_room = copy.deepcopy(notification_content)
+    notification_content_for_room["content"] = f"lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} đã có gia sư dạy chính thức"
+
     create_thread = threading.Thread
 
-    create_thread(target=NotificationHandler.group_send, kwargs={"user_send": user_send,
+    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_send,
+                                                           "user_receive": user_receive,
+                                                           "content": notification_content,
+                                                           "save_to_model": RoomNotificationModel}).start()
+
+    create_thread(target=NotificationHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
                                                                  "group_name": room_group,
-                                                                 "content": notification_content,
-                                                                 "save_to_model": RoomNotificationModel}).start()
+                                                                 "content": notification_content_for_room,
+                                                                 "save_to_model": RoomNotificationModel,
+                                                                 "except_users": [user_send, user_receive]}).start()

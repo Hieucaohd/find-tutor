@@ -59,6 +59,48 @@ class NotificationHandler:
             save_to_model(**content).create(take_result=False)
 
     @staticmethod
+    def group_send_except(user_send, group_name, content, save_to_model, except_users):
+        if not isinstance(content, dict):
+            raise Exception("content is not a dictionary")
+
+        if not isinstance(user_send, User):
+            raise Exception("user send is not object of User model")
+
+        for user in except_users:
+            if not isinstance(user, User):
+                raise Exception("user in except_users is not object of User model")
+
+        # send to group
+        content['user_id_send'] = user_send.id
+        content['type'] = "notify.message"
+        for user in except_users:
+            channel_names = ChannelNameModel.objects.filter(user = user)
+            for channel_name in channel_names:
+                async_to_sync(channel_layer.group_discard)(channel_name, group_name)
+        async_to_sync(channel_layer.group_send)(group_name, content)
+
+        # save to database
+        members = FollowModel().collection.find({ 
+            "following_groups": {
+                "$all": [group_name]
+            } 
+        })
+
+        id_users_except = list(user.id for user in except_users)
+
+        for member in members:
+            content['user_id_receive'] = member["user_id"]
+            if member["user_id"] in id_users_except:
+                continue
+            save_to_model(**content).create(take_result=False)
+
+        for user in except_users:
+            channel_names = ChannelNameModel.objects.filter(user = user)
+            for channel_name in channel_names:
+                async_to_sync(channel_layer.group_add)(channel_name, group_name)
+
+
+    @staticmethod
     def group_add(user, group_name):
         if not isinstance(user, User):
             raise Exception("user is not object of User model")
