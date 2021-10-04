@@ -73,11 +73,8 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, content, **kwargs):
         content['type'] = "notify.message"
-        a = {
-            "type": "notify.message",
-            "message": "received message"
-        }
-        await self.channel_layer.send(self.channel_name, a)
+        content['send message'] = "tôi là hiếu nhé"
+        await self.channel_layer.send(self.channel_name, content)
 
     async def notify_message(self, event):
         del event['type']

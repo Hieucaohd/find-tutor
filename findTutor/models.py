@@ -409,7 +409,9 @@ pre_delete.connect(findTutor.signals.before_image_private_user_delete, sender=Im
 pre_delete.connect(findTutor.signals.before_image_of_user_delete, sender=ImageOfUserModel)
 
 # WaitingTutorModel create
-# post_save.connect(findTutor.signals.after_create_waiting_list_item, sender=WaitingTutorModel)
+post_save.connect(findTutor.signals.after_create_waiting_list_item, sender=WaitingTutorModel)
 
+# ListInvitedModel create
+post_save.connect(findTutor.signals.after_create_invited_item, sender=ListInvitedModel)
 
 

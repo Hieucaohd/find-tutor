@@ -6,6 +6,8 @@ from .baseView import ListCreateBaseView, RetrieveUpdateDeleteBaseView
 from rest_framework import permissions, status
 from rest_framework.response import Response
 
+from findTutor.signals import tutor_out_room
+
 from django.http import Http404
 
 
@@ -128,12 +130,21 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
         """
             This is called when tutor not agree to try teaching or parent don't want tutor in list_invited any more.
         """
+        invited_item = self.get_object(pk)
         if self.isTutorBeInvited(request, pk):
             # notification for parent that tutor don't agree to try teaching.
+            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
+                                                                  "user_receive": invited_item.parent_room.parent.user,
+                                                                  "content": f"gia sư {request.user.tutormodel.full_name} không đồng ý dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của bạn",
+                                                                  "instance": invited_item}).start()
 
             return super().delete(request, pk)
         elif self.isParentInvited(request, pk):
             # notification for tutor that parent don't want him/her to try teaching any more.
+            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
+                                                                  "user_receive": invited_item.tutor.user,
+                                                                  "content": f"phụ huynh {request.user.parentmodel.full_name} không muốn tiếp tục mời bạn dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của họ",
+                                                                  "instance": invited_item}).start()
 
             return super().delete(request, pk)
         else:

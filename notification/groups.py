@@ -7,6 +7,8 @@ from authentication.models import User
 
 from findTutor.models import ParentRoomModel
 
+from asgiref.sync import async_to_sync
+
 
 class GroupName:
     
@@ -14,13 +16,13 @@ class GroupName:
     def generate_group_name_for_all(instance):
         model_name = instance.__class__.__name__
         id = instance.id
-        return f"{model_name}_{id}_notify"
+        return f"{model_name}.{id}.notify"
 
     @staticmethod
     def generate_group_name_for_master(instance):
         model_name = instance.__class__.__name__
         id = instance.id
-        return f"{model_name}_{id}_master_notify"
+        return f"{model_name}.{id}.master_notify"
 
 channel_layer = get_channel_layer()
 
@@ -43,7 +45,7 @@ class NotificationHandler:
         # send to group
         content['user_id_send'] = user_send.id
         content['type'] = "notify.message"
-        channel_layer.group_send(group_name, content)
+        async_to_sync(channel_layer.group_send)(group_name, content)
 
         # save to database
         members = FollowModel().collection.find({ 
@@ -63,7 +65,7 @@ class NotificationHandler:
 
         channel_names = ChannelNameModel.objects.filter(user = user)
         for channel_name in channel_names:
-            channel_layer.group_add(channel_name, group_name)
+            async_to_sync(channel_layer.group_add)(channel_name.channel_name, group_name)
 
         follow_model_collection = FollowModel().collection
         follow_model_collection.find_one_and_update({ "user_id": user.id }, { 
@@ -80,7 +82,7 @@ class NotificationHandler:
         # remove user's channel name from group
         channel_names = ChannelNameModel.objects.filter(user = user)
         for channel_name in channel_names:
-            channel_layer.group_discard(channel_name, group_name)
+            async_to_sync(channel_layer.group_discard)(channel_name.channel_name, group_name)
 
         # remove group name from database of user
         follow_model_collection = FollowModel().collection
@@ -102,7 +104,7 @@ class NotificationHandler:
         # send notification
         channel_names = ChannelNameModel.objects.filter(user = user_receive)
         for channel_name in channel_names:
-            channel_layer.send(channel_name, content)
+            async_to_sync(channel_layer.send)(channel_name.channel_name, content)
 
         # save to database
         save_to_model(**content).create(take_result=False)

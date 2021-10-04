@@ -4,13 +4,17 @@ from findTutor.inputs import *
 from findTutor.types import *
 from findTutor.models import *
 
-from findTutor.signals import (parent_create_room_signal, )
+from findTutor.signals import (parent_create_room_signal,
+                               create_tutor_teaching,
+                               )
 
 from findTutor.validateInputs import *
 from findTutor.checkTutorAndParent import isTutor, isParent
 
 from threading import Thread
 from multiprocessing import Process
+
+from findTutor.checkTutorAndParent import isTutor, isParent
 
 from django import db
 
@@ -87,6 +91,21 @@ class CreateTutorTeachingMutation(graphene.Mutation):
         attr = ValidateForTutorTeachingInput(input_fields=input_fields, info=info).validate()
         tutor_teaching = TutorTeachingModel.objects.create(**attr)
 
+        # signal
+        user_send = info.context.user
+        parent_room = tutor_teaching.parent_room
+        kwargs = {
+            "user_send": user_send,
+            "instance": tutor_teaching
+        }
+        if isTutor(user_send):
+            kwargs['user_receive'] = tutor_teaching.parent_room.parent.user
+            kwargs['content'] = f"gia sư {user_send.tutormodel.full_name} đã đồng ý để dạy lớp {parent_room.subject} {parent_room.lop}"
+            Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
+        elif isParent(user_send):
+            kwargs['user_receive'] = tutor_teaching.tutor.user
+            kwargs['content'] = f"phụ huynh {user_send.parentmodel.full_name} đã đồng ý để bạn dạy lớp {parent_room.subject} {parent_room.lop}"
+            Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
 
         return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
 

@@ -25,6 +25,6 @@ dj-database-url
 psycopg2
 pyrebase
 pymongo[srv]
-django-connect-mongo==1.9.0
+django-connect-mongo==1.10.0
 channels
 channels_redis
