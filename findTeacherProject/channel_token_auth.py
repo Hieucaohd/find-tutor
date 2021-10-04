@@ -35,6 +35,8 @@ class TokenAuthMiddleware(BaseMiddleware):
 			if b'authorization' in headers:
 				token_prefix, token_key = headers[b'authorization'].decode().split()
 			elif 'Token' in subprotocols:
+				if not 'Bearer' in subprotocols['Token']:
+					subprotocols['Token'] = "Bearer " + subprotocols["Token"]
 				token_prefix, token_key = subprotocols['Token'].split()
 			
 			if token_prefix == settings.TOKEN_PREFIX:
