@@ -101,11 +101,11 @@ class CreateTutorTeachingMutation(graphene.Mutation):
         }
         if isTutor(user_send):
             kwargs['user_receive'] = tutor_teaching.parent_room.parent.user
-            kwargs['content'] = f"gia sư {user_send.tutormodel.full_name} đã đồng ý để dạy lớp {parent_room.subject} {parent_room.lop}"
+            kwargs['content'] = f"Gia sư {user_send.tutormodel.full_name} đã đồng ý để dạy lớp {parent_room.subject} {parent_room.lop}"
             Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
         elif isParent(user_send):
             kwargs['user_receive'] = tutor_teaching.tutor.user
-            kwargs['content'] = f"phụ huynh {user_send.parentmodel.full_name} đã đồng ý để bạn dạy lớp {parent_room.subject} {parent_room.lop}"
+            kwargs['content'] = f"Phụ huynh {user_send.parentmodel.full_name} đã đồng ý để bạn dạy lớp {parent_room.subject} {parent_room.lop}"
             Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
 
         return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)

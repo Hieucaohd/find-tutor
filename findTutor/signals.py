@@ -29,6 +29,7 @@ tutor_out_room = django.dispatch.Signal()
 parent_invite_tutor = django.dispatch.Signal()
 
 create_tutor_teaching = django.dispatch.Signal()
+tutor_not_teaching_room = django.dispatch.Signal()
 
 
 
@@ -83,7 +84,7 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
 
     notification_content = {
         "room_id": parent_room.id,
-        "content": f"gia sư {user_of_tutor.tutormodel.full_name} đã ứng tuyển vào lớp {parent_room.subject} {parent_room.lop} của bạn",
+        "content": f"Gia sư {user_of_tutor.tutormodel.full_name} đã ứng tuyển vào lớp {parent_room.subject} {parent_room.lop} của bạn",
     }
 
     create_thread = threading.Thread
@@ -109,7 +110,7 @@ def after_create_invited_item(sender, instance, **kwargs):
 
     notification_content = {
         "room_id": parent_room.id,
-        "content": f"phụ huynh {user_of_parent.parentmodel.full_name} đã mời bạn dạy lớp {parent_room.subject} {parent_room.lop}"
+        "content": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã mời bạn dạy lớp {parent_room.subject} {parent_room.lop}"
     }
 
     create_thread = threading.Thread
@@ -169,7 +170,7 @@ def after_parent_create_room(sender, **kwargs):
 
     notification_content = {
         "room_id": parent_room.id,
-        "content": f"phụ huynh {user_of_parent.parentmodel.full_name} đã tạo lớp {parent_room.subject} {parent_room.lop}. Hãy ứng tuyển ngay nào!",
+        "content": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã tạo lớp {parent_room.subject} {parent_room.lop}. Hãy ứng tuyển ngay nào!",
     }
 
     create_thread = threading.Thread
@@ -200,7 +201,7 @@ def after_create_tutor_teaching(sender, **kwargs):
     }
 
     notification_content_for_room = copy.deepcopy(notification_content)
-    notification_content_for_room["content"] = f"lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} đã có gia sư dạy chính thức"
+    notification_content_for_room["content"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} đã có gia sư dạy chính thức."
 
     create_thread = threading.Thread
 
@@ -214,3 +215,37 @@ def after_create_tutor_teaching(sender, **kwargs):
                                                                  "content": notification_content_for_room,
                                                                  "save_to_model": RoomNotificationModel,
                                                                  "except_users": [user_send, user_receive]}).start()
+
+
+@receiver(tutor_not_teaching_room)
+def after_delete_tutor_from_teaching(sender, **kwargs):
+    # what need to do:
+    # - notify to room's group
+    user_send = kwargs.get("user_send")
+    user_receive = kwargs.get("user_receive")
+    instance = kwargs.get("instance")
+
+    parent_room = instance.parent_room
+    room_group = GroupName.generate_group_name_for_all(parent_room)
+
+    notification_content = {
+        "room_id": parent_room.id,
+        "content": kwargs.get("content"),
+    }
+
+    notification_content_for_room = copy.deepcopy(notification_content)
+    notification_content_for_room["content"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} vừa kết thúc hợp đồng với gia sư. Bạn có muốn dạy không?"
+
+    create_thread = threading.Thread
+
+    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_send,
+                                                           "user_receive": user_receive,
+                                                           "content": notification_content,
+                                                           "save_to_model": RoomNotificationModel}).start()
+
+    create_thread(target=NotificationHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
+                                                                 "group_name": room_group,
+                                                                 "content": notification_content_for_room,
+                                                                 "save_to_model": RoomNotificationModel,
+                                                                 "except_users": [user_send, user_receive]}).start()
+
