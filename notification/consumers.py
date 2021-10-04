@@ -45,7 +45,7 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
 
         await database_sync_to_async(ChannelNameModel.objects.create)(user=self.user, 
                                                                 channel_name=self.channel_name)
-        await self.accept()
+        await self.accept("Token")
         add_to_group.join()
 
 

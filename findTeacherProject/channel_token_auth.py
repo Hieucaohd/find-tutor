@@ -29,13 +29,20 @@ class TokenAuthMiddleware(BaseMiddleware):
 
 	async def __call__(self, scope, receive, send):
 		headers = dict(scope['headers'])
+		subprotocols = dict([scope['subprotocols']])
 		try:
+			token_prefix, token_key = None, None
 			if b'authorization' in headers:
 				token_prefix, token_key = headers[b'authorization'].decode().split()
-				if token_prefix == settings.TOKEN_PREFIX:
-					validated_token = await sync_to_async(self.simple_jwt.get_validated_token)(token_key)
-					user = await sync_to_async(self.simple_jwt.get_user)(validated_token)
-					scope['user'] = user
+			elif 'Token' in subprotocols:
+				token_prefix, token_key = subprotocols['Token'].split()
+			
+			if token_prefix == settings.TOKEN_PREFIX:
+				validated_token = await sync_to_async(self.simple_jwt.get_validated_token)(token_key)
+				user = await sync_to_async(self.simple_jwt.get_user)(validated_token)
+				scope['user'] = user
+			else:
+				raise Exception("invalid token prefix")
 		except:
 			scope['user'] = AnonymousUser()
 		return await super().__call__(scope, receive, send)
