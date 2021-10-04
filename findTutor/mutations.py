@@ -95,6 +95,7 @@ class CreateTutorTeachingMutation(graphene.Mutation):
         user_send = info.context.user
         parent_room = tutor_teaching.parent_room
         kwargs = {
+            "sender": ParentRoomModel,
             "user_send": user_send,
             "instance": tutor_teaching
         }

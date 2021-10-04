@@ -136,7 +136,8 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": invited_item.parent_room.parent.user,
                                                                   "content": f"gia sư {request.user.tutormodel.full_name} không đồng ý dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của bạn",
-                                                                  "instance": invited_item}).start()
+                                                                  "instance": invited_item,
+                                                                  "sender": self.__class__}).start()
 
             return super().delete(request, pk)
         elif self.isParentInvited(request, pk):
@@ -144,7 +145,8 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": invited_item.tutor.user,
                                                                   "content": f"phụ huynh {request.user.parentmodel.full_name} không muốn tiếp tục mời bạn dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của họ",
-                                                                  "instance": invited_item}).start()
+                                                                  "instance": invited_item,
+                                                                  "sender": self.__class__}).start()
 
             return super().delete(request, pk)
         else:

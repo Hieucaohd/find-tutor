@@ -121,13 +121,15 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": waiting_item.tutor.user,
                                                                   "content": f"phụ huynh {request.user.parentmodel.full_name} đã xóa bạn khỏi danh sách chờ của lớp {waiting_item.parent_room.subject} {waiting_item.parent_room.lop}",
-                                                                  "instance": waiting_item}).start()
+                                                                  "instance": waiting_item,
+                                                                  "sender": self.__class__}).start()
             return super().delete(request, pk)
         elif self.isTutorCreate(request, pk):
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": waiting_item.parent_room.parent.user,
                                                                   "content": f"gia sư {request.user.tutormodel.full_name} đã rời khỏi phòng chờ của lớp {waiting_item.parent_room.subject} {waiting_item.parent_room.lop} của bạn",
-                                                                  "instance": waiting_item}).start()
+                                                                  "instance": waiting_item,
+                                                                  "sender": self.__class__}).start()
             return super().delete(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
