@@ -97,7 +97,7 @@ class NotificationHandler:
         for user in except_users:
             channel_names = ChannelNameModel.objects.filter(user = user)
             for channel_name in channel_names:
-                async_to_sync(channel_layer.group_add)(channel_name.channel_name, group_name)
+                async_to_sync(channel_layer.group_add)(group_name, channel_name.channel_name)
 
 
     @staticmethod
@@ -107,7 +107,7 @@ class NotificationHandler:
 
         channel_names = ChannelNameModel.objects.filter(user = user)
         for channel_name in channel_names:
-            async_to_sync(channel_layer.group_add)(channel_name.channel_name, group_name)
+            async_to_sync(channel_layer.group_add)(group_name, channel_name.channel_name)
 
         follow_model_collection = FollowModel().collection
         follow_model_collection.find_one_and_update({ "user_id": user.id }, { 
