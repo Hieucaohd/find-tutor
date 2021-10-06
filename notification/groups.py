@@ -19,10 +19,20 @@ class GroupName:
         return f"{model_name}.{id}.notify"
 
     @staticmethod
-    def generate_group_name_for_master(instance):
+    def generate_group_name_for_info(instance):
         model_name = instance.__class__.__name__
         id = instance.id
-        return f"{model_name}.{id}.master_notify"
+        return f"{model_name}.{id}.info.notify"
+
+    @staticmethod
+    def generate_group_name_for_realtime(id=None, model=None, instance=None):
+        if model: 
+            model_name = model.__name__
+
+        if instance:
+            id = instance.id
+            model_name = instance.__class__.__name__
+        return f"{model_name}.{id}.realtime"
 
 channel_layer = get_channel_layer()
 
@@ -35,7 +45,7 @@ class NotificationHandler:
         pass
 
     @staticmethod
-    def group_send(user_send, group_name, content, save_to_model):
+    def group_send(user_send, group_name, content, save_to_model, consumer="notify.message"):
         if not isinstance(content, dict):
             raise Exception("content is not a dictionary")
 
@@ -44,7 +54,7 @@ class NotificationHandler:
 
         # send to group
         content['user_id_send'] = user_send.id
-        content['type'] = "notify.message"
+        content['type'] = consumer
         async_to_sync(channel_layer.group_send)(group_name, content)
 
         # save to database
@@ -59,7 +69,7 @@ class NotificationHandler:
             save_to_model(**content).create(take_result=False)
 
     @staticmethod
-    def group_send_except(user_send, group_name, content, save_to_model, except_users):
+    def group_send_except(user_send, group_name, content, save_to_model, except_users, consumer="notify.message"):
         if not isinstance(content, dict):
             raise Exception("content is not a dictionary")
 
@@ -72,7 +82,7 @@ class NotificationHandler:
 
         # send to group
         content['user_id_send'] = user_send.id
-        content['type'] = "notify.message"
+        content['type'] = consumer
         for user in except_users:
             channel_names = ChannelNameModel.objects.filter(user = user)
             for channel_name in channel_names:
@@ -135,13 +145,13 @@ class NotificationHandler:
         })
 
     @staticmethod
-    def send(user_send, user_receive, content, save_to_model):
+    def send(user_send, user_receive, content, save_to_model, consumer="notify.message"):
         if not (isinstance(user_send, User) and isinstance(user_receive, User)):
             raise Exception("user is not object of User model")
 
         content['user_id_send'] = user_send.id
         content['user_id_receive'] = user_receive.id
-        content['type'] = "notify.message"
+        content['type'] = consumer
 
         # send notification
         channel_names = ChannelNameModel.objects.filter(user = user_receive)

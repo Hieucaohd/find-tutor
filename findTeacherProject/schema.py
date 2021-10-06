@@ -18,3 +18,5 @@ class Mutation(findTutor.schema.Mutation,
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation, auto_camelcase=False)
+
+

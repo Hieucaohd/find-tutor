@@ -79,6 +79,22 @@ class Query(graphene.ObjectType):
             'num_pages': result.paginator.num_pages
         }
 
+    # lay waiting_item bang id
+    waiting_by_id = graphene.Field(WaitingTutorType,
+                                   id=graphene.ID(required=True))
+
+    def resolve_waiting_by_id(root, info, **kwargs):
+        id = kwargs.get("id")
+        return WaitingTutorModel.objects.get(pk=id)
+
+    # lay tutor teaching bang id
+    tutor_teaching_by_id = graphene.Field(TutorTeachingType,
+                                          id=graphene.ID(required=True))
+
+    def resolve_tutor_teaching_by_id(root, info, **kwargs):
+        id = kwargs.get("id")
+        return TutorTeachingModel.objects.get(pk=id)
+
 
 class Mutation(graphene.ObjectType):
     create_parent_room = CreateParentRoomMutation.Field()

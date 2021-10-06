@@ -13,18 +13,18 @@ def is_owner(record_item, info):
     return record_item.user == owner
 
 # permissions for tutor to see infor about parent
-def for_tutor_in_try_teaching(parent, info):
-    user_of_tutor = info.context.user
-    return parent.parentroommodel_set.filter(tryteachingmodel__tutor__user = user_of_tutor).exists()
+# def for_tutor_in_try_teaching(parent, info):
+#     user_of_tutor = info.context.user
+#     return parent.parentroommodel_set.filter(tryteachingmodel__tutor__user = user_of_tutor).exists()
 
 def for_tutor_in_teaching(parent, info):
     user_of_tutor = info.context.user
     return parent.parentroommodel_set.filter(tutorteachingmodel__tutor__user = user_of_tutor).exists()
 
 # permissions for parent to see infor about tutor
-def for_parent_in_try_teaching(tutor, info):
-    user_of_parent = info.context.user
-    return tutor.tryteachingmodel_set.filter(parent_room__parent__user = user_of_parent).exists()
+# def for_parent_in_try_teaching(tutor, info):
+#     user_of_parent = info.context.user
+#     return tutor.tryteachingmodel_set.filter(parent_room__parent__user = user_of_parent).exists()
 
 def for_parent_in_waiting_list(tutor, info):
     user_of_parent = info.context.user
@@ -83,14 +83,12 @@ class TutorType(DjangoObjectType):
     
     def resolve_detail_location(self, info):
         if ( is_owner(self, info) or 
-             for_parent_in_try_teaching(self, info) or 
              for_parent_in_waiting_list(self, info) or 
              for_parent_in_teaching(self, info) ):
             return self.detail_location
     
     def resolve_number_phone(self, info):
         if ( is_owner(self, info) or 
-             for_parent_in_try_teaching(self, info) or 
              for_parent_in_waiting_list(self, info) or
              for_parent_in_teaching(self, info) ):
             return self.number_phone
@@ -252,13 +250,11 @@ class ParentType(DjangoObjectType):
 
     def resolve_detail_location(self, info):
         if ( is_owner(self, info) or 
-             for_tutor_in_try_teaching(self, info) or
              for_tutor_in_teaching(self, info) ):
             return self.detail_location
     
     def resolve_number_phone(self, info):
         if ( is_owner(self, info) or 
-             for_tutor_in_try_teaching(self, info) or 
              for_tutor_in_teaching(self, info) ):
             return self.number_phone
 

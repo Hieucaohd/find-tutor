@@ -1,4 +1,7 @@
 from findTutor.models import *
+from findTutor.serializers import WaitingTutorSerializer
+from findTutor.checkTutorAndParent import isTutor
+from findTutor.type_websocket import waiting_item_type, tutor_teaching_item_type
 
 from authentication.models import User
 
@@ -8,6 +11,7 @@ from notification.groups import GroupName, NotificationHandler
 
 import django.dispatch
 from django.dispatch import receiver
+from django.forms.models import model_to_dict
 
 from asgiref.sync import async_to_sync
 
@@ -16,7 +20,7 @@ import copy
 import threading
 import multiprocessing
 
-from findTutor.checkTutorAndParent import isTutor
+from asgiref.sync import async_to_sync
 
 from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
@@ -80,7 +84,7 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
     user_of_parent = parent_room.parent.user
     user_of_tutor = instance.tutor.user
 
-    room_group = GroupName.generate_group_name_for_all(parent_room)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -97,6 +101,14 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
+    notify_to_room = waiting_item_type(instance)
+    notify_to_room['type_action'] = "CREATE"
+    notify_to_room['type_of_list'] = "waiting_list"
+    notify_to_room['type'] = "room.message"
+
+    room_group_realtime = GroupName.generate_group_name_for_realtime(instance=parent_room)
+    create_thread(target=async_to_sync(channel_layer.group_send), args=(room_group_realtime, notify_to_room)).start()
+
 
 def after_create_invited_item(sender, instance, **kwargs):
     # what need to do:
@@ -106,7 +118,7 @@ def after_create_invited_item(sender, instance, **kwargs):
     user_of_tutor = instance.tutor.user
     user_of_parent = parent_room.parent.user
 
-    room_group = GroupName.generate_group_name_for_all(parent_room)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -134,7 +146,7 @@ def before_delete_waiting_list_item(sender, **kwargs):
 
     parent_room = instance.parent_room
 
-    room_group = GroupName.generate_group_name_for_all(parent_room)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -151,7 +163,22 @@ def before_delete_waiting_list_item(sender, **kwargs):
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
-    
+
+def before_delete_waiting_list_item_for_realtime(sender, instance, **kwargs):
+    create_thread = threading.Thread
+
+    parent_room = instance.parent_room
+    notify_to_room = {
+        "result": {
+            "id": instance.id,
+        }
+    }
+    notify_to_room['type_action'] = "DELETE"
+    notify_to_room['type_of_list'] = "waiting_list"
+    notify_to_room['type'] = "room.message"
+
+    room_group_realtime = GroupName.generate_group_name_for_realtime(instance=parent_room)
+    create_thread(target=async_to_sync(channel_layer.group_send), args=(room_group_realtime, notify_to_room)).start() 
 
 
 @receiver(parent_create_room_signal)
@@ -165,8 +192,8 @@ def after_parent_create_room(sender, **kwargs):
     parent_room = kwargs.get("instance")
     user_of_parent = kwargs.get("info").context.user
 
-    room_group = GroupName.generate_group_name_for_all(parent_room)
-    parent_group = GroupName.generate_group_name_for_all(user_of_parent)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
+    parent_group = GroupName.generate_group_name_for_all(instance=user_of_parent)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -193,7 +220,7 @@ def after_create_tutor_teaching(sender, **kwargs):
     instance = kwargs.get("instance")
 
     parent_room = instance.parent_room
-    room_group = GroupName.generate_group_name_for_all(parent_room)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -215,6 +242,19 @@ def after_create_tutor_teaching(sender, **kwargs):
                                                                  "content": notification_content_for_room,
                                                                  "save_to_model": RoomNotificationModel,
                                                                  "except_users": [user_send, user_receive]}).start()
+    
+
+def after_create_tutor_teaching_for_realtime(sender, instance, **kwargs):
+    create_thread = threading.Thread
+    
+    parent_room = instance.parent_room
+    notify_to_room = tutor_teaching_item_type(instance)
+    notify_to_room['type_action'] = "CREATE"
+    notify_to_room['type_of_list'] = "tutor_teaching"
+    notify_to_room['type'] = "room.message"
+
+    room_group_realtime = GroupName.generate_group_name_for_realtime(instance=parent_room)
+    create_thread(target=async_to_sync(channel_layer.group_send), args=(room_group_realtime, notify_to_room)).start()
 
 
 @receiver(tutor_not_teaching_room)
@@ -226,7 +266,7 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
     instance = kwargs.get("instance")
 
     parent_room = instance.parent_room
-    room_group = GroupName.generate_group_name_for_all(parent_room)
+    room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
         "room_id": parent_room.id,
@@ -249,3 +289,19 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
                                                                  "save_to_model": RoomNotificationModel,
                                                                  "except_users": [user_send, user_receive]}).start()
 
+
+def before_delete_tutor_from_teaching_for_realtime(sender, instance, **kwargs):
+    create_thread = threading.Thread
+    
+    parent_room = instance.parent_room
+    notify_to_room = {
+        "result": {
+            "id": instance.id,
+        }
+    }
+    notify_to_room['type_action'] = "DELETE"
+    notify_to_room['type_of_list'] = "tutor_teaching"
+    notify_to_room['type'] = "room.message"
+
+    room_group_realtime = GroupName.generate_group_name_for_realtime(instance=parent_room)
+    create_thread(target=async_to_sync(channel_layer.group_send), args=(room_group_realtime, notify_to_room)).start()

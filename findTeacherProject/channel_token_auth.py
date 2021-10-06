@@ -28,9 +28,9 @@ class TokenAuthMiddleware(BaseMiddleware):
 		super().__init__(inner)
 
 	async def __call__(self, scope, receive, send):
-		headers = dict(scope['headers'])
-		subprotocols = dict([scope['subprotocols']])
 		try:
+			headers = dict(scope['headers'])
+			subprotocols = dict([scope['subprotocols']])
 			token_prefix, token_key = None, None
 			if b'authorization' in headers:
 				token_prefix, token_key = headers[b'authorization'].decode().split()

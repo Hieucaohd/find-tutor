@@ -12,6 +12,8 @@ from notification.models import ChannelNameModel
 from multiprocessing import Process, Queue
 from threading import Thread
 
+from notification.groups import GroupName
+
 
 class DoInThead(Thread):
     def __init__(self, notify_consumer):
@@ -49,16 +51,16 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
         add_to_group.join()
 
 
-    async def add_to_group(self):
-        collection = ListGroupUserModel().collection
-        try:
-            list_group = collection.find_one({ "user_id": self.user.id })
-            self.following_groups = list_group.following_groups
-        except:
-            self.following_groups = []
+    # async def add_to_group(self):
+    #     collection = ListGroupUserModel().collection
+    #     try:
+    #         list_group = collection.find_one({ "user_id": self.user.id })
+    #         self.following_groups = list_group.following_groups
+    #     except:
+    #         self.following_groups = []
 
-        await asyncio.gather(*(self.channel_layer.group_add(group_name, self.channel_name) 
-            for group_name in self.following_groups))
+    #     await asyncio.gather(*(self.channel_layer.group_add(group_name, self.channel_name) 
+    #         for group_name in self.following_groups))
 
 
     async def disconnect(self, close_code):
@@ -79,6 +81,8 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
     async def notify_message(self, event):
         del event['type']
         await self.send_json(event)
+
+
 
 
 
