@@ -6,8 +6,13 @@ from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer, LoginSerializer, LogoutSerializer, GetInforByTokenSerializer
-from .models import User
+from .serializers import (RegisterSerializer, 
+                          LoginSerializer, 
+                          LogoutSerializer, 
+                          GetInforByTokenSerializer,
+                          ChangePasswordSerializer,
+                          LinkSerializer)
+from .models import User, LinkModel
 from .utils import Util
 
 from django.contrib.sites.shortcuts import get_current_site
@@ -19,6 +24,7 @@ from django.conf import settings
 import jwt
 
 from findTutor.models import TutorModel, ParentModel
+from findTutor.viewsDic.baseView import UpdateBaseView, DeleteBaseView
 
 from .showInforAboutAnUser import inforAboutUser
 
@@ -84,6 +90,19 @@ class Login(generics.GenericAPIView):
 
         return Response(inforAboutUser(user), status=status.HTTP_200_OK)
 
+class ChangePassword(APIView):
+    serializer_class = ChangePasswordSerializer
+
+    def put(self, request, format=None):
+        request.data['email'] = request.user.email
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.data
+
+        user = User.objects.get(email=data.get('email'))
+
+        return Response(inforAboutUser(user), status=status.HTTP_200_OK)
+
 
 class Logout(generics.GenericAPIView):
     serializer_class = LogoutSerializer
@@ -105,5 +124,24 @@ class GetInforByToken(generics.GenericAPIView):
 
     def get(self, request, format=None):
         return Response(inforAboutUser(request.user))
+
+
+class LinkDetail(UpdateBaseView, DeleteBaseView):
+    modelBase = LinkModel
+    serializerBase = LinkSerializer
+
+    def put(self, request, pk, format=None):
+        link_item = self.get_object(pk)
+        if not request.user == link_item.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return super().put(request, pk, format)
+
+    def delete(self, request, pk, format=None):
+        link_item = self.get_object(pk)
+        if not link_item.user == request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return super().put(request, pk, format)
 
 

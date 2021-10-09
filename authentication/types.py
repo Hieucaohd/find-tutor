@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from authentication.models import User
+from authentication.models import User, LinkModel
 
 from findTutor.models import ImageOfUserModel
 from findTutor.types import ImageOfUserType
@@ -13,10 +13,13 @@ class UserType(DjangoObjectType):
         fields = (
                   "id",
                   "username",
+                  "email",
+                  "sex",
                   "tutormodel",
                   "parentmodel",
                   "imageprivateusermodel",
                   "oldimageprivateusermodel_set",
+                  "linkmodel_set",
                   )
     number_image_of_user = graphene.Int()
 
@@ -47,4 +50,15 @@ class UserType(DjangoObjectType):
 
         if hasattr(root, "parentmodel"):
             return root.parentmodel.last_name
+
+    def resolve_email(self, info):
+        if info.context.user == self:
+            return self.email
+        else:
+            return ''
+
+
+class LinkType(DjangoObjectType):
+    class Meta:
+        model = LinkModel
         

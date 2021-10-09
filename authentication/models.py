@@ -43,6 +43,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # other field
+    SEX_CHOICES = [("nam", "NAM"), ("nu", "NU")]
+    sex = models.CharField(max_length=500, choices=SEX_CHOICES, null=True, blank=True)
+
     auth_provider = models.CharField(max_length=255, blank=False, null=False, default=AUTH_PROVIDER.get('email'))
 
     USERNAME_FIELD = 'email'
@@ -59,3 +63,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
+
+        
+class LinkModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    url = models.TextField(null=False, blank=False)
+    image = models.TextField(null=True, blank=True)
+    name = models.CharField(max_length=500, null=True, blank=True)

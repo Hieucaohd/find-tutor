@@ -2,11 +2,17 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from .models import User
+from .models import User, LinkModel
 
 from django.contrib import auth
 
 from findTutor.models import TutorModel, ParentModel
+
+
+class LinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinkModel
+        fields = "__all__"
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -14,7 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'username']
+        fields = ['email', 'password', 'username', 'sex']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -42,8 +48,8 @@ class LoginSerializer(serializers.ModelSerializer):
         filter_user_by_email = User.objects.filter(email=email)
         user = auth.authenticate(email=email, password=password)
 
-        if filter_user_by_email[0].auth_provider != 'email':
-            raise AuthenticationFailed("Ban da dang nhap bang email " + email +
+        if filter_user_by_email and filter_user_by_email[0].auth_provider != 'email':
+            raise AuthenticationFailed("Ban da dang nhap email " + email +
                                        " bang " + filter_user_by_email[0].auth_provider +
                                        ". Hay dang nhap bang " + filter_user_by_email[0].auth_provider)
 
@@ -53,6 +59,38 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed("Tai khoan dang bi khoa, voi long lien he voi admin de moi lai")
         
         return attrs
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255, min_length=3)
+    old_password = serializers.CharField(max_length=68, min_length=6, write_only=True)
+    new_password = serializers.CharField(max_length=68, min_length=6, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'old_password', 'new_password']
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        old_password = attrs.get('old_password', '')
+        filter_user_by_email = User.objects.filter(email=email)
+        user = auth.authenticate(email=email, password=old_password)
+
+        if filter_user_by_email and filter_user_by_email[0].auth_provider != 'email':
+            raise AuthenticationFailed("Ban da dang nhap email " + email +
+                                       " bang " + filter_user_by_email[0].auth_provider +
+                                       ". Hay thay doi mat khau qua " + filter_user_by_email[0].auth_provider)
+
+        if not user:
+            raise AuthenticationFailed("Mat khau cu khong dung.")
+        if not user.is_active:
+            raise AuthenticationFailed("Tai khoan dang bi khoa, voi long lien he voi admin de mo lai")
+
+        user.set_password(attrs.get('new_password', ''))
+        user.save()
+        
+        return attrs
+
 
 
 class LogoutSerializer(serializers.Serializer):

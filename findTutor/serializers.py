@@ -38,6 +38,15 @@ class TutorSerializer(serializers.ModelSerializer):
             },
             'full_name': {
                 'read_only': True,
+            },
+            'first_name': {
+                'required': False,
+            },
+            'last_name': {
+                'required': False,
+            },
+            "profession": {
+                'required': False
             }
         }
 
@@ -137,7 +146,13 @@ class ParentSerializer(serializers.ModelSerializer):
             },
             'full_name': {
                 'read_only': True,
-            }
+            },
+            'last_name': {
+                'required': False,
+            },
+            'first_name': {
+                'required': False,
+            },
         }
 
 DAY_CAN_TEACH_CHOICES = ParentRoomModel.DAY_CAN_TEACH_CHOICES

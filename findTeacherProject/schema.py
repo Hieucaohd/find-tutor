@@ -12,7 +12,8 @@ class Query(findTutor.schema.Query,
     pass
 
 
-class Mutation(findTutor.schema.Mutation, 
+class Mutation(findTutor.schema.Mutation,
+               authentication.schema.Mutation, 
                graphene.ObjectType):
     pass
 
