@@ -28,9 +28,32 @@ from findTutor.viewsDic.baseView import UpdateBaseView, DeleteBaseView
 
 from .showInforAboutAnUser import inforAboutUser
 
+from authentication.models import LinkModel
+
+import copy
+
+import threading
+
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
+
+    def send_verify_email(self, request, user):
+        token = RefreshToken.for_user(user).access_token
+
+        current_site = get_current_site(request).domain
+        relative_link = reverse('verify-email')
+        absurl = 'https://' + current_site + relative_link + "?token=" + str(token)
+
+        email_body = "Xin chào " + user.username + ". Cảm ơn bạn đã đăng kí tài khoản tại findTutor. Hãy nhấp vào link dưới đây để xác thực tài khoản của bạn nhé \n" + absurl
+        data = {
+            'email_body': email_body,
+            'email_subject': "Tìm gia sư",
+            'to_email': [user.email],
+        }
+
+        Util.send_email(data)
+        
 
     def post(self, request, format=None):
         user_data_from_request = request.data
@@ -41,23 +64,9 @@ class RegisterView(generics.GenericAPIView):
 
         # send email to user
         user = User.objects.get(email=user_data['email'])
-        token = RefreshToken.for_user(user).access_token
 
-        current_site = get_current_site(request).domain
-        relative_link = reverse('verify-email')
-        absurl = 'http://' + current_site + relative_link + "?token=" + str(token)
-
-        email_body = "Xin chào " + user.username + ". Cảm ơn bạn đã đăng kí tài khoản tại findTutor. Hãy nhấp vào link dưới đây để xác thực tài khoản của bạn nhé \n" + absurl
-        data = {
-            'email_body': email_body,
-            'email_subject': "Tìm gia sư",
-            'to_email': [user.email],
-        }
-
-        try:
-            Util.send_email(data)
-        except:
-            pass
+        threading.Thread(target=self.send_verify_email, kwargs={"request": request,
+                                                                "user": user}).start()
 
         return Response(inforAboutUser(user))
 

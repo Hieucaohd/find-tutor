@@ -11,15 +11,28 @@ from ..serializers import TutorSerializer
 from .baseView import *
 from .permisstions import IsOwner
 
+from authentication.models import LinkModel
+
+import threading
+
 
 class PeopleList(ListCreateBaseView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def save_link(self, links, user):
+        for link in links:
+            link['user'] = user
+            LinkModel.objects.create(**link)
+
     def post(self, request, format=None):
+        links = request.data.get("link", [])
+        threading.Thread(target=self.save_link, kwargs={"links": links,
+                                                        "user": request.user}).start()
+
+        del request.data['link']
         serializer = self.serializerBase(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            print(serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors)
 

@@ -1,6 +1,28 @@
+def parent_room_by_id_query(parent_room):
+    from findTeacherProject.schema import schema
 
+    result = schema.execute(
+        """
+        query get_parent_room($id: ID!) {
+            room_by_id(id: $id) {
+                id
+                parent {
+                    id
+                    user {
+                        username
+                    }
+                }
+                subject
+            }
+        }
+        """
+        , variables={'id': parent_room.id}
+    )
+    new_dict = {}
+    new_dict['result'] = result.data["room_by_id"]
+    return new_dict
 
-def waiting_item_type(waiting_item):
+def wating_by_id_query(waiting_item):
     from findTeacherProject.schema import schema
 
     result = schema.execute(
@@ -36,8 +58,7 @@ def waiting_item_type(waiting_item):
     return new_dict
 
 
-
-def tutor_teaching_item_type(tutor_teaching_item):
+def tutor_teaching_by_id_query(tutor_teaching_item):
     from findTeacherProject.schema import schema
 
     result = schema.execute(
@@ -71,6 +92,9 @@ def tutor_teaching_item_type(tutor_teaching_item):
     new_dict = {}
     new_dict['result'] = result.data["tutor_teaching_by_id"]
     return new_dict
+
+
+
 
 
 

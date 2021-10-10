@@ -1,7 +1,7 @@
 from findTutor.models import *
 from findTutor.serializers import WaitingTutorSerializer
 from findTutor.checkTutorAndParent import isTutor
-from findTutor.type_websocket import waiting_item_type, tutor_teaching_item_type
+from findTutor.graphql_query import wating_by_id_query, tutor_teaching_by_id_query
 
 from authentication.models import User
 
@@ -101,7 +101,7 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
-    notify_to_room = waiting_item_type(instance)
+    notify_to_room = wating_by_id_query(instance)
     notify_to_room['type_action'] = "CREATE"
     notify_to_room['type_of_list'] = "waiting_list"
     notify_to_room['type'] = "room.message"
@@ -248,7 +248,7 @@ def after_create_tutor_teaching_for_realtime(sender, instance, **kwargs):
     create_thread = threading.Thread
     
     parent_room = instance.parent_room
-    notify_to_room = tutor_teaching_item_type(instance)
+    notify_to_room = tutor_teaching_by_id_query(instance)
     notify_to_room['type_action'] = "CREATE"
     notify_to_room['type_of_list'] = "tutor_teaching"
     notify_to_room['type'] = "room.message"

@@ -27,17 +27,6 @@ class FollowModel(MongoBaseModel):
     collection_name = "follows"
 
 
-# class GroupModel(MongoBaseModel):
-#     fields = {
-#         "group_name": { "unique": True },
-#         "members": {},   # danh sach cac user trong group
-#     }
-
-#     url = url
-#     db_name = db_name
-#     collection_name = "groups"
-
-
 class RoomNotificationModel(MongoBaseModel):
     fields = {
         "room_id": {},
@@ -45,6 +34,8 @@ class RoomNotificationModel(MongoBaseModel):
         "user_id_send": {},
         "user_id_receive": {},
         "is_seen": {},
+        "room": {},
+        "type_notify": {}
     }
 
     url = url
