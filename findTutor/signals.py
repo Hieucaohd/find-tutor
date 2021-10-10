@@ -1,7 +1,9 @@
 from findTutor.models import *
 from findTutor.serializers import WaitingTutorSerializer
 from findTutor.checkTutorAndParent import isTutor
-from findTutor.graphql_query import wating_by_id_query, tutor_teaching_by_id_query
+from findTutor.graphql_query import (wating_by_id_query, 
+                                     tutor_teaching_by_id_query, 
+                                     parent_room_by_id_query)
 
 from authentication.models import User
 
@@ -87,8 +89,8 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": f"Gia sư {user_of_tutor.tutormodel.full_name} đã ứng tuyển vào lớp {parent_room.subject} {parent_room.lop} của bạn",
+        "room": parent_room_by_id_query(parent_room),
+        "text": f"Gia sư {user_of_tutor.tutormodel.full_name} đã ứng tuyển vào lớp {parent_room.subject} {parent_room.lop} của bạn.",
     }
 
     create_thread = threading.Thread
@@ -121,8 +123,8 @@ def after_create_invited_item(sender, instance, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã mời bạn dạy lớp {parent_room.subject} {parent_room.lop}"
+        "room": parent_room_by_id_query(parent_room),
+        "text": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã mời bạn dạy lớp {parent_room.subject} {parent_room.lop}"
     }
 
     create_thread = threading.Thread
@@ -149,8 +151,8 @@ def before_delete_waiting_list_item(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": kwargs.get("content"),
+        "room": parent_room_by_id_query(parent_room),
+        "text": kwargs.get("text"),
     }
 
     create_thread = threading.Thread
@@ -196,8 +198,8 @@ def after_parent_create_room(sender, **kwargs):
     parent_group = GroupName.generate_group_name_for_all(instance=user_of_parent)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã tạo lớp {parent_room.subject} {parent_room.lop}. Hãy ứng tuyển ngay nào!",
+        "room": parent_room_by_id_query(parent_room),
+        "text": f"Phụ huynh {user_of_parent.parentmodel.full_name} đã tạo lớp {parent_room.subject} {parent_room.lop}. Hãy ứng tuyển ngay nào!",
     }
 
     create_thread = threading.Thread
@@ -223,12 +225,12 @@ def after_create_tutor_teaching(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": kwargs.get("content"),
+        "room": parent_room_by_id_query(parent_room),
+        "text": kwargs.get("text"),
     }
 
     notification_content_for_room = copy.deepcopy(notification_content)
-    notification_content_for_room["content"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} đã có gia sư dạy chính thức."
+    notification_content_for_room["text"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} đã có gia sư dạy chính thức."
 
     create_thread = threading.Thread
 
@@ -269,12 +271,12 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room_id": parent_room.id,
-        "content": kwargs.get("content"),
+        "room": parent_room_by_id_query(parent_room),
+        "text": kwargs.get("text"),
     }
 
     notification_content_for_room = copy.deepcopy(notification_content)
-    notification_content_for_room["content"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} vừa kết thúc hợp đồng với gia sư. Bạn có muốn dạy không?"
+    notification_content_for_room["text"] = f"Lớp {parent_room.subject} {parent_room.lop} của phụ huynh {parent_room.parent.full_name} vừa kết thúc hợp đồng với gia sư. Bạn có muốn dạy không?"
 
     create_thread = threading.Thread
 

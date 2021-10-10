@@ -1,7 +1,7 @@
 from django.urls import path, include
 # from rest_framework.authtoken import views
 from .viewsDic import (
-                       tutorView, userAuthView, parentView, 
+                       tutorView, parentView, 
                        parentRoomView, priceView, waitingTutorView, 
                        customAuthToken, listInvitedView, tryTeachingView, 
                        tutorTeachingView, informationAboutRoomOfTutor, 
@@ -12,11 +12,11 @@ from .viewsDic import (
 urlpatterns = [
     # tutor
     path('tutorList/', tutorView.TutorList.as_view(), name='tutor-list'),
-    path('tutorDetail/<int:pk>', tutorView.TutorDetail.as_view(), name='tutor-detail'),
+    path('tutorDetail/<int:pk_user>', tutorView.TutorDetail.as_view(), name='tutor-detail'),
 
     # parent
     path('parentList/', parentView.ParentList.as_view(), name='parent-list'),
-    path('parentDetail/<int:pk>', parentView.ParentDetail.as_view(), name='parent-detail'),
+    path('parentDetail/<int:pk_user>', parentView.ParentDetail.as_view(), name='parent-detail'),
 
     # parent room
     path('roomList/', parentRoomView.ParentRoomList.as_view(), name='room-list'),

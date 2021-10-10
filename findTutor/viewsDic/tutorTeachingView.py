@@ -67,13 +67,13 @@ class TutorTeachingDetail(DeleteBaseView):
         if request.user == teaching_item.parent_room.parent.user:
             # parent gui
             kwargs['user_receive'] = teaching_item.tutor.user
-            kwargs['content'] = f"Phụ huynh {teaching_item.parent_room.parent.full_name} không muốn bạn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của họ."
+            kwargs['text'] = f"Phụ huynh {teaching_item.parent_room.parent.full_name} không muốn bạn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của họ."
             threading.Thread(target=tutor_not_teaching_room.send, kwargs=kwargs).start()
             return super().delete(request, pk)
         elif request.user == teaching_item.tutor.user:
             # tutor gui
             kwargs['user_receive'] = teaching_item.parent_room.parent.user
-            kwargs['content'] = f"Gia sư {teaching_item.tutor.full_name} không muốn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của bạn."
+            kwargs['text'] = f"Gia sư {teaching_item.tutor.full_name} không muốn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của bạn."
             threading.Thread(target=tutor_not_teaching_room.send, kwargs=kwargs).start()
             return super().delete(request, pk)
         

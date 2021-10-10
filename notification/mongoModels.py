@@ -29,13 +29,11 @@ class FollowModel(MongoBaseModel):
 
 class RoomNotificationModel(MongoBaseModel):
     fields = {
-        "room_id": {},
-        "content": {},
         "user_id_send": {},
         "user_id_receive": {},
         "is_seen": {},
         "room": {},
-        "type_notify": {}
+        "text": {},
     }
 
     url = url

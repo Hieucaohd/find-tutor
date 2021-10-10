@@ -135,7 +135,7 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
             # notification for parent that tutor don't agree to try teaching.
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": invited_item.parent_room.parent.user,
-                                                                  "content": f"Gia sư {request.user.tutormodel.full_name} không đồng ý dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của bạn",
+                                                                  "text": f"Gia sư {request.user.tutormodel.full_name} không đồng ý dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của bạn",
                                                                   "instance": invited_item,
                                                                   "sender": self.__class__}).start()
 
@@ -144,7 +144,7 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
             # notification for tutor that parent don't want him/her to try teaching any more.
             threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
                                                                   "user_receive": invited_item.tutor.user,
-                                                                  "content": f"Phụ huynh {request.user.parentmodel.full_name} không muốn tiếp tục mời bạn dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của họ",
+                                                                  "text": f"Phụ huynh {request.user.parentmodel.full_name} không muốn tiếp tục mời bạn dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của họ",
                                                                   "instance": invited_item,
                                                                   "sender": self.__class__}).start()
 

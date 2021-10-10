@@ -18,9 +18,7 @@ def parent_room_by_id_query(parent_room):
         """
         , variables={'id': parent_room.id}
     )
-    new_dict = {}
-    new_dict['result'] = result.data["room_by_id"]
-    return new_dict
+    return result.data["room_by_id"]
 
 def wating_by_id_query(waiting_item):
     from findTeacherProject.schema import schema

@@ -11,7 +11,7 @@ from ..serializers import TutorSerializer
 from .baseView import *
 from .permisstions import IsOwner
 
-from authentication.models import LinkModel
+from authentication.models import LinkModel, User
 
 import threading
 
@@ -52,7 +52,17 @@ class PeopleDetail(RetrieveBaseView, UpdateBaseView):
         obj = self.get_object(pk)
         return obj.user == request.user
 
-    def put(self, request, pk, format=None):
+    def put(self, request, pk_user, format=None):
+        user = User.objects.get(pk=pk_user)
+
+        pk = None
+        if hasattr(user, 'tutormodel'):
+            pk = user.tutormodel.id
+        elif hasattr(user, 'parentmodel'):
+            pk = user.parentmodel.id
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         if self.isOwner(request, pk):
             return super().put(request, pk)
         else:
