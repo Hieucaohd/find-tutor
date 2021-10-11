@@ -66,7 +66,7 @@ class TutorType(DjangoObjectType):
                   # private
                   "number_of_identity_card",
 
-                  # day
+                  # thong tin lop hoc
                   'lop_day',
                   'cap_day',
 

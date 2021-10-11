@@ -154,3 +154,34 @@ class LinkDetail(UpdateBaseView, DeleteBaseView):
         return super().put(request, pk, format)
 
 
+class MultipleLinkDetail(APIView):
+    modelBase = LinkModel
+    serializerBase = LinkSerializer
+
+    def put(self, request, format=None):
+        print(f"{request.data=}")
+        links = request.data
+
+        links_saved = []
+        for link in links:
+            print(f'{link=}')
+
+            link_item = LinkModel.objects.get(pk=link.get('id'))
+            if link_item.user != request.user:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+            link_to_save = copy.deepcopy(link)
+            del link_to_save['id']
+            serializer = self.serializerBase(link_item, data=link_to_save)
+            if serializer.is_valid():
+                serializer.save()
+                links_saved.append(serializer.data)
+            else:
+                return Response(serializer.errors,status=status.HTTP_403_FORBIDDEN)
+
+        return Response(links_saved)
+
+
+
+
+

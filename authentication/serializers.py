@@ -14,6 +14,21 @@ class LinkSerializer(serializers.ModelSerializer):
         model = LinkModel
         fields = "__all__"
 
+        extra_kwargs = {
+            "user": {
+                "read_only": True
+            },
+            "url": {
+                "required": False
+            },
+            "name": {
+                "required": False
+            },
+            "image": {
+                "required": False
+            }
+        }
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=60, min_length=6, write_only=True)

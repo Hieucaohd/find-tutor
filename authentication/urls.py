@@ -5,7 +5,8 @@ from .views import (RegisterView,
                     Logout, 
                     GetInforByToken, 
                     ChangePassword,
-                    LinkDetail,)
+                    LinkDetail,
+                    MultipleLinkDetail,)
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -20,4 +21,5 @@ urlpatterns = [
     path('getInforByToken/', GetInforByToken.as_view()),
     path('changePassword/', ChangePassword.as_view()),
     path('linkDetail/<int:pk>', LinkDetail.as_view()),
+    path('updateMultipleLink/', MultipleLinkDetail.as_view()),
 ]
