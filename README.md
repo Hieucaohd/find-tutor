@@ -33,4 +33,7 @@
   - Graphiql: http://tim-gia-su.herokuapp.com/findTutor/graphql (nhấn ctrl+space để xem các gợi ý)
   - Hoặc postman.
 
+# document:
+
+## link google doc: https://docs.google.com/document/d/1teGtkQkd7LnRMjg1-a-D2sICdsuvy2n5BWPyU0K5JvU/edit?usp=sharing
 
