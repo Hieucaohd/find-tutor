@@ -66,6 +66,10 @@ class TutorType(DjangoObjectType):
                   # private
                   "number_of_identity_card",
 
+                  # day
+                  'lop_day',
+                  'cap_day',
+
                   # thong tin ve lop
                   'waitingtutormodel_set',
                   'listinvitedmodel_set',

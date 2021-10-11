@@ -55,7 +55,7 @@ class Query(graphene.ObjectType):
     # lay room thong qua id
     room_by_id = graphene.Field(ParentRoomType, 
                                 token=graphene.String(required=False),
-                                id=graphene.Int(required=True))
+                                id=graphene.ID(required=True))
 
     def resolve_room_by_id(root, info, **kwargs):
         id = kwargs.get('id')

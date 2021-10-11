@@ -1,7 +1,7 @@
 from findTutor.models import *
 from findTutor.serializers import WaitingTutorSerializer
 from findTutor.checkTutorAndParent import isTutor
-from findTutor.graphql_query import (wating_by_id_query, 
+from findTutor.graphqlQuery import (wating_by_id_query, 
                                      tutor_teaching_by_id_query, 
                                      parent_room_by_id_query)
 
