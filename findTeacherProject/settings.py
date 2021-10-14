@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-x6ru6j*)01lp-x+sr$%%afgo+wfbnecjb403xi+vx2tk=gy1)a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+TO_HEROKU = False
+TO_AWS = not TO_HEROKU
 
 ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost', '127.0.0.1:8000']
 
@@ -145,17 +147,30 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd74bo08e99e5db',
-        'HOST': 'ec2-18-235-45-217.compute-1.amazonaws.com',
-        'PORT': '5432',
-        'USER': 'tmqrxlemxuovow',
-        'PASSWORD': '96a635d0c9e5890ecfba39e49e1f78cef4858f393f83d18b6b0ec7a8577dfb91',
+DATABASES = None
+if TO_HEROKU:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'd74bo08e99e5db',
+            'HOST': 'ec2-18-235-45-217.compute-1.amazonaws.com',
+            'PORT': '5432',
+            'USER': 'tmqrxlemxuovow',
+            'PASSWORD': '96a635d0c9e5890ecfba39e49e1f78cef4858f393f83d18b6b0ec7a8577dfb91',
+        }
     }
-}
+
+if TO_AWS:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'testdb',
+            'USER': 'hieucao192',
+            'PASSWORD': "192",
+            'HOST': 'localhost',
+            'PORT': 5432
+        }
+    }
 
 
 MONGO_URL = "mongodb+srv://hieucao192:" + urllib.parse.quote("Caotrunghieu@192") + "@authenticationtest.6lh8w.mongodb.net/userSearch?retryWrites=true&w=majority"
