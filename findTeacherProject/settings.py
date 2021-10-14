@@ -29,7 +29,8 @@ DEBUG = False
 TO_HEROKU = False
 TO_AWS = not TO_HEROKU
 
-ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost', '127.0.0.1:8000', '18.141.198.53']
+# ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost', '127.0.0.1:8000', '18.141.198.53']
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = 'authentication.User'
 
