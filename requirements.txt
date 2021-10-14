@@ -22,7 +22,7 @@ django-graphql-jwt-using-rest-framework-jwt==1.2.0
 gunicorn
 whitenoise
 dj-database-url
-psycopg2
+psycopg2-binary
 pyrebase
 pymongo[srv]
 django-connect-mongo==1.10.0

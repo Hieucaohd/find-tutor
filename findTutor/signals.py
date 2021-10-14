@@ -9,7 +9,7 @@ from authentication.models import User
 
 from notification.mongoModels import *
 from notification.models import ChannelNameModel
-from notification.groups import GroupName, NotificationHandler
+from notification.groups import GroupName, ChannelLayerHandler
 
 import django.dispatch
 from django.dispatch import receiver
@@ -95,10 +95,10 @@ def after_create_waiting_list_item(sender, instance, **kwargs):
 
     create_thread = threading.Thread
 
-    create_thread(target=NotificationHandler.group_add, kwargs={"user": user_of_tutor,
+    create_thread(target=ChannelLayerHandler.group_add, kwargs={"user": user_of_tutor,
                                                                 "group_name": room_group}).start()
 
-    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_of_tutor,
+    create_thread(target=ChannelLayerHandler.send, kwargs={"user_send": user_of_tutor,
                                                            "user_receive": user_of_parent,
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
@@ -157,10 +157,10 @@ def before_delete_waiting_list_item(sender, **kwargs):
 
     create_thread = threading.Thread
     if isTutor(user_send):
-        create_thread(target=NotificationHandler.group_discard, kwargs={"user": user_send,
+        create_thread(target=ChannelLayerHandler.group_discard, kwargs={"user": user_send,
                                                                         "group_name": room_group}).start()
 
-    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_send,
+    create_thread(target=ChannelLayerHandler.send, kwargs={"user_send": user_send,
                                                            "user_receive": user_receive,
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
@@ -204,10 +204,10 @@ def after_parent_create_room(sender, **kwargs):
 
     create_thread = threading.Thread
 
-    create_thread(target=NotificationHandler.group_add, kwargs={"user": user_of_parent, 
+    create_thread(target=ChannelLayerHandler.group_add, kwargs={"user": user_of_parent, 
                                                                 "group_name": room_group}).start()
 
-    create_thread(target=NotificationHandler.group_send, kwargs={"user_send": user_of_parent, 
+    create_thread(target=ChannelLayerHandler.group_send, kwargs={"user_send": user_of_parent, 
                                                                  "group_name": parent_group, 
                                                                  "content": notification_content,
                                                                  "save_to_model": RoomNotificationModel}).start()
@@ -234,12 +234,12 @@ def after_create_tutor_teaching(sender, **kwargs):
 
     create_thread = threading.Thread
 
-    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_send,
+    create_thread(target=ChannelLayerHandler.send, kwargs={"user_send": user_send,
                                                            "user_receive": user_receive,
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
-    create_thread(target=NotificationHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
+    create_thread(target=ChannelLayerHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
                                                                  "group_name": room_group,
                                                                  "content": notification_content_for_room,
                                                                  "save_to_model": RoomNotificationModel,
@@ -280,12 +280,12 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
 
     create_thread = threading.Thread
 
-    create_thread(target=NotificationHandler.send, kwargs={"user_send": user_send,
+    create_thread(target=ChannelLayerHandler.send, kwargs={"user_send": user_send,
                                                            "user_receive": user_receive,
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
-    create_thread(target=NotificationHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
+    create_thread(target=ChannelLayerHandler.group_send_except, kwargs={"user_send": parent_room.parent.user,
                                                                  "group_name": room_group,
                                                                  "content": notification_content_for_room,
                                                                  "save_to_model": RoomNotificationModel,

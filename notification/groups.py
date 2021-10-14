@@ -16,13 +16,13 @@ class GroupName:
     def generate_group_name_for_all(instance):
         model_name = instance.__class__.__name__
         id = instance.id
-        return f"{model_name}.{id}.notify"
+        return f"{model_name}.{id}.all"
 
     @staticmethod
     def generate_group_name_for_info(instance):
         model_name = instance.__class__.__name__
         id = instance.id
-        return f"{model_name}.{id}.info.notify"
+        return f"{model_name}.{id}.info"
 
     @staticmethod
     def generate_group_name_for_realtime(id=None, model=None, instance=None):
@@ -34,9 +34,18 @@ class GroupName:
             model_name = instance.__class__.__name__
         return f"{model_name}.{id}.realtime"
 
+    @staticmethod
+    def decode_from_group_name(group_name):
+        model_name, id, prefix = group_name.split(".")
+        return {
+            "model_name": model_name,
+            "id": int(id),
+            "prefix": prefix,
+        }
+
 channel_layer = get_channel_layer()
 
-class NotificationHandler:
+class ChannelLayerHandler:
     def __init__(self):
         # function of this class:
         # - send notification to a group and 

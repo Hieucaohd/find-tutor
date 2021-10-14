@@ -1,28 +1,126 @@
-# import graphene
+import graphene
 
-# from authentication.types import UserType
-# from authentication.models import User
+from authentication.types import UserType
+from authentication.models import User
 
-# from notification.mongoModels import *
+from notification.mongoModels import *
+from notification.groups import GroupName
 
+from findTutor.types import ParentRoomType
+from findTutor.models import ParentRoomModel
 
-# class FriendType(graphene.ObjectType):
-#     list_friend = graphene.List(UserType, user_id=graphene.ID(required=True))
-
-#     def resolve_list_friend(root, info, **kwargs):
-#         user_id = kwargs.get("user_id", 0)
-#         list_friend_ids = FriendModel().get(user_id=user_id).list_friends
-#         return User.objects.filter(id__in = list_friend_ids)
+import json
+from types import SimpleNamespace
 
 
-# class RoomNotificationType(graphene.ObjectType):
-#     user_id_send = graphene.ID()
-#     user_id_receive = graphene.ID()
-#     is_seen = graphene.Boolean()
-#     room = graphene.ObjectType()
-#     text = graphene.String()
+class RoomNotificationType(graphene.ObjectType):
+    _id = graphene.ID()
+    user_id_send = graphene.Int()
+    user_send = graphene.Field(UserType)
+    user_id_receive = graphene.Int()
+    user_receive = graphene.Field(UserType)
+    room = graphene.Field(ParentRoomType)
+    is_seen = graphene.Boolean()
+    text = graphene.String()
+    create_at = graphene.DateTime()
 
 
-# class FollowType(graphene.ObjectType):
-#     user_id = graphene.ID()
-#     following_groups = graphene.List(graphene.String)
+    def resolve__id(root, info, **kwargs):
+        return root['_id']
+
+
+    def resolve_user_id_send(root, info, **kwargs):
+        return root['user_id_send']
+
+
+    def resolve_user_send(root, info, **kwargs):
+        return User.objects.get(pk=root['user_id_send'])
+
+
+    def resolve_user_id_receive(root, info, **kwargs):
+        return root['user_id_receive']
+
+
+    def resolve_user_receive(root, info, **kwargs):
+        return User.objects.get(pk=root['user_id_receive'])
+
+
+    def resolve_room(root, info, **kwargs):
+        parent_room = ParentRoomModel.objects.get(pk=root['room']['id'])
+        return parent_room
+
+
+    def resolve_is_seen(root, info, **kwargs):
+        return root.get("is_seen", False)
+
+
+    def resolve_text(root, info, **kwargs):
+        return root['text']
+
+
+    def resolve_create_at(root, info, **kwargs):
+        return root['create_at']
+
+
+class FollowType(graphene.ObjectType):
+    _id = graphene.ID()
+    user_id = graphene.Int()
+    user = graphene.Field(UserType)
+    following_groups = graphene.List(graphene.String)
+    following_rooms = graphene.List(ParentRoomType,
+                                    number_items=graphene.Int(required=False))
+    following_users = graphene.Field(UserType,
+                                    number_items=graphene.Int(required=False))
+
+    def resolve__id(root, info, **kwargs):
+        return root['_id']
+
+
+    def resolve_user_id(root, info, **kwargs):
+        return root['user_id']
+
+
+    def resolve_user(root, info, **kwargs):
+        return User.objects.get(pk=root['user_id'])
+
+
+    def resolve_following_groups(root, info, **kwargs):
+        return root['following_groups']
+
+
+    def resolve_following_rooms(root, info, **kwargs):
+        following_groups = root['following_groups']
+        number_items = kwargs.get("number_items", 6)
+
+        rooms = []
+        for group_name in following_groups:
+            decoded_group = GroupName.decode_from_group_name(group_name)
+            model_name, id = decoded_group['model_name'], decoded_group['id']
+
+            if model_name == ParentRoomModel.__name__:
+                try:
+                    room = ParentRoomModel.objects.get(pk=id)
+                    rooms.append(room)
+                except:
+                    pass
+
+        return rooms[0:number_items]
+
+
+    def resolve_following_users(root, info, **kwargs):
+        following_groups = root['following_groups']
+        number_items = kwargs.get("number_items", 6)
+
+        users = []
+        for group_name in following_groups:
+            decoded_group = GroupName.decode_from_group_name(group_name)
+            model_name, id = decoded_group['model_name'], decoded_group['id']
+
+            if model_name == User.__name__:
+                try:
+                    room = User.objects.get(pk=id)
+                    users.append(room)
+                except:
+                    pass
+
+        return users[0:number_items]

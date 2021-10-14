@@ -159,13 +159,10 @@ class MultipleLinkDetail(APIView):
     serializerBase = LinkSerializer
 
     def put(self, request, format=None):
-        print(f"{request.data=}")
         links = request.data
 
         links_saved = []
         for link in links:
-            print(f'{link=}')
-
             link_item = LinkModel.objects.get(pk=link.get('id'))
             if link_item.user != request.user:
                 return Response(status=status.HTTP_403_FORBIDDEN)
