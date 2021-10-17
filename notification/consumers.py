@@ -14,6 +14,8 @@ from threading import Thread
 
 from notification.groups import GroupName
 
+import copy
+
 
 class DoInThead(Thread):
     def __init__(self, notify_consumer):
@@ -79,8 +81,9 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.send(self.channel_name, content)
 
     async def notify_message(self, event):
-        del event['type']
-        await self.send_json(event)
+        event_copy = copy.deepcopy(event)
+        del event_copy['type']
+        await self.send_json(event_copy)
 
 
 

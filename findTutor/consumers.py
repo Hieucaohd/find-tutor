@@ -16,6 +16,8 @@ from notification.groups import GroupName
 
 from findTutor.models import ParentRoomModel
 
+import copy
+
 
 class RoomConsumer(AsyncJsonWebsocketConsumer):
 
@@ -32,7 +34,8 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group, self.channel_name)
 
     async def room_message(self, event):
-        del event['type']
-        await self.send_json(event)
+        event_copy = copy.deepcopy(event)
+        del event_copy['type']
+        await self.send_json(event_copy)
 
 
