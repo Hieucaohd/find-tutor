@@ -113,8 +113,10 @@ GRAPHQL_JWT = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:3192",
     "http://192.168.29.102:3000",
     "https://timgiasu.vercel.app",
+    "https://findtutorapp.website",
 ]
 
 ROOT_URLCONF = 'findTeacherProject.urls'
