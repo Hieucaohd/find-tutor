@@ -115,8 +115,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.29.102:3000",
     "http://192.168.29.103:3000",
     "https://timgiasu.vercel.app",
-    "https://findtutorapp.website",
-    "https://www.findtutorapp.website",
+    "https://timgiasu.findtutorapp.website",
+    "https://www.timgiasu.findtutorapp.website",
 ]
 
 ROOT_URLCONF = 'findTeacherProject.urls'
