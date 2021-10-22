@@ -34,7 +34,10 @@ class RoomNotificationType(graphene.ObjectType):
 
 
     def resolve_user_send(root, info, **kwargs):
-        return User.objects.get(pk=root['user_id_send'])
+        try:
+            return User.objects.get(pk=root['user_id_send'])
+        except User.DoesNotExist:
+            return "User does not exist"
 
 
     def resolve_user_id_receive(root, info, **kwargs):
@@ -42,12 +45,17 @@ class RoomNotificationType(graphene.ObjectType):
 
 
     def resolve_user_receive(root, info, **kwargs):
-        return User.objects.get(pk=root['user_id_receive'])
+        try:
+            return User.objects.get(pk=root['user_id_receive'])
+        except User.DoesNotExist:
+            return "User does not exist"
 
 
     def resolve_room(root, info, **kwargs):
-        parent_room = ParentRoomModel.objects.get(pk=root['room']['id'])
-        return parent_room
+        try:
+            return ParentRoomModel.objects.get(pk=root['room']['id'])
+        except ParentRoomModel.DoesNotExist:
+            return "room does not exist"
 
 
     def resolve_is_seen(root, info, **kwargs):
@@ -81,7 +89,10 @@ class FollowType(graphene.ObjectType):
 
 
     def resolve_user(root, info, **kwargs):
-        return User.objects.get(pk=root['user_id'])
+        try:
+            return User.objects.get(pk=root['user_id'])
+        except User.DoesNotExist:
+            return "User does not exist"
 
 
     def resolve_following_groups(root, info, **kwargs):
