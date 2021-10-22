@@ -25,9 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-x6ru6j*)01lp-x+sr$%%afgo+wfbnecjb403xi+vx2tk=gy1)a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-TO_HEROKU = False
-TO_AWS = not TO_HEROKU
+DEBUG = True
+TO_AWS = not DEBUG
 
 # ALLOWED_HOSTS = ['tim-gia-su.herokuapp.com', '127.0.0.1', 'localhost', '127.0.0.1:8000', '18.141.198.53']
 ALLOWED_HOSTS = ["*"]
@@ -151,39 +150,26 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-DATABASES = None
-if TO_HEROKU:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'd74bo08e99e5db',
-            'HOST': 'ec2-18-235-45-217.compute-1.amazonaws.com',
-            'PORT': '5432',
-            'USER': 'tmqrxlemxuovow',
-            'PASSWORD': '96a635d0c9e5890ecfba39e49e1f78cef4858f393f83d18b6b0ec7a8577dfb91',
-        }
-    }
 
-if TO_AWS:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'testdb',
-            'USER': 'hieucao192',
-            'PASSWORD': "192",
-            'HOST': 'localhost',
-            'PORT': 5432
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'testdb',
+        'USER': 'hieucao192',
+        'PASSWORD': "192",
+        'HOST': 'localhost',
+        'PORT': 5432
     }
+}
 
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                "hosts": [('127.0.0.1', 6379)],
-            }
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
         }
     }
+}
 
 
 MONGO_URL = "mongodb+srv://hieucao192:" + urllib.parse.quote("Caotrunghieu@192") + "@authenticationtest.6lh8w.mongodb.net/userSearch?retryWrites=true&w=majority"
@@ -226,7 +212,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticrootfile')
-
 STATIC_URL = '/static/'
 
 # Default primary key field type
@@ -287,26 +272,3 @@ if DEBUG:
 
 
 
-
-# import sentry_sdk
-# from sentry_sdk.integrations.django import DjangoIntegration
-
-# sentry_sdk.init(
-#     dsn="https://4c788544f3fd4c1b96ea5207a1dd3d61@o1014057.ingest.sentry.io/5979390",
-#     integrations=[DjangoIntegration()],
-
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for performance monitoring.
-#     # We recommend adjusting this value in production,
-#     traces_sample_rate=1.0,
-
-#     # If you wish to associate users to errors (assuming you are using
-#     # django.contrib.auth) you may enable sending PII data.
-#     send_default_pii=True,
-
-#     # By default the SDK will try to use the SENTRY_RELEASE
-#     # environment variable, or infer a git commit
-#     # SHA as release, however you may want to set
-#     # something more human-readable.
-#     # release="myapp@1.0.0",
-# )
