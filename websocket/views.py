@@ -9,7 +9,8 @@ from authentication.models import User
 
 from findTutor.models import ParentRoomModel
 
-from notification.groups import ChannelLayerHandler, GroupName
+from notification.groups import GroupName
+from notification.channel_layer_custom import ChannelLayerHandler
 from notification.serializers import FollowRoomSerializer, FollowUserSerializer
 
 # Create your views here.
