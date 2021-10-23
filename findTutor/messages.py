@@ -84,6 +84,7 @@ class RoomNotificationMessage:
 
     @staticmethod
     def generate_text(id, user_send):
+        text = {}
         text["id"] = id
         text["user_send"] = user_by_id_query(user_send)["result"]
         return text
