@@ -15,7 +15,7 @@ from types import SimpleNamespace
 
 class TextOfRoomNotificationType(graphene.ObjectType):
     id = graphene.String()
-    user_send = graphene.Field(User)
+    user_send = graphene.Field(UserType)
 
     def resolve_id(root, info, **kwargs):
         return root["id"]
