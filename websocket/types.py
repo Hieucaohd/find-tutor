@@ -13,6 +13,20 @@ import json
 from types import SimpleNamespace
 
 
+class TextOfRoomNotificationType(graphene.ObjectType):
+    id = graphene.String()
+    user_send = graphene.Field(User)
+
+    def resolve_id(root, info, **kwargs):
+        return root["id"]
+
+    def resolve_user_send(root, info, **kwargs):
+        try:
+            return User.objects.get(pk=root["user_send"]["id"])
+        except User.DoesNotExist:
+            return "User does not exist"
+
+
 class RoomNotificationType(graphene.ObjectType):
     _id = graphene.ID()
     user_id_send = graphene.Int()
@@ -21,7 +35,7 @@ class RoomNotificationType(graphene.ObjectType):
     user_receive = graphene.Field(UserType)
     room = graphene.Field(ParentRoomType)
     is_seen = graphene.Boolean()
-    text = graphene.String()
+    text = graphene.Field(TextOfRoomNotificationType)
     create_at = graphene.DateTime()
 
 
