@@ -18,6 +18,7 @@ class TextOfRoomNotificationType(graphene.ObjectType):
     user_send = graphene.Field(UserType)
 
     def resolve_id(root, info, **kwargs):
+        # print(f"{root=}")
         return root["id"]
 
     def resolve_user_send(root, info, **kwargs):
