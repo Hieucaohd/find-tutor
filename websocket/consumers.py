@@ -6,13 +6,13 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 
-from notification.mongoModels import FollowModel
-from notification.models import ChannelNameModel
+from websocket.mongoModels import FollowModel
+from websocket.models import ChannelNameModel
 
 from multiprocessing import Process, Queue
 from threading import Thread
 
-from notification.groups import GroupName
+from websocket.groups import GroupName
 
 import copy
 

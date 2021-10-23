@@ -15,7 +15,7 @@ django.setup()
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-import notification.routing
+import websocket.routing
 import findTutor.routing
 
 from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
@@ -24,7 +24,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": TokenAuthMiddlewareStack(
         URLRouter(
-            notification.routing.websocket_urlpatterns + 
+            websocket.routing.websocket_urlpatterns +
             findTutor.routing.websocket_urlpatterns   
         )
     ),

@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from notification.views import FollowRoomDetail, FollowRoomList, FollowUserDetail, FollowUserList
+from websocket.views import FollowRoomDetail, FollowRoomList, FollowUserDetail, FollowUserList
 
 urlpatterns = [
     path("followRoomList/", FollowRoomList.as_view()),

@@ -3,7 +3,7 @@ from django.conf import settings
 
 url = settings.MONGO_URL
 
-db_name = "notification"
+db_name = "websocket"
 
 class FriendModel(MongoBaseModel):
     fields = {

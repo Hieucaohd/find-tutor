@@ -3,13 +3,13 @@ import graphene
 import findTutor.schema
 import search.schema
 import authentication.schema
-import notification.schema
+import websocket.schema
 
 
-class Query(findTutor.schema.Query, 
-            search.schema.Query, 
+class Query(findTutor.schema.Query,
+            search.schema.Query,
             authentication.schema.Query,
-            notification.schema.Query,
+            websocket.schema.Query,
             graphene.ObjectType):
     pass
 

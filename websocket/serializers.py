@@ -3,8 +3,8 @@ from authentication.models import User
 
 from findTutor.models import ParentRoomModel
 
-from notification.groups import GroupName
-from notification.channel_layer_custom import ChannelLayerHandler
+from websocket.groups import GroupName
+from websocket.channel_layer_custom import ChannelLayerHandler
 
 
 class FollowRoomSerializer(serializers.Serializer):

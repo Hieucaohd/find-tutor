@@ -1,11 +1,12 @@
 import graphene
 
 from findTutor.inputs import *
+from findTutor.messages import RoomNotificationMessage
 from findTutor.types import *
 from findTutor.models import *
 
 from findTutor.signals import (parent_create_room_signal,
-                               create_tutor_teaching,
+                               create_tutor_teaching_signal,
                                )
 
 from findTutor.validateInputs import *
@@ -101,12 +102,18 @@ class CreateTutorTeachingMutation(graphene.Mutation):
         }
         if isTutor(user_send):
             kwargs['user_receive'] = tutor_teaching.parent_room.parent.user
-            kwargs['text'] = f"Gia sư {user_send.tutormodel.full_name} đã đồng ý để dạy lớp {parent_room.subject} {parent_room.lop}"
-            Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                id=RoomNotificationMessage.message_type["tutor_agree_for_parent_to_teaching"]["notify_parent"],
+                user_send=user_send
+            )
+            Thread(target=create_tutor_teaching_signal.send, kwargs=kwargs).start()
         elif isParent(user_send):
             kwargs['user_receive'] = tutor_teaching.tutor.user
-            kwargs['text'] = f"Phụ huynh {user_send.parentmodel.full_name} đã đồng ý để bạn dạy lớp {parent_room.subject} {parent_room.lop}"
-            Thread(target=create_tutor_teaching.send, kwargs=kwargs).start()
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                id=RoomNotificationMessage.message_type["parent_agree_for_tutor_teaching"]["notify_tutor"],
+                user_send=user_send
+            )
+            Thread(target=create_tutor_teaching_signal.send, kwargs=kwargs).start()
 
         return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
 

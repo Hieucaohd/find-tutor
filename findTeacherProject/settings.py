@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'analysisUser',
     'channels',
-    'notification',
+    'websocket',
 ]
 
 REST_FRAMEWORK = {
@@ -89,8 +89,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
 
 GRAPHENE = {
     "MIDDLEWARE": [
@@ -242,7 +240,6 @@ if DEBUG:
 
     MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 

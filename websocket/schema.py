@@ -4,8 +4,8 @@ import pymongo
 
 from authentication.types import UserType
 
-from notification.types import *
-from notification.mongoModels import *
+from websocket.types import *
+from websocket.mongoModels import *
 
 import copy
 

@@ -6,9 +6,12 @@ from .baseView import ListCreateBaseView, RetrieveUpdateDeleteBaseView
 from rest_framework import permissions, status
 from rest_framework.response import Response
 
-from findTutor.signals import tutor_out_room
+from findTutor.signals import tutor_out_room_signal
+from findTutor.messages import RoomNotificationMessage
 
 from django.http import Http404
+
+import threading
 
 
 class ListInvitedList(ListCreateBaseView):
@@ -99,54 +102,37 @@ class ListInvitedDetail(RetrieveUpdateDeleteBaseView):
         """
             This is called when tutor agree to try teaching.
         """
-        if self.isTutorBeInvited(request, pk):
-            invited = self.get_object(pk)
-            serializer = self.serializerBase(invited, data=request.data)
-            if serializer.is_valid():
-
-                # take tutor and room to Try Teaching.
-                if not self.isRoomHasTutorTryTeaching(request, pk):
-                    # serializer.save(tutor_agree=True)
-                    
-                    tutor = self.get_tutor_from_request(request)
-                    parent_room = invited.parent_room
-                    new_try_teaching = TryTeachingModel.objects.create(tutor=tutor, parent_room=parent_room)
-                    data = TryTeachingSerializer(new_try_teaching, many=False).data
-                    print(data)
-                    invited.delete()
-                    # notification for parent that tutor agree to try teaching.
-                    
-                else:
-                    # notification for tutor that: room is having a another tutor try teaching.
-
-                    return Response(status=status.HTTP_403_FORBIDDEN)
-
-                return Response(data)
-            return Response(serializer.errors)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        pass
 
     def delete(self, request, pk, format=None):
         """
             This is called when tutor not agree to try teaching or parent don't want tutor in list_invited any more.
         """
         invited_item = self.get_object(pk)
+
+        kwargs = {
+            "user_send": request.user,
+            "instance": invited_item,
+            "sender": self.__class__,
+        }
         if self.isTutorBeInvited(request, pk):
-            # notification for parent that tutor don't agree to try teaching.
-            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
-                                                                  "user_receive": invited_item.parent_room.parent.user,
-                                                                  "text": f"Gia sư {request.user.tutormodel.full_name} không đồng ý dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của bạn",
-                                                                  "instance": invited_item,
-                                                                  "sender": self.__class__}).start()
+            # notify for parent that tutor don't agree to try teaching.
+            kwargs['user_receive'] = invited_item.parent_room.parent.user,
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                                id=RoomNotificationMessage.message_type['tutor_not_agree_parent_invite']['notify_parent'],
+                                user_send=request.user
+                            )
+            threading.Thread(target=tutor_out_room_signal.send, kwargs=kwargs).start()
 
             return super().delete(request, pk)
         elif self.isParentInvited(request, pk):
-            # notification for tutor that parent don't want him/her to try teaching any more.
-            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
-                                                                  "user_receive": invited_item.tutor.user,
-                                                                  "text": f"Phụ huynh {request.user.parentmodel.full_name} không muốn tiếp tục mời bạn dạy lớp {invited_item.parent_room.subject} {invited_item.parent_room.lop} của họ",
-                                                                  "instance": invited_item,
-                                                                  "sender": self.__class__}).start()
+            # notify for tutor that parent don't want him/her to try teaching any more.
+            kwargs['user_receive'] = invited_item.tutor.user,
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                                id=RoomNotificationMessage.message_type['parent_cancel_invite_to_tutor']['notify_tutor'],
+                                user_send=request.user
+                            )
+            threading.Thread(target=tutor_out_room_signal.send, kwargs=kwargs).start()
 
             return super().delete(request, pk)
         else:

@@ -3,8 +3,8 @@ import graphene
 from authentication.types import UserType
 from authentication.models import User
 
-from notification.mongoModels import *
-from notification.groups import GroupName
+from websocket.mongoModels import *
+from websocket.groups import GroupName
 
 from findTutor.types import ParentRoomType
 from findTutor.models import ParentRoomModel

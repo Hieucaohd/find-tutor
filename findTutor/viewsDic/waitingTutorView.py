@@ -1,3 +1,4 @@
+from findTutor.messages import RoomNotificationMessage
 from ..serializers import WaitingTutorSerializer, ListInvitedSerializer
 from ..models import TutorModel, ParentModel, WaitingTutorModel, ListInvitedModel, TutorTeachingModel
 
@@ -7,7 +8,7 @@ from rest_framework import status, permissions
 from .relateParentRoomBaseView import ItemRelateListBaseView
 from .baseView import RetrieveUpdateDeleteBaseView
 
-from findTutor.signals import tutor_out_room
+from findTutor.signals import tutor_out_room_signal
 
 import threading
 
@@ -93,43 +94,35 @@ class WaitingTutorDetail(RetrieveUpdateDeleteBaseView):
         """
             When parent (owner of room) invite tutor.
         """
-        if self.isOwnerOfRoom(request, pk):
-            waiting_obj = self.get_object(pk)
-            serializer = self.serializerBase(waiting_obj, data=request.data)
-            if serializer.is_valid():
-                serializer.save(parent_invite=True)
-
-                # take tutor to List Invited.
-                new_invited = ListInvitedModel.objects.create(parent_room=waiting_obj.parent_room, tutor=waiting_obj.tutor)
-                data = ListInvitedSerializer(new_invited).data
-                print(data)
-                # notification for tutor here.
-
-                waiting_obj.delete()    # delete tutor from waiting list.
-
-                return Response(data)
-            return Response(serializer.errors)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        pass
 
     def delete(self, request, pk, format=None):
         """
             When parent or tutor don't want to continua waiting.
         """
         waiting_item = self.get_object(pk)
+        kwargs = {
+            "user_send": request.user,
+            "instance": waiting_item,
+            "sender": self.__class__
+        }
         if self.isOwnerOfRoom(request, pk):
-            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
-                                                                  "user_receive": waiting_item.tutor.user,
-                                                                  "text": f"Phụ huynh {request.user.parentmodel.full_name} đã xóa bạn khỏi danh sách chờ của lớp {waiting_item.parent_room.subject} {waiting_item.parent_room.lop}",
-                                                                  "instance": waiting_item,
-                                                                  "sender": self.__class__}).start()
+            # notify for tutor 
+            kwargs["user_receive"] = waiting_item.tutor.user
+            kwargs["text"] = RoomNotificationMessage.generate_text(
+                                id=RoomNotificationMessage.message_type['parent_delete_tutor_from_waiting_list']['notify_tutor'],
+                                user_send=request.user
+                            )
+            threading.Thread(target=tutor_out_room_signal.send, kwargs=kwargs).start()
             return super().delete(request, pk)
         elif self.isTutorCreate(request, pk):
-            threading.Thread(target=tutor_out_room.send, kwargs={"user_send": request.user,
-                                                                  "user_receive": waiting_item.parent_room.parent.user,
-                                                                  "text": f"Gia sư {request.user.tutormodel.full_name} đã rời khỏi phòng chờ của lớp {waiting_item.parent_room.subject} {waiting_item.parent_room.lop} của bạn",
-                                                                  "instance": waiting_item,
-                                                                  "sender": self.__class__}).start()
+            # notify for parent
+            kwargs['user_receive'] = waiting_item.parent_room.parent.user
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                                id=RoomNotificationMessage.message_type['tutor_out_from_waiting_list']['notify_parent'],
+                                user_send=request.user
+                            )
+            threading.Thread(target=tutor_out_room_signal.send, kwargs=kwargs).start()
             return super().delete(request, pk)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)

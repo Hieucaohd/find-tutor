@@ -364,24 +364,24 @@ class TutorTeachingModel(models.Model):
 import findTutor.signals
 
 # ImagePrivateUserModel delete
-pre_delete.connect(findTutor.signals.before_image_private_user_delete, sender=ImagePrivateUserModel)
+pre_delete.connect(findTutor.signals.image_private_user_model_delete, sender=ImagePrivateUserModel)
 
 # ImageOfUserModel delete
-pre_delete.connect(findTutor.signals.before_image_of_user_delete, sender=ImageOfUserModel)
+pre_delete.connect(findTutor.signals.image_of_user_model_delete, sender=ImageOfUserModel)
 
 # WaitingTutorModel create
-post_save.connect(findTutor.signals.after_create_waiting_list_item, sender=WaitingTutorModel)
+post_save.connect(findTutor.signals.waiting_tutor_model_create, sender=WaitingTutorModel)
 
 # WaitingTutorModel delete
-pre_delete.connect(findTutor.signals.before_delete_waiting_list_item_for_realtime, sender=WaitingTutorModel)
+pre_delete.connect(findTutor.signals.waiting_tutor_model_delete, sender=WaitingTutorModel)
 
 # ListInvitedModel create
-post_save.connect(findTutor.signals.after_create_invited_item, sender=ListInvitedModel)
+post_save.connect(findTutor.signals.list_invited_model_create, sender=ListInvitedModel)
 
 # TutorTeachingModel create
-post_save.connect(findTutor.signals.after_create_tutor_teaching_for_realtime, sender=TutorTeachingModel)
+post_save.connect(findTutor.signals.tutor_teaching_model_create, sender=TutorTeachingModel)
 
 # TutorTeachingModel delete
-pre_delete.connect(findTutor.signals.before_delete_tutor_from_teaching_for_realtime, sender=TutorTeachingModel)
+pre_delete.connect(findTutor.signals.tutor_teaching_model_delete, sender=TutorTeachingModel)
 
 

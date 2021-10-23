@@ -46,7 +46,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('social-auth/', include('socialAuth.urls')),
     path('search/', include('search.urls')),
-    path('notification/', include('notification.urls')),
+    path('websocket/', include('websocket.urls')),
 
     # for graphQL
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),

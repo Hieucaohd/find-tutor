@@ -1,3 +1,4 @@
+from findTutor.messages import RoomNotificationMessage
 from .baseView import *
 
 from ..models import TutorTeachingModel, ParentRoomModel, TutorModel
@@ -8,7 +9,7 @@ from rest_framework import status, permissions
 
 import threading
 
-from findTutor.signals import tutor_not_teaching_room
+from findTutor.signals import tutor_not_teaching_room_signal
 
 
 class TutorTeachingList(ListBaseView):
@@ -65,16 +66,26 @@ class TutorTeachingDetail(DeleteBaseView):
         }
         
         if request.user == teaching_item.parent_room.parent.user:
-            # parent gui
+            # notify to tutor
             kwargs['user_receive'] = teaching_item.tutor.user
-            kwargs['text'] = f"Phụ huynh {teaching_item.parent_room.parent.full_name} không muốn bạn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của họ."
-            threading.Thread(target=tutor_not_teaching_room.send, kwargs=kwargs).start()
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                id=RoomNotificationMessage.message_type["parent_delete_tutor_from_teaching"]["notify_tutor"],
+                user_send=request.user
+            )
+            threading.Thread(target=tutor_not_teaching_room_signal.send, kwargs=kwargs).start()
+
+            # delete
             return super().delete(request, pk)
         elif request.user == teaching_item.tutor.user:
-            # tutor gui
+            # notify to parent
             kwargs['user_receive'] = teaching_item.parent_room.parent.user
-            kwargs['text'] = f"Gia sư {teaching_item.tutor.full_name} không muốn tiếp tục dạy lớp {teaching_item.parent_room.subject} {teaching_item.parent_room.lop} của bạn."
-            threading.Thread(target=tutor_not_teaching_room.send, kwargs=kwargs).start()
+            kwargs['text'] = RoomNotificationMessage.generate_text(
+                id=RoomNotificationMessage.message_type["tutor_out_from_teaching"]["notify_parent"],
+                user_send=request.user
+            )
+            threading.Thread(target=tutor_not_teaching_room_signal.send, kwargs=kwargs).start()
+
+            # delete
             return super().delete(request, pk)
         
         return Response(status=status.HTTP_403_FORBIDDEN)

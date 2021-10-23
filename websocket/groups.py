@@ -1,7 +1,7 @@
 from channels.layers import get_channel_layer
 
-from notification.mongoModels import *
-from notification.models import ChannelNameModel
+from websocket.mongoModels import *
+from websocket.models import ChannelNameModel
 
 from authentication.models import User
 
@@ -48,8 +48,8 @@ class GroupName:
 # class ChannelLayerHandler:
 #     def __init__(self):
 #         # function of this class:
-#         # - send notification to a group and
-#         #   save notification to database of the members of this group
+#         # - send websocket to a group and
+#         #   save websocket to database of the members of this group
 #         # - add a user's channel name to a group (save to database)
 #         pass
 #
@@ -162,7 +162,7 @@ class GroupName:
 #         content['user_id_receive'] = user_receive.id
 #         content['type'] = consumer
 #
-#         # send notification
+#         # send websocket
 #         channel_names = ChannelNameModel.objects.filter(user = user_receive)
 #         for channel_name in channel_names:
 #             async_to_sync(channel_layer.send)(channel_name.channel_name, content)
