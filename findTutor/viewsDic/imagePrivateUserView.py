@@ -74,6 +74,8 @@ class ImagePrivateUserDetail(UpdateBaseView, DeleteBaseView):
 
 
     def put(self, request, format=None):
+        # print(request.META)
+        # print(request.COOKIES)
         get_private_image = self.modelBase.objects.get(user=request.user)
 
         serializer = self.serializerBase(get_private_image, data=request.data)

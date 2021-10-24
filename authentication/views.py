@@ -43,9 +43,10 @@ class RegisterView(generics.GenericAPIView):
 
         current_site = get_current_site(request).domain
         relative_link = reverse('verify-email')
-        absurl = 'https://' + current_site + relative_link + "?token=" + str(token)
+        absurl = 'http://' + current_site + relative_link + "?token=" + str(token)
 
-        email_body = "Xin chào " + user.username + ". Cảm ơn bạn đã đăng kí tài khoản tại findTutor. Hãy nhấp vào link dưới đây để xác thực tài khoản của bạn nhé \n" + absurl
+        front_end_domain = "timgiasu.findtutorapp.website"
+        email_body = f"Xin chào {user.username}.\nCảm ơn bạn đã đăng kí tài khoản tại {front_end_domain}.\nHãy nhấp vào link dưới đây để xác thực tài khoản của bạn nhé: \n{absurl}"
         data = {
             'email_body': email_body,
             'email_subject': "Tìm gia sư",
@@ -65,13 +66,14 @@ class RegisterView(generics.GenericAPIView):
         # send email to user
         user = User.objects.get(email=user_data['email'])
 
-        threading.Thread(target=self.send_verify_email, kwargs={"request": request,
+        if settings.DEBUG:
+            threading.Thread(target=self.send_verify_email, kwargs={"request": request,
                                                                 "user": user}).start()
 
         return Response(inforAboutUser(user))
 
 
-class VerifyEmail(generics.GenericAPIView):
+class VerifyEmail(APIView):
     def get(self, request):
         token = request.GET.get('token')
         try:

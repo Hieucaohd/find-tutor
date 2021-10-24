@@ -98,15 +98,33 @@ GRAPHENE = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    "graphql_jwt.backends.JSONWebTokenBackend",
+    # "graphql_jwt.backends.JSONWebTokenBackend",
+    "findTeacherProject.graphql_token_auth.CostumJSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+
+
+# thu nghiem graphql jwt
+from django.contrib.auth import get_user_model
+
+def get_user_name_field(payload):
+    user_id = payload.get("user_id")
+    User = get_user_model()
+
+    user_request = User._default_manager.get(pk=user_id)
+    
+    return user_request.email
 
 
 GRAPHQL_JWT = {
     "JWT_ALLOW_ARGUMENT": True,
     "JWT_AUTH_HEADER_PREFIX": TOKEN_PREFIX,
+    "JWT_PAYLOAD_GET_USERNAME_HANDLER": (
+        lambda payload: get_user_name_field(payload)
+    ),
 }
+##########################
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -144,10 +162,10 @@ ASGI_APPLICATION = 'findTeacherProject.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'testdb',
-        'USER': 'hieucao192',
-        'PASSWORD': "192",
-        'HOST': 'localhost',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
         'PORT': 5432
     }
 }
@@ -214,8 +232,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_HOST_USER = 'pythonhieu192@gmail.com'
-EMAIL_HOST_PASSWORD = 'phaithanhcong1'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
@@ -230,10 +248,10 @@ if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'testdb',
-            'USER': 'hieucao192',
-            'PASSWORD': "192",
-            'HOST': 'localhost',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
             'PORT': 5432
         }
     }

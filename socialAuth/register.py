@@ -14,8 +14,10 @@ def register_social_user(user_id, email, name, provider):
     filtered_user_by_email = User.objects.filter(email=email)
 
     if filtered_user_by_email:
+        # Neu nguoi dung da tung dang nhap bang tai khoan social
 
         if provider == filtered_user_by_email[0].auth_provider:
+            # kiem tra xem provider nguoi dung dang nhap lan truoc co trung voi dang nhap lan nay
 
             register_user = authenticate(email=email, password=filtered_user_by_email[0].password)
 
@@ -29,6 +31,8 @@ def register_social_user(user_id, email, name, provider):
                                        ". Hay su dung " + filtered_user_by_email[0].auth_provider +
                                        " de dang nhap.")
     else:
+        # Neu nguoi dung chua tung dang nhap
+
         password = make_password(BaseUserManager().make_random_password())
         user = User.objects.create_user(username=name, password=password, email=email)
         user.is_verified = True
