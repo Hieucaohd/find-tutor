@@ -162,10 +162,10 @@ ASGI_APPLICATION = 'findTeacherProject.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('FINDTUTOR_DB_NAME'),
-        'USER': os.environ.get('FINDTUTOR_DB_USER'),
-        'PASSWORD': os.environ.get('FINDTUTOR_DB_PASSWORD'),
-        'HOST': os.environ.get('FINDTUTOR_DB_HOST'),
+        'NAME': 'testdb',
+        'USER': 'hieucao192',
+        'PASSWORD': '192',
+        'HOST': 'localhost',
         'PORT': 5432
     }
 }
@@ -232,8 +232,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_HOST_USER = os.environ.get('FINDTUTOR_EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('FINDTUTOR_EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = 'timgiasu.xacnhan@gmail.com'
+EMAIL_HOST_PASSWORD = 'Timfgiasuw@2021'
 
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
@@ -248,10 +248,10 @@ if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ.get('FINDTUTOR_DB_NAME'),
-            'USER': os.environ.get('FINDTUTOR_DB_USER'),
-            'PASSWORD': os.environ.get('FINDTUTOR_DB_PASSWORD'),
-            'HOST': os.environ.get('FINDTUTOR_DB_HOST'),
+            'NAME': 'testdb',
+            'USER': 'hieucao192',
+            'PASSWORD': '192',
+            'HOST': 'localhost',
             'PORT': 5432
         }
     }
