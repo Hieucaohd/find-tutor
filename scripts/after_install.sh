@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/home/ubuntu/findTutorProject/DjangoEnv/bin/source /home/ubuntu/findTutorProject/findTutor/.env
+source /home/ubuntu/findTutorProject/findTutor/.env
 
 # install dependencies
 /home/ubuntu/findTutorProject/DjangoEnv/bin/pip install -r /home/ubuntu/findTutorProject/findTutor/requirements.txt
