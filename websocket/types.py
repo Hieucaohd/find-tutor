@@ -87,15 +87,30 @@ class RoomNotificationType(graphene.ObjectType):
         return root['create_at']
 
 
+class ResolveAllRoomNotificationType(graphene.ObjectType):
+    result = graphene.List(RoomNotificationType)
+    num_pages = graphene.Int()
+
+
+class ResolveAllFollowingRoomsType(graphene.ObjectType):
+    result = graphene.List(ParentRoomType)
+    num_pages = graphene.Int()
+
+
+class ResolveAllFollowingUsersType(graphene.ObjectType):
+    result = graphene.List(UserType)
+    num_pages = graphene.Int()
+
+
 class FollowType(graphene.ObjectType):
     _id = graphene.ID()
     user_id = graphene.Int()
     user = graphene.Field(UserType)
     following_groups = graphene.List(graphene.String)
-    following_rooms = graphene.List(ParentRoomType,
+    following_rooms = graphene.Field(ResolveAllFollowingRoomsType,
                                     page=graphene.Int(required=False),
                                     num_in_page=graphene.Int(required=False),)
-    following_users = graphene.Field(UserType,
+    following_users = graphene.Field(ResolveAllFollowingUsersType,
                                     page=graphene.Int(required=False),
                                     num_in_page=graphene.Int(required=False),)
 
@@ -134,7 +149,12 @@ class FollowType(graphene.ObjectType):
 
         query_set = ParentRoomModel.objects.filter(pk__in=ids)
 
-        return paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)
+        result = paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)
+
+        return {
+            'result': result,
+            'num_pages': result.paginator.num_pages
+        }
 
 
     def resolve_following_users(root, info, **kwargs):
@@ -153,4 +173,9 @@ class FollowType(graphene.ObjectType):
 
         query_set = User.objects.filter(pk__in=ids)
 
-        return paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)
+        result = paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)
+
+        return {
+            'result': result,
+            'num_pages': result.paginator.num_pages
+        }
