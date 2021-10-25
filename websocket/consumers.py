@@ -61,7 +61,7 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
         # kiem tra xem con channel nao cua nguoi dung hay khong
         # neu khong con thi dua tat ca cac is_new cua thong bao ve false
         channel_names_of_user = await database_sync_to_async(ChannelNameModel.objects.filter)(user=self.user)
-        if len(channel_names_of_user) == 1:
+        if sync_to_async(len)(channel_names_of_user) == 1:
             # dua tat ca is_new cua cac thong bao co is_new = True la false
             threading.Thread(target=RoomNotificationModel().collection.update_many, kwargs={
                                                                                             "filter": { "is_new": True }, 

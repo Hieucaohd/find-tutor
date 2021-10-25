@@ -9,16 +9,27 @@ from django.conf import settings
 from connection_to_mongodb import MongoBaseModel
 
 def connect_to_mongodb(dict_class, app_name):
-    for class_name, class_item in dict_class.items():
-        if inspect.isclass(class_item) and issubclass(class_item, MongoBaseModel) and not class_item is MongoBaseModel:
-            if hasattr(class_item, "fields"):
-                collection = class_item().collection
-                fields = class_item.fields
+    for class_name, mongo_class in dict_class.items():
+
+        if inspect.isclass(mongo_class) and issubclass(mongo_class, MongoBaseModel) and not mongo_class is MongoBaseModel:
+            print(f"Loading... ==> app {app_name}, class: {class_name}")
+            
+            if hasattr(mongo_class, "fields"):
+
+                collection = mongo_class().collection
+                
+                fields = mongo_class.fields
+                
                 for field, config in fields.items():
-                    if isinstance(config, dict) and config.get("unique"):
-                        collection.create_index([(field, pymongo.ASCENDING)], **config)
+                    
+                    if isinstance(config, dict) and "unique" in config:
+                        collection.create_index([(field, pymongo.ASCENDING)], unique=config["unique"])
+                    
                     elif not isinstance(config, dict):
-                        print(f"warning ==> config of field '{field}' in class '{class_name}' of app '{app_name}' is not a dictionary. Fix and migrate again to apply this config to mongodb. Every else config successfully apply to mongodb")
+                        warning_message = f"""warning ==> config of field '{field}' in class '{class_name}' of app '{app_name}' is not a {dict}. 
+                        Fix and migrate again to apply this config to mongodb. Every else config successfully apply to mongodb"""
+                        print(warning_message)
+            
             print(f"ok ==> app: {app_name}, class: {class_name}")
 
 

@@ -29,15 +29,26 @@ class FollowModel(MongoBaseModel):
 
 class RoomNotificationModel(MongoBaseModel):
     fields = {
-        "user_id_send": {},
-        "user_id_receive": {},
+        "user_id_send": {
+            "required": True,
+            "type": int,
+        },
+        "user_id_receive": {
+            "required": True,
+            "type": int,
+        },
         "room": {},
         "text": {},
-        "is_seen": {},
-        "is_click": {},
+        "is_click": {
+            "default": False,
+            "type": bool,
+        },
         "is_new": { 
             "required": True,
+            "default": True,
+            "type": bool,
         },
+        "try": "he",
     }
 
     url = url
@@ -57,22 +68,3 @@ class UserNotificationModel(MongoBaseModel):
     collection_name = "userNotifications"
 
 
-"""
-tutor:
-    - another people reply his/her comment
-    - another want to be friend
-
-    - parent kick him/her from waiting list 
-    - parent accept/not accept him/her to teaching
-
-    - parent change the room that tutor being.
-    
-    - parent invited him/her
-
-parent:
-    - another people reply his/her comment
-    - another want to be friend
-
-    - tutor apply to him/her room
-    - tutor ok to teaching
-"""
