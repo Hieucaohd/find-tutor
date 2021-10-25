@@ -9,6 +9,8 @@ from websocket.groups import GroupName
 from findTutor.types import ParentRoomType
 from findTutor.models import ParentRoomModel
 
+from findTeacherProject.paginator import paginator_sql_query
+
 import json
 from types import SimpleNamespace
 
@@ -91,9 +93,11 @@ class FollowType(graphene.ObjectType):
     user = graphene.Field(UserType)
     following_groups = graphene.List(graphene.String)
     following_rooms = graphene.List(ParentRoomType,
-                                    number_items=graphene.Int(required=False))
+                                    page=graphene.Int(required=False),
+                                    num_in_page=graphene.Int(required=False),)
     following_users = graphene.Field(UserType,
-                                    number_items=graphene.Int(required=False))
+                                    page=graphene.Int(required=False),
+                                    num_in_page=graphene.Int(required=False),)
 
     def resolve__id(root, info, **kwargs):
         return root['_id']
@@ -115,38 +119,38 @@ class FollowType(graphene.ObjectType):
 
 
     def resolve_following_rooms(root, info, **kwargs):
+        page = kwargs.get("page", 1)
+        num_in_page = kwargs.get("num_in_page", 10)
+
+        # list cac group names
         following_groups = root['following_groups']
-        number_items = kwargs.get("number_items", 6)
 
-        rooms = []
-        for group_name in following_groups:
-            decoded_group = GroupName.decode_from_group_name(group_name)
-            model_name, id = decoded_group['model_name'], decoded_group['id']
+        # lay id va model_name tu group_name
+        decode_group_name = lambda group_name: GroupName.decode_from_group_name(group_name)
 
-            if model_name == ParentRoomModel.__name__:
-                try:
-                    room = ParentRoomModel.objects.get(pk=id)
-                    rooms.append(room)
-                except:
-                    pass
+        # lay danh sach cac ids
+        ids = [decode_group_name(group_name)['id'] for group_name in following_groups 
+                if decode_group_name(group_name)['model_name'] == ParentRoomModel.__name__]
 
-        return rooms[0:number_items]
+        query_set = ParentRoomModel.objects.filter(pk__in=ids)
+
+        return paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)
 
 
     def resolve_following_users(root, info, **kwargs):
+        page = kwargs.get("page", 1)
+        num_in_page = kwargs.get("num_in_page", 10)
+
+        # list cac group names
         following_groups = root['following_groups']
-        number_items = kwargs.get("number_items", 6)
 
-        users = []
-        for group_name in following_groups:
-            decoded_group = GroupName.decode_from_group_name(group_name)
-            model_name, id = decoded_group['model_name'], decoded_group['id']
+        # lay id va model_name tu group_name
+        decode_group_name = lambda group_name: GroupName.decode_from_group_name(group_name)
 
-            if model_name == User.__name__:
-                try:
-                    room = User.objects.get(pk=id)
-                    users.append(room)
-                except:
-                    pass
+        # lay danh sach cac ids
+        ids = [decode_group_name(group_name)['id'] for group_name in following_groups 
+                if decode_group_name(group_name)['model_name'] == User.__name__]
 
-        return users[0:number_items]
+        query_set = User.objects.filter(pk__in=ids)
+
+        return paginator_sql_query(query_set=query_set, num_in_page=num_in_page, page=page)

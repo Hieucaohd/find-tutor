@@ -9,25 +9,29 @@ from websocket.mongoModels import *
 
 import copy
 
+from findTeacherProject.paginator import paginator_mongo_query
+
 
 class Query(graphene.ObjectType):
     all_room_notification = graphene.List(RoomNotificationType, 
-                                     number_notifications=graphene.Int(required=False),
-                                     token=graphene.String(required=False),)
+                                     page=graphene.Int(required=False),
+                                     num_in_page=graphene.Int(required=False),
+                                     token=graphene.String(required=True),)
 
     def resolve_all_room_notification(root, info, **kwargs):
-        collection = RoomNotificationModel().collection
+        page = kwargs.get('page', 1)
+        num_in_page = kwargs.get('num_in_page', 10)
 
-        number_notifications = kwargs.get("number_notifications", 6)
+        collection = RoomNotificationModel().collection
 
         user_id_receive = info.context.user.id
         
-        room_notifications = collection.find({"user_id_receive": user_id_receive}).sort('create_at', pymongo.DESCENDING)
+        cursor = collection.find({"user_id_receive": user_id_receive}).sort('create_at', pymongo.DESCENDING)
 
-        return copy.deepcopy(room_notifications)[0:number_notifications]
+        return paginator_mongo_query(cursor=cursor, num_in_page=num_in_page, page=page)
 
     follow = graphene.Field(FollowType,
-                            token=graphene.String(required=False),)
+                            token=graphene.String(required=True),)
 
     def resolve_follow(root, info, **kwargs):
         collection = FollowModel().collection

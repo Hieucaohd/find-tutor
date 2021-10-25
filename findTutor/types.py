@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from findTutor.models import *
 
-from findTutor.paginator import paginator_function
+from findTeacherProject.paginator import paginator_sql_query
 
 
 def is_owner(record_item, info):
@@ -151,7 +151,7 @@ class OldImagePrivateUserType(DjangoObjectType):
         request = info.context
         page = request.GET.get("page_old_private_image", 1)
         queryset = queryset.filter(type_action = "update")
-        paginator = paginator_function(queryset, 5, page)
+        paginator = paginator_sql_query(queryset, 5, page)
         return paginator
 
 
@@ -217,7 +217,7 @@ class ImageOfUserType(DjangoObjectType):
         queryset = queryset.filter(condition)
 
         page = request.GET.get("page_image_of_user", 1)
-        paginator = paginator_function(queryset, 10, page)
+        paginator = paginator_sql_query(queryset, 10, page)
         return paginator
 
 

@@ -2,7 +2,7 @@ import graphene
 
 from graphql_jwt.decorators import login_required
 
-from findTutor.paginator import paginator_function
+from findTeacherProject.paginator import paginator_sql_query
 
 from findTutor.types import *
 from findTutor.models import *
@@ -44,7 +44,7 @@ class Query(graphene.ObjectType):
         
         query_set = query_set.filter(tutorteachingmodel = None)
         query_set = query_set.order_by("-create_at")
-        result = paginator_function(query_set, num_in_page, page)
+        result = paginator_sql_query(query_set, num_in_page, page)
 
         return {
             'result': result,
@@ -72,7 +72,7 @@ class Query(graphene.ObjectType):
         page = kwargs.get("page", 1)
         num_in_page = kwargs.get("num_in_page", 16)
 
-        result = paginator_function(TutorModel.objects.all(), num_in_page, page)
+        result = paginator_sql_query(TutorModel.objects.all(), num_in_page, page)
 
         return {
             'result': result,

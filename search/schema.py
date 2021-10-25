@@ -10,7 +10,7 @@ from search.mongoModels import SearchRoomModel, SearchTutorModel, SearchParentMo
 
 import copy
 
-from findTutor.paginator import paginator_function
+from findTeacherProject.paginator import paginator_sql_query
 
 
 class ResultSearchRoomType(graphene.ObjectType):
@@ -73,7 +73,7 @@ class Query(graphene.ObjectType):
 
         search_room = ResolveSearchForRoom(model=ParentRoomModel, fields=fields, kwargs=kwargs)
 
-        result = paginator_function(list(search_room.resolve_search()), num_in_page, page)
+        result = paginator_sql_query(list(search_room.resolve_search()), num_in_page, page)
 
         return {
             'result': result,
@@ -106,7 +106,7 @@ class Query(graphene.ObjectType):
 
         search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
-        result = paginator_function(list(search_tutor.resolve_search()), num_in_page, page)
+        result = paginator_sql_query(list(search_tutor.resolve_search()), num_in_page, page)
 
         return {
             'result': result,
@@ -137,7 +137,7 @@ class Query(graphene.ObjectType):
 
         search_parent = ResolveSearchForParent(model=ParentModel, fields=fields, kwargs=kwargs)
 
-        result = paginator_function(list(search_parent.resolve_search()), num_in_page, page)
+        result = paginator_sql_query(list(search_parent.resolve_search()), num_in_page, page)
 
         return {
             'result': result,
