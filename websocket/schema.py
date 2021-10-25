@@ -26,7 +26,7 @@ class Query(graphene.ObjectType):
 
         user_id_receive = info.context.user.id
         
-        cursor = collection.find({"user_id_receive": user_id_receive}).sort('create_at', pymongo.DESCENDING)
+        cursor = collection.find({"user_id_receive": user_id_receive, "is_news": False }).sort('create_at', pymongo.DESCENDING)
 
         num_pages = int(cursor.count() / num_in_page) + 1
 

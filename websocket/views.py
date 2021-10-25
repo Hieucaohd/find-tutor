@@ -12,6 +12,7 @@ from findTutor.models import ParentRoomModel
 from websocket.groups import GroupName
 from websocket.channel_layer_custom import ChannelLayerHandler
 from websocket.serializers import FollowRoomSerializer, FollowUserSerializer
+from websocket.mongoModels import RoomNotificationModel
 
 # Create your views here.
 
@@ -63,3 +64,15 @@ class FollowUserDetail(APIView):
         ChannelLayerHandler.group_discard(user=request.user, group_name=user_group)
 
         return Response({"user_id": user_id}, status=status.HTTP_200_OK)
+
+
+class RoomNoificationDetail(APIView):
+
+    def put(self, request, format):
+        user_receive_id = request.user.id
+        room_notification_ids = request.data.get("ids", [])
+
+        for id in room_notification_ids:
+            RoomNotificationModel().collection.update_many({ "_id": id, "user_receive_id": user_receive_id }, { "is_seen": True })
+
+        return Response(status=status.HTTP_200_OK)

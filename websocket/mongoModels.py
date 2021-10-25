@@ -31,9 +31,13 @@ class RoomNotificationModel(MongoBaseModel):
     fields = {
         "user_id_send": {},
         "user_id_receive": {},
-        "is_seen": {},
         "room": {},
         "text": {},
+        "is_seen": {},
+        "is_click": {},
+        "is_new": { 
+            "required": True,
+        },
     }
 
     url = url

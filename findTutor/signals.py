@@ -91,6 +91,7 @@ def waiting_tutor_model_create(sender, instance, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": RoomNotificationMessage.generate_text(
                     id=RoomNotificationMessage.message_type["tutor_apply_in_room"]["notify_parent"],
                     user_send=user_of_tutor
@@ -128,6 +129,7 @@ def list_invited_model_create(sender, instance, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": RoomNotificationMessage.generate_text(
                     id=RoomNotificationMessage.message_type["parent_invite_tutor"]["notify_tutor"],
                     user_send=user_of_parent
@@ -159,6 +161,7 @@ def before_delete_waiting_list_item(sender, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": kwargs.get("text"),
     }
 
@@ -206,6 +209,7 @@ def after_parent_create_room(sender, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": RoomNotificationMessage.generate_text(
             id=RoomNotificationMessage.message_type["parent_create_room"]["notify_user_following_parent"],
             user_send=user_of_parent
@@ -236,6 +240,7 @@ def after_create_tutor_teaching(sender, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": kwargs.get("text"),
     }
 
@@ -286,6 +291,7 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
 
     notification_content = {
         "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": kwargs.get("text"),
     }
 

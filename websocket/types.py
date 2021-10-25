@@ -38,6 +38,7 @@ class RoomNotificationType(graphene.ObjectType):
     user_receive = graphene.Field(UserType)
     room = graphene.Field(ParentRoomType)
     is_seen = graphene.Boolean()
+    is_click = graphene.Boolean()
     text = graphene.Field(TextOfRoomNotificationType)
     create_at = graphene.DateTime()
 
@@ -77,6 +78,9 @@ class RoomNotificationType(graphene.ObjectType):
 
     def resolve_is_seen(root, info, **kwargs):
         return root.get("is_seen", False)
+
+    def resolve_is_click(root, info, **kwargs):
+        return root.get("is_click", False)
 
 
     def resolve_text(root, info, **kwargs):

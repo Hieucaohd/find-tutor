@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 
-from websocket.mongoModels import FollowModel
+from websocket.mongoModels import FollowModel, RoomNotificationModel
 from websocket.models import ChannelNameModel
 
 from multiprocessing import Process, Queue
@@ -15,6 +15,8 @@ from threading import Thread
 from websocket.groups import GroupName
 
 import copy
+
+import datetime
 
 
 class DoInThead(Thread):
@@ -55,6 +57,16 @@ class NotifyConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         if not self.user.is_authenticated:
             return
+
+        # kiem tra xem con channel nao cua nguoi dung hay khong
+        # neu khong con thi dua tat ca cac is_new cua thong bao ve false
+        channel_names_of_user = await database_sync_to_async(ChannelNameModel.objects.filter)(user=self.user)
+        if len(channel_names_of_user) == 1:
+            # dua tat ca is_new cua cac thong bao co is_new = True la false
+            threading.Thread(target=RoomNotificationModel().collection.update_many, kwargs={
+                                                                                            "filter": { "is_new": True }, 
+                                                                                            "update": { "is_new": False },
+                                                                                            }).start()
 
         channel_item = await database_sync_to_async(ChannelNameModel.objects.get)(channel_name=self.channel_name)
         await database_sync_to_async(channel_item.delete)()
