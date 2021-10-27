@@ -28,3 +28,4 @@ pymongo[srv]
 django-connect-mongo==1.14.0
 channels
 channels_redis
+celery
