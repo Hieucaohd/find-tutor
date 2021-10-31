@@ -76,7 +76,6 @@ class TutorTeachingDetail(DeleteBaseView):
 
             # delete
             return super().delete(request, pk)
-            
         elif request.user == teaching_item.tutor.user:
             # notify to parent
             kwargs['user_receive'] = teaching_item.parent_room.parent.user

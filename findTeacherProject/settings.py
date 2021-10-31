@@ -105,7 +105,7 @@ AUTHENTICATION_BACKENDS = [
 
 
 
-# ########### graphql jwt
+# thu nghiem graphql jwt
 from django.contrib.auth import get_user_model
 
 def get_user_name_field(payload):
