@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'analysisUser',
     'channels',
     'websocket',
-    'django.contrib.postgres',
 ]
 
 REST_FRAMEWORK = {
