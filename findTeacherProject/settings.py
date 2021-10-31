@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.postgres",
     'findTutor',
     'rest_framework',
     'multiselectfield',
@@ -105,7 +106,7 @@ AUTHENTICATION_BACKENDS = [
 
 
 
-# thu nghiem graphql jwt
+# ########### graphql jwt
 from django.contrib.auth import get_user_model
 
 def get_user_name_field(payload):
