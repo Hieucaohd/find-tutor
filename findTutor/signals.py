@@ -83,9 +83,6 @@ def waiting_tutor_model_create(sender, instance, **kwargs):
     # what need to do:
     # - add tutor to room's group
     # - send message to parent
-    # import datetime
-    # print("gia su ung tuyen vao room", datetime.datetime.utcnow())
-
     parent_room = instance.parent_room
     user_of_parent = parent_room.parent.user
     user_of_tutor = instance.tutor.user
@@ -93,7 +90,8 @@ def waiting_tutor_model_create(sender, instance, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
+        "is_new": True,
         "text": RoomNotificationMessage.generate_text(
                     id=RoomNotificationMessage.message_type["tutor_apply_in_room"]["notify_parent"],
                     user_send=user_of_tutor
@@ -110,7 +108,7 @@ def waiting_tutor_model_create(sender, instance, **kwargs):
                                                            "content": notification_content,
                                                            "save_to_model": RoomNotificationModel}).start()
 
-    notify_to_room = wating_by_id_query(instance.id)
+    notify_to_room = wating_by_id_query(instance)
     notify_to_room['type_action'] = "CREATE"
     notify_to_room['type_of_list'] = "waiting_list"
     notify_to_room['type'] = "room.message"
@@ -130,7 +128,7 @@ def list_invited_model_create(sender, instance, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
         "is_new": True,
         "text": RoomNotificationMessage.generate_text(
                     id=RoomNotificationMessage.message_type["parent_invite_tutor"]["notify_tutor"],
@@ -162,7 +160,7 @@ def before_delete_waiting_list_item(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
         "is_new": True,
         "text": kwargs.get("text"),
     }
@@ -210,7 +208,7 @@ def after_parent_create_room(sender, **kwargs):
     parent_group = GroupName.generate_group_name_for_all(instance=user_of_parent)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
         "is_new": True,
         "text": RoomNotificationMessage.generate_text(
             id=RoomNotificationMessage.message_type["parent_create_room"]["notify_user_following_parent"],
@@ -241,7 +239,7 @@ def after_create_tutor_teaching(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
         "is_new": True,
         "text": kwargs.get("text"),
     }
@@ -271,7 +269,7 @@ def tutor_teaching_model_create(sender, instance, **kwargs):
     create_thread = threading.Thread
 
     parent_room = instance.parent_room
-    notify_to_room = tutor_teaching_by_id_query(instance.id)
+    notify_to_room = tutor_teaching_by_id_query(instance)
     notify_to_room['type_action'] = "CREATE"
     notify_to_room['type_of_list'] = "tutor_teaching"
     notify_to_room['type'] = "room.message"
@@ -292,7 +290,7 @@ def after_delete_tutor_from_teaching(sender, **kwargs):
     room_group = GroupName.generate_group_name_for_all(instance=parent_room)
 
     notification_content = {
-        "room": parent_room_by_id_query(parent_room.id),
+        "room": parent_room_by_id_query(parent_room),
         "is_new": True,
         "text": kwargs.get("text"),
     }

@@ -48,6 +48,7 @@ class RoomNotificationModel(MongoBaseModel):
             "default": True,
             "type": bool,
         },
+        "try": "he",
     }
 
     url = url

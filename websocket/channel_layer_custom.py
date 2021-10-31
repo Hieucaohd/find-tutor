@@ -11,9 +11,6 @@ from asgiref.sync import async_to_sync
 
 channel_layer = get_channel_layer()
 
-from findTeacherProject.celery import app
-
-
 class ChannelLayerHandler:
     def __init__(self):
         # function of this class:
@@ -35,7 +32,7 @@ class ChannelLayerHandler:
         content['type'] = consumer
         async_to_sync(channel_layer.group_send)(group_name, content)
 
-        # save to database mongodb
+        # save to database
         members = FollowModel().collection.find({ 
             "following_groups": {
                 "$all": [group_name]
@@ -47,7 +44,7 @@ class ChannelLayerHandler:
             save_to_model(**content).create(take_result=False)
 
     @staticmethod
-    def group_send_except(user_send, group_name, content, save_to_model, except_users=[], consumer="notify.message"):
+    def group_send_except(user_send, group_name, content, save_to_model, except_users, consumer="notify.message"):
         if not isinstance(content, dict):
             raise Exception("content is not a dictionary")
 
