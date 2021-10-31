@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "django.contrib.postgres",
     'findTutor',
     'rest_framework',
     'multiselectfield',
@@ -59,6 +58,7 @@ INSTALLED_APPS = [
     'analysisUser',
     'channels',
     'websocket',
+    'django.contrib.postgres',
 ]
 
 REST_FRAMEWORK = {
