@@ -46,9 +46,6 @@ class Query(graphene.ObjectType):
         query_set = query_set.order_by("-create_at")
         result = paginator_sql_query(query_set, num_in_page, page)
 
-        print(request.user)
-        print(query_set)
-
         return {
             'result': result,
             'num_pages': result.paginator.num_pages

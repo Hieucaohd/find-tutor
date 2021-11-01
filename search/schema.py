@@ -5,7 +5,7 @@ from graphql_jwt.decorators import login_required
 from findTutor.models import *
 from findTutor.types import *
 
-from search.resolveSearch import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
+from .search_algorithm import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
 from search.mongoModels import SearchRoomModel, SearchTutorModel, SearchParentModel
 
 import copy
@@ -66,8 +66,7 @@ class Query(graphene.ObjectType):
 
         save_search_to_mongo(request=request, model=SearchRoomModel, kwargs=kwargs, take_result=False)
 
-        def fields(item):
-            return [item.subject, item.other_require]
+        fields = ['subject', 'other_require']
         
         kwargs['request'] = request
 
@@ -101,8 +100,7 @@ class Query(graphene.ObjectType):
 
         save_search_to_mongo(request=info.context, model=SearchTutorModel, kwargs=kwargs, take_result=False)
 
-        def fields(item):
-            return [item.full_name, item.experience, item.achievement, item.university, item.profession]
+        fields = ['full_name', 'experience', 'achievement', 'university', 'profession']
 
         search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
@@ -132,8 +130,7 @@ class Query(graphene.ObjectType):
 
         save_search_to_mongo(request=info.context, model=SearchParentModel, kwargs=kwargs, take_result=False)
 
-        def fields(item):
-            return [item.full_name]
+        fields = ['full_name']
 
         search_parent = ResolveSearchForParent(model=ParentModel, fields=fields, kwargs=kwargs)
 
