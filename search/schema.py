@@ -5,7 +5,7 @@ from graphql_jwt.decorators import login_required
 from findTutor.models import *
 from findTutor.types import *
 
-from .search_algorithm.resolve_search import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
+from .search_algorithm import ResolveSearchForRoom, ResolveSearchForTutor, ResolveSearchForParent
 from search.mongoModels import SearchRoomModel, SearchTutorModel, SearchParentModel
 
 import copy

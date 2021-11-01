@@ -93,9 +93,10 @@ class FullTextSearch(Search):
     def get_result(self) -> Sequence:
         query_set = self._get_query_set()
 
-        query_set = query_set.annotate(
-                search=SearchVector(*self._list_fields),
-                ).filter(search=self._search_text)
+        if self._search_text != '' and self._search_text != None:
+            query_set = query_set.annotate(
+                    search=SearchVector(*self._list_fields),
+                    ).filter(search=self._search_text)
 
         return query_set
 

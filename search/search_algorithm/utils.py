@@ -4,6 +4,9 @@ import re
 import unidecode
 
 def replace_special_character(text: str) -> str:
+    if not text:
+        return text
+
     text = re.sub(r'[^\w\s]', '', text)
     text = text.lower()
     list_word = text.split()
@@ -16,7 +19,7 @@ def replace_special_character(text: str) -> str:
 
 
 def compare_two_string(text_1: str, text_2: str) -> int:
-    if not text_2:
+    if not text_2 or not text_1:
         return 0
 
     levenshtein_dis = rapidfuzz.string_metric.levenshtein(text_1, text_2)

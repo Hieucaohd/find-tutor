@@ -1,4 +1,4 @@
-from findTutor.checkTutorAndParent import isTutor
+from findTutor.checkTutorAndParent import isTutor, isParent
 
 from django.db.models import Q
 
@@ -91,6 +91,10 @@ class ResolveSearchForRoom(ResolveSearch):
     def _get_suitable_room_query(self) -> None:
         request = self.kwargs.get('request')
         if request.user.is_authenticated and isTutor(request.user):
+            """
+                tra ve cac phong ma tutor chua tung vao.
+            """
+
             user_not_in_list = (~Q(waitingtutormodel__tutor__user=request.user) & 
                                 ~Q(listinvitedmodel__tutor__user=request.user) &
                                 ~Q(tryteachingmodel__tutor__user=request.user) &
@@ -98,8 +102,18 @@ class ResolveSearchForRoom(ResolveSearch):
                                 )
             self.list_querys.append(user_not_in_list)
 
+        elif request.user.is_authenticated and isParent(request.user):
+            """
+                tra ve cac phong ma phu huynh khong tao
+            """
+
+            parent_not_create_room = (~Q(parent__user=request.user)
+                                      )
+            self.list_querys.append(parent_not_create_room)
+
     def resolve_search(self) -> Sequence:
         search_infor = self.kwargs.get('search_infor')
+        print(search_infor)
         order_by = self.kwargs.get('order_by')
 
         order_list = {
@@ -112,7 +126,9 @@ class ResolveSearchForRoom(ResolveSearch):
                                       search_text=search_infor,
                                       list_fields=self.fields,
                                       list_querys=self.list_querys)
-        get_order = order_list.get(order_by, "create_at")
+
+        # neu khong cung cap thu tu thi tra theo lop moi nhat
+        get_order = order_list.get(order_by, "-create_at")
         result = full_text_search.get_result().order_by(get_order)
 
         return result
