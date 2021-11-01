@@ -61,7 +61,17 @@ class FuzzySearch(Search):
 
         query_set = self._get_query_set()
     
-        field_values = lambda record: [ record.__dict__[field] for field in self._list_fields ]
+        # field_values = lambda record: [ record.__dict__.get(field) for field in self._list_fields ]
+
+        def field_values(record):
+            field_values_list = []
+            for field in self._list_fields:
+                try:
+                    field_values_list.append(record.__getattribute__(field))
+                except AttributeError:
+                    pass
+            return field_values_list
+
 
         list_results = list( {
                                 'record':record, 
