@@ -100,7 +100,7 @@ class Query(graphene.ObjectType):
 
         save_search_to_mongo(request=info.context, model=SearchTutorModel, kwargs=kwargs, take_result=False)
 
-        fields = ['full_name', 'experience', 'achievement', 'university', 'profession']
+        fields = ['first_name', 'last_name', 'experience', 'achievement', 'university', 'profession']
 
         search_tutor = ResolveSearchForTutor(model=TutorModel, fields=fields, kwargs=kwargs)
 
@@ -130,7 +130,7 @@ class Query(graphene.ObjectType):
 
         save_search_to_mongo(request=info.context, model=SearchParentModel, kwargs=kwargs, take_result=False)
 
-        fields = ['full_name']
+        fields = ['first_name', 'last_name']
 
         search_parent = ResolveSearchForParent(model=ParentModel, fields=fields, kwargs=kwargs)
 
