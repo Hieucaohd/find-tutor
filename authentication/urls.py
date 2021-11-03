@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (RegisterHttpOnlyCookie, 
                     VerifyEmail, 
                     LoginHttpOnlyCookie, 
-                    Logout, 
+                    LogoutHttpOnly, 
                     GetInforByToken, 
                     ChangePassword,
                     LinkDetail,
@@ -15,7 +15,7 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('register/', RegisterHttpOnlyCookie.as_view(), name='register'),
     path('login/', LoginHttpOnlyCookie.as_view(), name='login'),
-    path('logout/', Logout.as_view(), name='logout'),
+    path('logout/', LogoutHttpOnly.as_view(), name='logout'),
     path('verify-email/', VerifyEmail.as_view(), name='verify-email'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('getInforByToken/', GetInforByToken.as_view()),

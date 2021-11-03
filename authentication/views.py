@@ -178,6 +178,15 @@ class Logout(generics.GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class LogoutHttpOnly(Logout):
+
+    def post(self, request, format=None):
+        response = super().post(request, format)
+        response.delete_cookie(settings.SIMPLE_JWT['JWT_COOKIE_NAME'])
+        response.delete_cookie(settings.SIMPLE_JWT['JWT_REFRESH_TOKEN_COOKIE_NAME'])
+        return response
+
+
 class GetInforByToken(generics.GenericAPIView):
     serializer_class = GetInforByTokenSerializer
 
