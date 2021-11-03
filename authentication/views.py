@@ -171,6 +171,7 @@ class Logout(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
+        request.data["refresh_token"] = request.COOKIES.get(settings.SIMPLE_JWT['JWT_REFRESH_TOKEN_COOKIE_NAME']) or None
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

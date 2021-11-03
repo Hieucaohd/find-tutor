@@ -255,6 +255,8 @@ MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 USE_FIREBASE = True
 
+CSRF_COOKIE_HTTPONLY = True
+
 if USE_FIREBASE:
     MEDIA_URL = ''
 
