@@ -133,7 +133,7 @@ GRAPHQL_JWT = {
 ##########################
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
     'AUTH_HEADER_TYPES': (TOKEN_PREFIX, ),
     **JWT_COOKIE_CONFIG,

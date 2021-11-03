@@ -22,14 +22,20 @@ class CustomJWTAuthentication(JWTAuthentication):
         header = self.get_header(request)
 
         if header is None:
-            raw_token = request.COOKIES.get(settings.SIMPLE_JWT['JWT_COOKIE_NAME']) or None
+            # lay access token o cookie
+            raw_access_token = request.COOKIES.get(settings.SIMPLE_JWT['JWT_COOKIE_NAME']) or None
         else:
-            raw_token = self.get_raw_token(header)
+            # lay access token o header
+            raw_access_token = self.get_raw_access_token(header)
 
-        if not raw_token:
+        if not raw_access_token:
+            # return None nghia la coi user la anonymous user.
             return None
 
-        validated_token = self.get_validated_token(raw_token)
+        # kiem tra access token
+        validated_token = self.get_validated_token(raw_access_token)
+        
+        # kiem tra csrf token o header
         # enforce_csrf(request)
 
         return self.get_user(validated_token), validated_token
