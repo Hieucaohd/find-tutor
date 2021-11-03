@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from graphql_jwt.backends import JSONWebTokenBackend
 
-class CostumJSONWebTokenBackend(JSONWebTokenBackend):
+class CustomJSONWebTokenBackend(JSONWebTokenBackend):
     def __init__(self):
         self.simple_jwt = JWTAuthentication()
 

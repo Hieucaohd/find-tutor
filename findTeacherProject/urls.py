@@ -26,6 +26,7 @@ from django.conf.urls.static import static
 from graphene_django.views import GraphQLView
 from .schema import schema
 from django.views.decorators.csrf import csrf_exempt
+from graphql_jwt.decorators import jwt_cookie
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -49,7 +50,7 @@ urlpatterns = [
     path('websocket/', include('websocket.urls')),
 
     # for graphQL
-    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path('graphql/', csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=True, schema=schema)))),
 ]
 
 urlpatterns += [

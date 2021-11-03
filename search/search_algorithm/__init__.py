@@ -6,7 +6,6 @@ from .resolve_search import (ResolveSearchForRoom,
                              )
 
 __all__ = [
-    "compare_two_string"
     "ResolveSearchForRoom",
     "ResolveSearchForTutor",
     "ResolveSearchForParent",

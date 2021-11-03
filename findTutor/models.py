@@ -12,17 +12,16 @@ from django.conf import settings
 from django.db.models.signals import pre_delete, pre_save, post_save
 
 
-# bảng gia sư
-class TutorModel(models.Model):
+class PeopleAbstractModel(models.Model):
     # nhạy cảm
     # mỗi người dùng chỉ được đăng kí một gia sư 
-    user = models.OneToOneField(User, on_delete=models.CASCADE) 
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # số thẻ căn cước công dân của gia sư
     # không yêu cầu cung cấp 
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
     number_of_identity_card = models.CharField(null=True, blank=True, max_length=200)
-
+    
     # số điện thoại
     # không yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
@@ -32,10 +31,6 @@ class TutorModel(models.Model):
     # yêu cầu cung cấp
     first_name = models.CharField(max_length=20, null=False, blank=False)
     last_name = models.CharField(max_length=20, null=False, blank=False)
-
-    # ngày tháng năm sinh, YYYY-MM-DD
-    # yêu cầu cung cấp
-    birthday = models.DateField(null=False, blank=False)
 
     # đia chỉ của gia sư 
     # yêu cầu cung cấp, mã của tỉnh và mã của huyện
@@ -48,6 +43,24 @@ class TutorModel(models.Model):
     # không yêu cầu cung cấp
     # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy 
     detail_location = models.CharField(max_length=500, null=True, blank=True)
+
+    # ngày tháng năm sinh, YYYY-MM-DD
+    # yêu cầu cung cấp
+    birthday = models.DateField(null=False, blank=False)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def full_name(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
+
+    def __str__(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
+
+
+# bảng gia sư
+class TutorModel(PeopleAbstractModel):
 
     # nghề nghiệp hiện tại, một trong 2 lựa chọn (sinh viên hoặc giáo viên)
     # yêu cầu cung cấp 
@@ -81,13 +94,6 @@ class TutorModel(models.Model):
     for i in range(1, 5):
         CAP_DAY_CHOICES.append((i, i))
     cap_day = MultiSelectField(choices=CAP_DAY_CHOICES, min_choices=0)
-
-    @property
-    def full_name(self):
-        return str(self.first_name) + ' ' + str(self.last_name)
-
-    def __str__(self):
-        return str(self.first_name) + ' ' + str(self.last_name)
 
 
 IS_BLANK_IMAGE_USER = True
@@ -187,48 +193,8 @@ class ImageOfUserModel(models.Model):
         return self.type_image + " cua " + self.user.username
 
 
-class ParentModel(models.Model):
-    # nhạy cảm
-    # mỗi người dùng chỉ được đăng kí một gia sư
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    # số điện thoại
-    # không yêu cầu cung cấp
-    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
-    number_phone = models.CharField(max_length=30, null=True, blank=True)
-
-    # số thẻ căn cước công dân của gia sư
-    # không yêu cầu cung cấp 
-    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
-    number_of_identity_card = models.CharField(null=True, blank=True, max_length=200)
-
-    # họ và tên
-    # yêu cầu cung cấp
-    first_name = models.CharField(max_length=20, null=False, blank=False)
-    last_name = models.CharField(max_length=20, null=False, blank=False)
-
-    # ngày tháng năm sinh, YYYY-MM-DD
-    # yêu cầu cung cấp
-    birthday = models.DateField(null=True, blank=True)
-
-    # đia chỉ của gia sư 
-    # yêu cầu cung cấp mã của tỉnh và mã của huyện
-    # sử dụng mã code theo tiêu chuẩn của cuộc thống kê quốc gia Việt Nam
-    province_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_province], default=1)
-    district_code = models.IntegerField(null=False, blank=False, validators=[min_code_of_location, max_code_of_district], default=1)
-    ward_code = models.IntegerField(null=True, blank=True, validators=[min_code_of_location, max_code_of_ward], default=1)
-
-    # địa chỉ chi tiết của gia sư (số nhà, đường, tổ, đội)
-    # không yêu cầu cung cấp
-    # đây là dữ liệu nhạy cảm, chỉ gia sư và những người gia sư cho phép mới có thể thấy
-    detail_location = models.CharField(max_length=500, null=True, blank=True)
-
-    @property
-    def full_name(self):
-        return str(self.first_name) + ' ' + str(self.last_name)
-
-    def __str__(self):
-        return str(self.first_name) + ' ' + str(self.last_name)
+class ParentModel(PeopleAbstractModel):
+    pass
 
 
 class ParentRoomModel(models.Model):

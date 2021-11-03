@@ -30,18 +30,7 @@ class WaitingTutorInput(graphene.InputObjectType):
 class ListInvitedInput(graphene.InputObjectType):
     id_user_of_tutor = graphene.ID(required=True)
     id_parent_room = graphene.ID(required=True)
-
-"""
-class TryTeachingInput(graphene.InputObjectType):
-    id_waiting_list = graphene.ID(required=False)
-    id_list_invited = graphene.ID(required=False)
-
-
-class UpdateTryTeachingInput(graphene.InputObjectType):
-    id_try_teaching = graphene.ID(required=True)
-    tutor_agree = graphene.Boolean(required=False)
-    parent_agree = graphene.Boolean(required=False)
-"""
+    
 
 class TutorTeachingInput(graphene.InputObjectType):
     id_waiting_list = graphene.ID(required=False)

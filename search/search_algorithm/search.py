@@ -49,7 +49,7 @@ class FuzzySearch(Search):
         """
 
         max_result = max(compare_two_string(search_text, replace_special_character(field)) 
-                                            for field in field_values)
+                                            for field in field_values if field)
         return max_result
 
     def _sorted_fuzzy_search_result(self) -> Sequence[Union[ParentRoomModel, ParentModel, TutorModel]]:
@@ -61,18 +61,8 @@ class FuzzySearch(Search):
 
         query_set = self._get_query_set()
     
-        # field_values = lambda record: [ record.__dict__.get(field) for field in self._list_fields ]
-
-        def field_values(record):
-            field_values_list = []
-            for field in self._list_fields:
-                try:
-                    field_values_list.append(record.__getattribute__(field))
-                except AttributeError:
-                    pass
-            return field_values_list
-
-
+        field_values = lambda record: [ getattr(record, field, '') for field in self._list_fields ]
+        
         list_results = list( {
                                 'record':record, 
                                 'score': self.__compare_search_text(self._search_text, 

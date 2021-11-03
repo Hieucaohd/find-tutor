@@ -118,31 +118,7 @@ class CreateTutorTeachingMutation(graphene.Mutation):
 
         return CreateTutorTeachingMutation(tutor_teaching=tutor_teaching)
 
-"""
-class CreateTryTeachingMutation(graphene.Mutation):
-    class Arguments:
-        input_fields = TryTeachingInput(required=True)
 
-    try_teaching = graphene.Field(TryTeachingType)
-
-    @classmethod
-    def mutate(cls, root, info, input_fields):
-        attr = ValidateForTryTeachingInput(input_fields=input_fields, info=info).validate()
-        try_teaching = TryTeachingModel.objects.create(**attr)
-        return CreateTryTeachingMutation(try_teaching=try_teaching)
-
-
-class UpdateTryTeachingMutation(graphene.Mutation):
-    class Arguments:
-        input_fields = UpdateTryTeachingInput(required=True)
-
-    try_teaching = graphene.Field(TryTeachingType)
-
-    @classmethod
-    def mutate(cls, root, info, input_fields):
-        attr = ValidateForUpdateTryTeachingInput(input_fields=input_fields, info=info).validate()
-        return UpdateTryTeachingMutation(try_teaching=attr)
-"""
 
 
 

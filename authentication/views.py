@@ -16,10 +16,9 @@ from .models import User, LinkModel
 from .utils import Util
 
 from django.contrib.sites.shortcuts import get_current_site
-
 from django.urls import reverse
-
 from django.conf import settings
+from django.middleware import csrf
 
 import jwt
 
@@ -34,8 +33,29 @@ import copy
 
 import threading
 
+def set_jwt_cookie_http_only(response, access_token, refresh_token):
+    # set access cookie
+    response.set_cookie(
+            key = settings.SIMPLE_JWT['JWT_COOKIE_NAME'],
+            value = access_token,
+            expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            secure = settings.SIMPLE_JWT['JWT_COOKIE_SECURE'],
+            httponly = settings.SIMPLE_JWT['JWT_COOKIE_HTTP_ONLY'],
+            samesite = settings.SIMPLE_JWT['JWT_COOKIE_SAMESITE'],
+        )
 
-class RegisterView(generics.GenericAPIView):
+    # set refresh cookie
+    response.set_cookie(
+            key = settings.SIMPLE_JWT['JWT_REFRESH_TOKEN_COOKIE_NAME'],
+            value = refresh_token,
+            expires = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+            secure = settings.SIMPLE_JWT['JWT_COOKIE_SECURE'],
+            httponly = settings.SIMPLE_JWT['JWT_COOKIE_HTTP_ONLY'],
+            samesite = settings.SIMPLE_JWT['JWT_COOKIE_SAMESITE'],
+        )
+
+
+class Register(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def send_verify_email(self, request, user):
@@ -70,7 +90,21 @@ class RegisterView(generics.GenericAPIView):
             threading.Thread(target=self.send_verify_email, kwargs={"request": request,
                                                                 "user": user}).start()
 
-        return Response(inforAboutUser(user))
+        return Response(inforAboutUser(user), status=status.HTTP_200_OK)
+
+class RegisterHttpOnlyCookie(Register):
+
+    def post(self, request, format=None):
+        response = super().post(request, format)
+
+        access_token = response.data.get("token")
+        refresh_token = response.data.get("refresh_token")
+
+        set_jwt_cookie_http_only(response, access_token, refresh_token)
+
+        csrf.get_token(request)
+
+        return response
 
 
 class VerifyEmail(APIView):
@@ -95,11 +129,27 @@ class Login(generics.GenericAPIView):
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         data = serializer.data
 
         user = User.objects.get(email=data.get('email'))
 
         return Response(inforAboutUser(user), status=status.HTTP_200_OK)
+
+class LoginHttpOnlyCookie(Login):
+
+    def post(self, request, format=None):
+        response = super().post(request, format)
+
+        access_token = response.data.get("token")
+        refresh_token = response.data.get("refresh_token")
+
+        set_jwt_cookie_http_only(response, access_token, refresh_token)
+
+        csrf.get_token(request)
+
+        return response
+
 
 class ChangePassword(APIView):
     serializer_class = ChangePasswordSerializer

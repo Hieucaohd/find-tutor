@@ -18,7 +18,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 import websocket.routing
 import findTutor.routing
 
-from findTeacherProject.channel_token_auth import TokenAuthMiddlewareStack
+from authentication.custom_auth import TokenAuthMiddlewareStack
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

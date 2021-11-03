@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import (RegisterView, 
+from .views import (RegisterHttpOnlyCookie, 
                     VerifyEmail, 
-                    Login, 
+                    LoginHttpOnlyCookie, 
                     Logout, 
                     GetInforByToken, 
                     ChangePassword,
@@ -13,8 +13,8 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', Login.as_view(), name='login'),
+    path('register/', RegisterHttpOnlyCookie.as_view(), name='register'),
+    path('login/', LoginHttpOnlyCookie.as_view(), name='login'),
     path('logout/', Logout.as_view(), name='logout'),
     path('verify-email/', VerifyEmail.as_view(), name='verify-email'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
