@@ -101,13 +101,13 @@ JWT_COOKIE_NAME = "access_token"
 JWT_REFRESH_TOKEN_COOKIE_NAME = "refresh_token"
 
 JWT_COOKIE_CONFIG = {
-    "JWT_COOKIE_NAME": JWT_COOKIE_NAME,
-    "JWT_REFRESH_TOKEN_COOKIE_NAME": JWT_REFRESH_TOKEN_COOKIE_NAME,
-    "JWT_COOKIE_SECURE": False,
-    "JWT_COOKIE_HTTP_ONLY": True,
-    "JWT_COOKIE_PATH": "/",
-    "JWT_COOKIE_DOMAIN": None,
-    "JWT_COOKIE_SAMESITE": None,
+    "JWT_COOKIE_NAME": JWT_COOKIE_NAME,     # key cua access token
+    "JWT_REFRESH_TOKEN_COOKIE_NAME": JWT_REFRESH_TOKEN_COOKIE_NAME,     # key cua refresh token
+    "JWT_COOKIE_SECURE": True,     # Neu True, chi cho phep https://
+    "JWT_COOKIE_HTTP_ONLY": True,   # client khong the lay
+    "JWT_COOKIE_PATH": "/",         # duong dan cua auth cookie
+    "JWT_COOKIE_DOMAIN": None,      # 
+    "JWT_COOKIE_SAMESITE": 'Strict',    # co the la 'Lax', 'Strict', None to disable
 }
 
 ############ graphql jwt
