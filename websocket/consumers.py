@@ -40,6 +40,13 @@ class DoInThead(Thread):
 class NotifyConsumer(AsyncJsonWebsocketConsumer):
     
     async def connect(self):
+        print(dir(self.scope))
+        print()
+        print(self.scope)
+        print()
+        print(self.scope.keys())
+        print()
+        print(self.scope['cookies'])
         self.user = self.scope["user"]
 
         if not self.user.is_authenticated:

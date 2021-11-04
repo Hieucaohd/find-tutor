@@ -1,11 +1,3 @@
-"""
-ASGI config for findTeacherProject project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
-"""
 import os
 from django.conf.urls import url
 import django
@@ -18,7 +10,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 import websocket.routing
 import findTutor.routing
 
-from authentication.custom_auth import TokenAuthMiddlewareStack
+from authentication.custom_jwt_auth import TokenAuthMiddlewareStack
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
