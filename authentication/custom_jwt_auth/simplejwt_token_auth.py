@@ -23,10 +23,10 @@ class CustomJWTAuthentication(JWTAuthentication):
 
         if header is None:
             # lay access token o cookie
-            raw_access_token = request.COOKIES.get(settings.SIMPLE_JWT['JWT_COOKIE_NAME']) or None
+            raw_access_token = request.COOKIES.get(settings.SIMPLE_JWT['JWT_COOKIE_NAME'], None)
         else:
             # lay access token o header
-            raw_access_token = self.get_raw_access_token(header)
+            raw_access_token = self.get_raw_token(header)
 
         if not raw_access_token:
             # return None nghia la coi user la anonymous user.
