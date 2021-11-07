@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     'graphene_django',
-    'channels',
+    'channels', 
+    'guardian', 
 
     # helper package
     'multiselectfield',
@@ -100,8 +101,9 @@ MIDDLEWARE = [
 
 
 AUTHENTICATION_BACKENDS = [
-    "authentication.custom_jwt_auth.graphql_token_auth.CustomJSONWebTokenBackend",   # Custom graphql_jwt for http_only cookie  
     "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+    "authentication.custom_jwt_auth.graphql_token_auth.CustomJSONWebTokenBackend",   # Custom graphql_jwt for http_only cookie
 ]
 
 
@@ -243,12 +245,8 @@ if USE_FIREBASE:
 if DEBUG:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'testdb',
-            'USER': 'hieucao192',
-            'PASSWORD': '192',
-            'HOST': 'localhost',
-            'PORT': 5432
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 

@@ -256,6 +256,11 @@ class ParentRoomModel(models.Model):
     def __str__(self):
         return 'lop ' + str(self.subject)
 
+    class Meta:
+        permissions = (
+            ("delete_room", "Can delete a room"),
+        )
+
 
 class OldLocationModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -267,6 +272,11 @@ class OldLocationModel(models.Model):
     detail_location = models.CharField(max_length=500, null=False)
 
     create_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        permissions = (
+            ("delete_room", "Can delete a room"),
+        )
 
 
 class PriceModel(models.Model):

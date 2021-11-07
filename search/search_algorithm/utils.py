@@ -1,5 +1,5 @@
 import rapidfuzz
-import pylcs
+# import pylcs
 import re
 import unidecode
 
@@ -23,8 +23,8 @@ def compare_two_string(text_1: str, text_2: str) -> int:
         return 0
 
     levenshtein_dis = rapidfuzz.string_metric.levenshtein(text_1, text_2)
-    common_substring= pylcs.lcs2(text_1, text_2)
-    common_subsequen = pylcs.lcs(text_1, text_2)
+    # common_substring= pylcs.lcs2(text_1, text_2)
+    # common_subsequen = pylcs.lcs(text_1, text_2)
 
     common_substring_phan_tram = common_substring / len(text_1) * 100
     common_subsequen_phan_tram = common_subsequen / len(text_1) * 100

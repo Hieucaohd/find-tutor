@@ -15,7 +15,6 @@ Pillow==7.0.0
 PyJWT==2.1.0
 requests==2.22.0
 vietnam-provinces==0.4.2
-pylcs
 rapidfuzz==1.4.1
 graphene_django
 django-graphql-jwt
