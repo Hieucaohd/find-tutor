@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 
     'graphene_django',
     'channels', 
-    'guardian', 
+    # 'guardian', 
 
     # helper package
     'multiselectfield',
@@ -102,7 +102,7 @@ MIDDLEWARE = [
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "guardian.backends.ObjectPermissionBackend",
+    # "guardian.backends.ObjectPermissionBackend",
     "authentication.custom_jwt_auth.graphql_token_auth.CustomJSONWebTokenBackend",   # Custom graphql_jwt for http_only cookie
 ]
 
